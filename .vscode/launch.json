@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+        "name": "Python: Remote Attach",
+        "type": "python",
+        "request": "attach",
+        "port": 5678,
+        "host": "localhost",
+        "pathMappings": [
+            {
+                "localRoot": "${workspaceFolder}/odoo_demo_project",
+                "remoteRoot": "/home/odoo/extra-addons/odoo_demo_project"
+            },
+            {
+                "localRoot": "${workspaceFolder}/odoo",
+                "remoteRoot": "/home/odoo/odoo"
+            }
+        ]
+        }
+    ]
+}
