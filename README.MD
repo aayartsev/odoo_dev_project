@@ -11,7 +11,7 @@ docker build -f F:\projects\odoo_dev_project-16\Dockerfile -t odoo-x86 .
 ```
 for linux of mac(for m1 you can set name of image odoo-arm, do not forget change name in `docker-compose.yml`)
 ```
-docker build -f $HOME/projects/odoo_dev_project-16/Dockerfile -t odoo-x86 .
+docker build -f $HOME/projects/odoo_dev_project-16/Dockerfile -t odoo-arm .
 ```
 8. then install all python packages: 
 

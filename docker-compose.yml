@@ -32,7 +32,7 @@ services:
             #  пробрасываем файл дополнительными python пакетами, которые мы используем в своем проекте
             - $PROJECT_DIR_PATH/requirements.txt:$DOCKER_PROJECT_DIR/requirements.txt
             # Пробрасываем каталог с кешем прекоммита, если что, мы всегда можем его удалить и он установиться заново
-            - $DOCKER_HOME.cache:DOCKER_PROJECT_DIR/.cache
+            - $DOCKER_HOME.cache:$DOCKER_PROJECT_DIR/.cache
             # пробрасываем непосредственно сам проект с разрабатываемыми модуляим
             - $OODOO_PROJECT_DIR_PATH:$DOCKER_ODOO_PROJECT_DIR_PATH
             
