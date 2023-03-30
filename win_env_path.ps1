@@ -7,6 +7,7 @@
 [Environment]::SetEnvironmentVariable("PROJECT_DIR_NAME", "odoo_dev_project-16")
 [Environment]::SetEnvironmentVariable("PROJECT_DIR_PATH", ("$env:userprofile\Documents\projects\$env:PROJECT_DIR_NAME"))
 [Environment]::SetEnvironmentVariable("OODOO_PROJECT_DIR_PATH", ("$env:userprofile\Documents\odoo_projects\$env:GIT_SERVER_NAME\$env:GIT_PROJECT_AUTHOR\$env:GIT_PROJECT_NAME"))
+[Environment]::SetEnvironmentVariable("DOCKER_HOME", ("$env:PROJECT_DIR_PATH\docker_home"))
 # Описанные тут пути относятся к файловой системе контейнера, т.к. все действия выполняются внутри него"
 [Environment]::SetEnvironmentVariable("DOCKER_PROJECT_DIR", "/home/odoo")
 [Environment]::SetEnvironmentVariable("DOCKER_ODOO_DIR", "$env:DOCKER_PROJECT_DIR/odoo")

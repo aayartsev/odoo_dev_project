@@ -24,15 +24,15 @@ services:
             # пробрасываем внутрь контейнера сам каталог с odoo
             - $ODOO_PATH:$DOCKER_ODOO_DIR
             # пробрасываем конфигурационный файл вашего проекта внутрь контейнера
-            - $PROJECT_DIR_PATH\dev_odoo_docker_config_file.conf:$DOCKER_PROJECT_DIR/odoo.conf
+            - $PROJECT_DIR_PATH/dev_odoo_docker_config_file.conf:$DOCKER_PROJECT_DIR/odoo.conf
             # поскольку контейнер у нас по сути одноразовый мы здесь пробросим каталог со статическими ресурсами к себе в проект
-            - $PROJECT_DIR_PATH\odoo_local:$DOCKER_PROJECT_DIR/.local/share/Odoo
+            - $DOCKER_HOME.local :$DOCKER_PROJECT_DIR/.local
             # пробрасываем каталог, который содержит виртуальное окружения для нашего проекта
-            - $PROJECT_DIR_PATH\venv:$DOCKER_VENV_DIR
+            - $PROJECT_DIR_PATH/venv:$DOCKER_VENV_DIR
             #  пробрасываем файл дополнительными python пакетами, которые мы используем в своем проекте
-            - $PROJECT_DIR_PATH\requirements.txt:$DOCKER_PROJECT_DIR/requirements.txt
+            - $PROJECT_DIR_PATH/requirements.txt:$DOCKER_PROJECT_DIR/requirements.txt
             # Пробрасываем каталог с кешем прекоммита, если что, мы всегда можем его удалить и он установиться заново
-            - $PROJECT_DIR_PATH/pre-commit:/home/odoo/.cache/pre-commit
+            - $DOCKER_HOME.cache:DOCKER_PROJECT_DIR/.cache
             # пробрасываем непосредственно сам проект с разрабатываемыми модуляим
             - $OODOO_PROJECT_DIR_PATH:$DOCKER_ODOO_PROJECT_DIR_PATH
             

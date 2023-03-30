@@ -8,6 +8,7 @@ ARG USER_NAME=odoo
 ARG PASSWORD=odoo
 ARG WORKSPACE_FOLDER=odoo_project
 # Если используете, например, макбук на M1 посатавьте arm64
+# If you use mac on M1 set to arm64
 ARG PROCESSOR_ARCH=amd64
   
 # Подготавливаем внутреннего пользователя
@@ -34,6 +35,8 @@ RUN apt-get -y install libxml2-dev libxslt1-dev libldap2-dev\
         xvfb libfontconfig python3-virtualenv virtualenv
 # Скачиваем и устанавливаем wkhtmltopdf который будет рендерить PDF файлы как нам нужно, 
 # пакет из официальных репозиториев не рендерит заголовки и подвалы
+# Here we download and install wkhtmltox from its website, because from debian packages it has less functionality, and do not
+# render headers and footers
 RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_${PROCESSOR_ARCH}.deb \
     && apt-get install -y ./wkhtmltox_0.12.6.1-2.bullseye_${PROCESSOR_ARCH}.deb
 

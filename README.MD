@@ -21,7 +21,7 @@ F:\projects\odoo_dev_project-16\win_docker_pip3.ps1
 ```
 for linux of mac
 ```
-docker build -f $HOME/projects/odoo_dev_project-16/lin_mac_docker_pip3.sh
+$HOME/projects/odoo_dev_project-16/lin_mac_docker_pip3.sh
 ```
 you can add packages for your project in `requirements.txt` file
 
@@ -33,7 +33,7 @@ F:\projects\odoo_dev_project-16\win_docker_start.ps1 -d demo -i -u -r
 ```
 for linux of mac
 ```
-docker build -f $HOME/projects/odoo_dev_project-16/lin_mac_docker_start.sh -d demo -i -u -r
+$HOME/projects/odoo_dev_project-16/lin_mac_docker_start.sh -d demo -i -u -r
 ```
 in this case script will start odoo create database with name demo with demo data adn install and update modules that are written in this script. -r will add Russian language and update translation from your modules
 
@@ -45,7 +45,7 @@ F:\projects\odoo_dev_project-16\win_docker_pre_commit.ps1
 ```
 for linux of mac
 ```
-docker build -f $HOME/projects/odoo_dev_project-16/lin_mac_docker_start.sh
+$HOME/projects/odoo_dev_project-16/lin_mac_docker_start.sh
 ```
 First of all you need to copy all pre-commit config files where your set rules for checking code and add them to `volumes` in `docker-compose.yml` because files of our project always have executable permissions inside of docker container. And you need disable this checks. In current situations this job is done and you can check differs between files from this project and files from [demo project](https://github.com/aayartsev/odoo_demo_project).
 

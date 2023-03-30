@@ -1,11 +1,11 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source $SCRIPT_DIR/docker_env.sh
+source $SCRIPT_DIR/lin_mac_docker_env.sh
 
-cd $ODOO_DIR
+cd $ODOO_PATH
 git stash
 git checkout $ODOO_VERSION
 
-ln -s $ODOO_DIR $PROJECT_DIR_PATH
+ln -s $ODOO_PATH $PROJECT_DIR_PATH
 cd $OODOO_PROJECT_DIR_PATH
 ln -s $OODOO_PROJECT_DIR_PATH $PROJECT_DIR_PATH
 
