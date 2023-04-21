@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13
+    user: root
+    tty: true
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=odoo
+      - POSTGRES_USER=odoo
+      - POSTGRES_DB=postgres
+
+  odoo:
+    image: {ODOO_IMAGE}
+    user: odoo
+    tty: true
+    depends_on:
+      - db
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - 8069:8069
+      - {DEBUGGER_PORT}:5678
+
+    volumes: {MAPPED_VOLUMES}
+
+    command: $START_STRING

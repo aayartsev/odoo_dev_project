@@ -6,10 +6,9 @@ ARG USER_GID=$USER_UID
 
 ARG USER_NAME=odoo
 ARG PASSWORD=odoo
-ARG WORKSPACE_FOLDER=odoo_project
 # Если используете, например, макбук на M1 посатавьте arm64
 # If you use mac on M1 set to arm64
-ARG PROCESSOR_ARCH=amd64
+ARG PROCESSOR_ARCH=arm64
   
 # Подготавливаем внутреннего пользователя
 RUN groupadd --gid $USER_GID $USER_NAME \  
@@ -19,9 +18,9 @@ RUN groupadd --gid $USER_GID $USER_NAME \
     && echo $USER_NAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USER_NAME \  
     && chmod 0440 /etc/sudoers.d/$USER_NAME\
     && mkdir /home/$USER_NAME/.ssh\  
-    && chown ${USER_NAME}:${USER_NAME} /home/$USER_NAME/.ssh\   
-    && mkdir -p /home/${USER_NAME}/.vscode-server\  
-    && chown -R ${USER_NAME}:${USER_NAME} /home/${USER_NAME}/.vscode-server\  
+    && chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh\   
+    && mkdir -p /home/$USER_NAME/.vscode-server\  
+    && chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/.vscode-server\  
     && apt-get -y install git postgresql-client node-less npm ssh  \  
     && python3 -m pip install pre-commit
  
@@ -37,7 +36,7 @@ RUN apt-get -y install libxml2-dev libxslt1-dev libldap2-dev\
 # пакет из официальных репозиториев не рендерит заголовки и подвалы
 # Here we download and install wkhtmltox from its website, because from debian packages it has less functionality, and do not
 # render headers and footers
-RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_${PROCESSOR_ARCH}.deb \
-    && apt-get install -y ./wkhtmltox_0.12.6.1-2.bullseye_${PROCESSOR_ARCH}.deb
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.bullseye_{PROCESSOR_ARCH}.deb \
+    && apt-get install -y ./wkhtmltox_0.12.6.1-2.bullseye_{PROCESSOR_ARCH}.deb
 
 USER $USER_NAME
