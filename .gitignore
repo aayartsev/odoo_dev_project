@@ -118,7 +118,6 @@ test_examples/
 logs/
 data/
 cache/
-config.json
 
 
 # Spyder project settings
