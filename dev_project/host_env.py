@@ -4,6 +4,8 @@ import json
 import shutil
 import logging
 import pathlib
+import platform
+
 from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 from .constants import *
 
@@ -20,6 +22,7 @@ class CreateEnvironment():
         self.config["dependencies_dirs"] = []
         self.config["docker_dirs_with_addons"] = []
         self.config["debugger_path_mappings"] = []
+        self.config["arch"] = platform.machine()
         self.config["odoo_image_name"] = f"odoo-{self.config['arch']}"
         developing_project = self.handle_git_link(self.config.get("developing_project"))
         self.config["odoo_project_dir_path"] = developing_project.project_path

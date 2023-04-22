@@ -17,7 +17,6 @@
     "odoo_projects_dir":"/Users/yartsev/odoo_projects",
     "docker_project_dir":"/home/odoo",
     "odoo_version": "16.0",
-    "arch":"arm64",
     "update_git_repos": false,
     "developing_project":"git@github.com:aayartsev/odoo_demo_project.git",
     "pre_commit_map_files":[
