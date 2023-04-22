@@ -1,6 +1,7 @@
 import configparser
 import json
 import base64
+import pathlib
 
 from .constants import *
 
@@ -33,7 +34,7 @@ class StartStringBuilder():
             "--odoo_dir": self.config["docker_odoo_dir"],
             "-c": self.config["docker_path_odoo_conf"],
         }
-        db_management_start_string=f"""python3 {os.path.join(self.config["docker_project_dir"], DB_MANAGEMENT_RELATIVE_PATH)}"""
+        db_management_start_string=f"""python3 {pathlib.PurePosixPath(self.config["docker_project_dir"], DB_MANAGEMENT_RELATIVE_PATH)}"""
         for param, param_value in db_management_params.items():
             db_management_start_string += f" {param} {param_value}"
         start_python_command = f"""python3 -u -m debugpy --listen 0.0.0.0:5678 {self.config["docker_odoo_dir"]}/odoo-bin -c {self.config["docker_project_dir"]}/odoo.conf --limit-time-real 99999"""
@@ -48,7 +49,7 @@ class StartStringBuilder():
         start_pre_commit = self.args_dict.get("--start_precommit", False)
 
         if install_pip:
-            pip_install_command = f"""cd {self.config["docker_project_dir"]} && python3 -m venv ${self.config["docker_venv_dir"]} && . {os.path.join(self.config["docker_venv_dir"], "bin", "activate")} && wget -O odoo_requirements.txt https://raw.githubusercontent.com/odoo/odoo/{self.config["odoo_version"]}/requirements.txt && python3 -m pip install -r odoo_requirements.txt && python3 -m pip install -r {os.path.join(self.config["docker_project_dir"], REQUIREMENTS_TXT)}"""
+            pip_install_command = f"""cd {self.config["docker_project_dir"]} && python3 -m venv {self.config["docker_venv_dir"]} && . {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && wget -O odoo_requirements.txt https://raw.githubusercontent.com/odoo/odoo/{self.config["odoo_version"]}/requirements.txt && python3 -m pip install -r odoo_requirements.txt && python3 -m pip install {" ".join([req for req in self.config["requirements_txt"]])}"""
             start_string = f"""bash -c '{pip_install_command}'"""
             return start_string
         
@@ -81,6 +82,5 @@ class StartStringBuilder():
         if translate_lang:
             start_python_command += f" --language {translate_lang} --load-language {translate_lang} --i18n-overwrite"
             
-        start_string = f"""bash -c ' cd {self.config["docker_project_dir"]} && source {os.path.join(self.config["docker_venv_dir"], "bin", "activate")} && {db_management_start_string} && {start_python_command}'"""
-
+        start_string = f"""bash -c ' cd {self.config["docker_project_dir"]} && source {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && {db_management_start_string} && {start_python_command}'"""
         return start_string

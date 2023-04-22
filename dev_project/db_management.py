@@ -74,9 +74,6 @@ if RESTORE_DB_FILE_PATH:
     RESTORE_DB_FILE_PATH = ARGS_DICT["--odoo_dir"] + "/../backups/" + RESTORE_DB_FILE_PATH
 
 
-# f = open(ARGS_DICT["--odoo_dir"] + "/../config.json", "r")
-# print(f.read()) 
-
 # Enable database manager
 config['list_db'] = True
 
@@ -91,7 +88,6 @@ with environment_manage():
         for db_name in list:
             final_string += db_name + "\n"
         final_string = final_string.strip("\n")
-        print(final_string)
 
     # Удаление базы данных
     if DROP_DB_NAME:

@@ -3,7 +3,7 @@ import subprocess
 import json
 import shutil
 import logging
-
+import pathlib
 from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 from .constants import *
 
@@ -25,15 +25,15 @@ class CreateEnvironment():
         self.config["odoo_project_dir_path"] = developing_project.project_path
         self.config["venv_dir"] = os.path.join(self.config["project_dir"], "venv")
         self.config["docker_home"] = os.path.join(self.config["project_dir"], "docker_home")
-        self.config["docker_odoo_dir"] = os.path.join(self.config["docker_project_dir"], "odoo")
-        self.config["docker_dirs_with_addons"].append(os.path.join(self.config["docker_odoo_dir"], "addons"))
-        self.config["docker_dirs_with_addons"].append(os.path.join(self.config["docker_odoo_dir"], "odoo", "addons"))
-        self.config["docker_path_odoo_conf"] = os.path.join(self.config["docker_project_dir"], "odoo.conf")
-        self.config["docker_venv_dir"] = os.path.join(self.config["docker_project_dir"], "venv")
-        self.config["docker_extra_addons"] = os.path.join(self.config["docker_project_dir"], "extra-addons")
-        self.config["docker_odoo_project_dir_path"] = os.path.join(self.config["docker_extra_addons"], developing_project.project_data.name)
+        self.config["docker_odoo_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo"))
+        self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "addons")))
+        self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "odoo", "addons")))
+        self.config["docker_path_odoo_conf"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo.conf"))
+        self.config["docker_venv_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "venv"))
+        self.config["docker_extra_addons"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "extra-addons"))
+        self.config["docker_odoo_project_dir_path"] = str(pathlib.PurePosixPath(self.config["docker_extra_addons"], developing_project.project_data.name))
         self.config["docker_dirs_with_addons"].append(self.config["docker_odoo_project_dir_path"])
-        self.config["docker_backups_dir"] = os.path.join(self.config["docker_project_dir"], "backups")
+        self.config["docker_backups_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "backups"))
         self.config["dependencies_dir"] = os.path.join(self.config["project_dir"], "dependencies")
 
         
@@ -41,15 +41,15 @@ class CreateEnvironment():
         self.mapped_folders = [
             (self.config["odoo_src_dir"], self.config["docker_odoo_dir"]),
             (self.config["venv_dir"], self.config["docker_venv_dir"]),
-            (os.path.join(self.config["project_dir"], DEV_PROJECT_DIR), os.path.join(self.config["docker_project_dir"], DEV_PROJECT_DIR)),
+            (os.path.join(self.config["project_dir"], DEV_PROJECT_DIR), str(pathlib.PurePosixPath(self.config["docker_project_dir"], DEV_PROJECT_DIR))),
             (self.config.get("backups", {}).get("local_dir", ""), self.config["docker_backups_dir"]),
-            (os.path.join(self.config["docker_home"], ".local"), os.path.join(self.config["docker_project_dir"], ".local")),
-            (os.path.join(self.config["docker_home"], ".cache"), os.path.join(self.config["docker_project_dir"], ".cache")),
+            (os.path.join(self.config["docker_home"], ".local"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".local"))),
+            (os.path.join(self.config["docker_home"], ".cache"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".cache"))),
             (developing_project.project_path, self.config["docker_odoo_project_dir_path"]),
         ]
         for dependency_path in self.config["dependencies"]:
             dependency_project = self.handle_git_link(dependency_path)
-            docker_dependency_project_path = os.path.join(self.config["docker_extra_addons"], dependency_project.project_data.name)
+            docker_dependency_project_path = str(pathlib.PurePosixPath(self.config["docker_extra_addons"], dependency_project.project_data.name))
             self.config["dependencies_dirs"].append(dependency_project.project_path)
             self.config["docker_dirs_with_addons"].append(docker_dependency_project_path)
             self.mapped_folders.append(
@@ -64,7 +64,7 @@ class CreateEnvironment():
                     shutil.copy(real_file_place, full_path_pre_commit_file)
                 self.mapped_folders.append((
                     full_path_pre_commit_file, 
-                    os.path.join(self.config["docker_odoo_project_dir_path"],pre_commit_file)
+                    str(pathlib.PurePosixPath(self.config["docker_odoo_project_dir_path"],pre_commit_file))
                 ))
             else:
                 logging.warning(f"""Pre-commit file {pre_commit_file} was not found at {self.config["odoo_project_dir_path"]}""")

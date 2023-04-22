@@ -82,5 +82,7 @@ class HandleOdooProjectGitLink():
             self.clone_repo()
     
     def clone_repo(self):
+        if not os.path.exists(self.dir_to_clone):
+            os.makedirs(self.dir_to_clone)
         os.chdir(self.dir_to_clone)
         subprocess.run(["git", "clone", self.gitlink])
