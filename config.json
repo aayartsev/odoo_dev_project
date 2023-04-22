@@ -10,11 +10,11 @@
         "db_default_admin_password": "admin"
     },
     "backups":{
-        "local_dir":"/Users/yartsev/odoo_backups"
+        "local_dir":"C:\\Users\\yartsev\\odoo_backups"
     },
     
-    "odoo_src_dir":"/Users/yartsev/odoo",
-    "odoo_projects_dir":"/Users/yartsev/odoo_projects",
+    "odoo_src_dir":"C:\\Users\\yartsev\\odoo",
+    "odoo_projects_dir":"C:\\Users\\yartsev\\odoo_projects",
     "docker_project_dir":"/home/odoo",
     "odoo_version": "16.0",
     "update_git_repos": false,
@@ -26,5 +26,8 @@
         ".pylintrc-mandatory"
     ],
     "dependencies":[
+    ],
+    "requirements_txt":[
+        "debugpy==1.6.3"
     ]
 }
