@@ -2,7 +2,10 @@ import re
 import os
 import subprocess
 import shutil
+import pathlib
 from dataclasses import dataclass
+from .constants import *
+
 
 @dataclass
 class OdooProjectData(object):
@@ -15,22 +18,50 @@ class HandleOdooProjectGitLink():
     def __init__(self, gitlink, config):
         self.gitlink = gitlink
         self.config = config
+        self.project_type = None
         self.ssh_regex = r"git@[a-z.]*:"
         self.link_type = self.get_git_link_type()
         self.project_data = self.parse_link_by_type()
         self.project_path = self.get_project_path()
-        self.dir_to_clone = self.get_dir_to_clone()
-        self.check_project()
+        if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
+            self.dir_to_clone = self.get_dir_to_clone()
+            self.check_project()
+        self.get_project_type()
+        inside_docker_path = self.project_data.name
+        if self.project_type == TYPE_PROJECT_MODULE:
+            inside_docker_path = os.path.join(inside_docker_path, self.project_data.name)
+        self.docker_dependency_project_path = str(
+            pathlib.PurePosixPath(self.config["docker_extra_addons"], inside_docker_path))
         
     def get_git_link_type(self):
+        if "file://" in self.gitlink:
+            return GITLINK_TYPE_FILE
         if "http" in self.gitlink:
-            return "http"
+            return GITLINK_TYPE_HTTP
         ssh_pattern = re.findall(self.ssh_regex, self.gitlink)
         if ssh_pattern:
-            return "ssh"
+            return GITLINK_TYPE_SSH
     
     def parse_link_by_type(self):
         return getattr(self, f"parse_{self.link_type}")()
+
+    def get_project_type(self):
+        self.project_type = TYPE_PROJECT_PROJECT
+        if os.path.exists(os.path.join(self.project_path, "__manifest__.py")):
+            self.project_type = TYPE_PROJECT_MODULE
+
+    def parse_local_filesystem(self):
+        local_path = self.gitlink.replace("file://","")
+        if local_path[-1] == "/":
+            local_path = local_path[:-1]
+
+        project_name = os.path.basename(local_path)
+        return OdooProjectData(
+            server="",
+            author="",
+            name=project_name,
+        )
+
 
     def parse_http(self):
         server = self.gitlink.split("/")[2]
@@ -55,13 +86,19 @@ class HandleOdooProjectGitLink():
         )
     
     def get_project_path(self):
-        return os.path.abspath(os.path.join(
-            self.config["odoo_projects_dir"],
-            self.project_data.server,
-            self.project_data.author,
-            self.project_data.name,
-        ))
-    
+        if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
+            return os.path.abspath(os.path.join(
+                self.config["odoo_projects_dir"],
+                self.project_data.server,
+                self.project_data.author,
+                self.project_data.name,
+            ))
+        if self.link_type in [GITLINK_TYPE_FILE]:
+            local_path = self.gitlink.replace("file://","")
+            if local_path[-1] == "/":
+                local_path = local_path[:-1]
+            return local_path
+
     def get_dir_to_clone(self):
         return os.path.abspath(os.path.join(
             self.project_path,
