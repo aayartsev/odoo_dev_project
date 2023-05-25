@@ -29,7 +29,7 @@ class HandleOdooProjectGitLink():
         self.get_project_type()
         inside_docker_path = self.project_data.name
         if self.project_type == TYPE_PROJECT_MODULE:
-            inside_docker_path = os.path.join(inside_docker_path, self.project_data.name)
+            inside_docker_path = pathlib.PurePosixPath(inside_docker_path, self.project_data.name)
         self.docker_dependency_project_path = str(
             pathlib.PurePosixPath(self.config["docker_extra_addons"], inside_docker_path))
         
