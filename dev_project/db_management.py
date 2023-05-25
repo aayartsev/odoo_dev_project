@@ -6,6 +6,9 @@ import json
 import configparser
 import base64
 import contextlib
+from contextlib import closing
+
+from passlib.hash import pbkdf2_sha512
 
 args = sys.argv[1:]
 ARGS_DICT = {}
@@ -70,6 +73,7 @@ DB_NAME = ARGS_DICT.get("-d", False)
 RESTORE_DB_FILE_PATH = ARGS_DICT.get("--db-restore", False)
 DROP_DB_NAME = ARGS_DICT.get("--db-drop", False)
 GET_DBS_LIST = ARGS_DICT.get("--get_dbs_list", False)
+SET_ADMIN_PASS = ARGS_DICT.get("--set_admin_pass", False)
 if RESTORE_DB_FILE_PATH:
     RESTORE_DB_FILE_PATH = ARGS_DICT["--odoo_dir"] + "/../backups/" + RESTORE_DB_FILE_PATH
 
@@ -102,4 +106,18 @@ with environment_manage():
         db_exist = odoo.service.db.exp_db_exist(DB_NAME)
         if not db_exist:
             odoo.service.db.exp_create_database(
-                DB_NAME, CREATE_DEMO, LANG, user_password=USER_PASSWORD, login=LOGIN, country_code=COUNTRY_CODE)
+                DB_NAME,
+                CREATE_DEMO, LANG,
+                user_password=USER_PASSWORD,
+                login=LOGIN,
+                country_code=COUNTRY_CODE
+            )
+
+    if SET_ADMIN_PASS and DB_NAME:
+        password_crypt = pbkdf2_sha512.using(rounds=1).hash(SET_ADMIN_PASS)
+        # TODO check field name for password for different versions and check admin id
+        sql_command = f""" UPDATE res_users SET password = '{password_crypt}', login = '{"admin"}' WHERE id = 2;"""
+        db = odoo.sql_db.db_connect(DB_NAME)
+        with closing(db.cursor()) as cr:
+            cr.execute(sql_command, log_exceptions=True)
+            cr.commit()
