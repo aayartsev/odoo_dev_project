@@ -24,8 +24,7 @@ class CreateEnvironment():
         self.config["debugger_path_mappings"] = []
         self.config["arch"] = platform.machine()
         self.config["odoo_image_name"] = f"odoo-{self.config['arch']}"
-        developing_project = self.handle_git_link(self.config.get("developing_project"))
-        self.config["odoo_project_dir_path"] = developing_project.project_path
+        
         self.config["venv_dir"] = os.path.join(self.config["project_dir"], "venv")
         self.config["docker_home"] = os.path.join(self.config["project_dir"], "docker_home")
         self.config["docker_odoo_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo"))
@@ -34,6 +33,9 @@ class CreateEnvironment():
         self.config["docker_path_odoo_conf"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo.conf"))
         self.config["docker_venv_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "venv"))
         self.config["docker_extra_addons"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "extra-addons"))
+        developing_project = self.handle_git_link(self.config.get("developing_project"))
+        self.config["odoo_project_dir_path"] = developing_project.project_path
+        #TODO create check for odoo project if its type module
         self.config["docker_odoo_project_dir_path"] = str(pathlib.PurePosixPath(self.config["docker_extra_addons"], developing_project.project_data.name))
         self.config["docker_dirs_with_addons"].append(self.config["docker_odoo_project_dir_path"])
         self.config["docker_backups_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "backups"))
@@ -52,9 +54,12 @@ class CreateEnvironment():
         ]
         for dependency_path in self.config["dependencies"]:
             dependency_project = self.handle_git_link(dependency_path)
-            docker_dependency_project_path = str(pathlib.PurePosixPath(self.config["docker_extra_addons"], dependency_project.project_data.name))
+            docker_dependency_project_path = dependency_project.docker_dependency_project_path
             self.config["dependencies_dirs"].append(dependency_project.project_path)
-            self.config["docker_dirs_with_addons"].append(docker_dependency_project_path)
+            docker_dir_with_addons = docker_dependency_project_path
+            if dependency_project.project_type == TYPE_PROJECT_MODULE:
+                docker_dir_with_addons = os.path.join(docker_dir_with_addons, os.pardir)
+            self.config["docker_dirs_with_addons"].append(docker_dir_with_addons)
             self.mapped_folders.append(
                 (dependency_project.project_path, docker_dependency_project_path)
             )
@@ -78,7 +83,7 @@ class CreateEnvironment():
         with open(dockerfile_template_path) as f:
             lines = f.readlines()
         content = "".join(lines).format(PROCESSOR_ARCH=self.config["arch"])
-        dockerfile_path = os.path.join(self.config["project_dir"], "Dockerfile")
+        dockerfile_path = os.path.join(self.config["project_dir"], DOCKERFILE)
         self.config["dockerfile_path"] = dockerfile_path
         with open(dockerfile_path, 'w') as writer:
             writer.write(content)
@@ -178,6 +183,8 @@ class CreateEnvironment():
         else:
             with open(launch_json, "r") as open_file:
                 content = json.load(open_file)
+        # TODO compare old pathMapping records and current debugger_path_mappings
+        # and delete not used folders and add new
         debugger_unit_exists = False
         for debugger_unit in content["configurations"]:
             if debugger_unit["name"] == DEBUGGER_UNIT_NAME:
