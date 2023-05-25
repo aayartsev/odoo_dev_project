@@ -47,6 +47,7 @@ class StartStringBuilder():
         install_pip = self.args_dict.get("--pip_install", False)
         get_dbs_list = self.args_dict.get("--get_dbs_list", False)
         start_pre_commit = self.args_dict.get("--start_precommit", False)
+        set_admin_pass = self.args_dict.get("--set_admin_pass", False)
 
         if install_pip:
             pip_install_command = f"""cd {self.config["docker_project_dir"]} && python3 -m venv {self.config["docker_venv_dir"]} && . {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && wget -O odoo_requirements.txt https://raw.githubusercontent.com/odoo/odoo/{self.config["odoo_version"]}/requirements.txt && python3 -m pip install -r odoo_requirements.txt && python3 -m pip install {" ".join([req for req in self.config["requirements_txt"]])}"""
@@ -69,6 +70,9 @@ class StartStringBuilder():
 
         if drop_db_name:
             db_management_start_string += f" --db-drop {drop_db_name}"
+        
+        if set_admin_pass:
+            db_management_start_string += f" --set_admin_pass {set_admin_pass}"
 
         if self.args_dict.get("-i", False):
             start_python_command += f""" -i {self.config["init_modules"]}"""
