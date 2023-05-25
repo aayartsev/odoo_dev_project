@@ -58,7 +58,7 @@ class CreateEnvironment():
             self.config["dependencies_dirs"].append(dependency_project.project_path)
             docker_dir_with_addons = docker_dependency_project_path
             if dependency_project.project_type == TYPE_PROJECT_MODULE:
-                docker_dir_with_addons = os.path.join(docker_dir_with_addons, os.pardir)
+                docker_dir_with_addons = str(pathlib.PurePosixPath(docker_dir_with_addons, os.pardir))
             self.config["docker_dirs_with_addons"].append(docker_dir_with_addons)
             self.mapped_folders.append(
                 (dependency_project.project_path, docker_dependency_project_path)
