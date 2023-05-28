@@ -15,7 +15,6 @@
     
     "odoo_src_dir":"C:\\Users\\yartsev\\odoo",
     "odoo_projects_dir":"C:\\Users\\yartsev\\odoo_projects",
-    "docker_project_dir":"/home/odoo",
     "odoo_version": "16.0",
     "update_git_repos": false,
     "developing_project":"git@github.com:aayartsev/odoo_demo_project.git",

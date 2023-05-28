@@ -8,13 +8,13 @@ services:
     ports:
       - 5432:5432
     environment:
-      - POSTGRES_PASSWORD=odoo
-      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD={POSTGRES_ODOO_PASS}
+      - POSTGRES_USER={POSTGRES_ODOO_USER}
       - POSTGRES_DB=postgres
 
   odoo:
     image: {ODOO_IMAGE}
-    user: odoo
+    user: {CURRENT_USER}
     tty: true
     depends_on:
       - db
@@ -26,4 +26,4 @@ services:
 
     volumes: {MAPPED_VOLUMES}
 
-    command: $START_STRING
+    command: {START_STRING}

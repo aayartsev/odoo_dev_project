@@ -1,5 +1,6 @@
 import os
 import pathlib
+import pwd
 
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"
@@ -15,3 +16,11 @@ GITLINK_TYPE_HTTP = "http"
 GITLINK_TYPE_FILE = "local_filesystem"
 TYPE_PROJECT_PROJECT = "project"
 TYPE_PROJECT_MODULE = "module"
+CURRENT_USER_UID = os.getuid()
+CURRENT_USER_GID = os.getgid()
+CURRENT_USER = pwd.getpwuid(os.getuid())[0]
+CURRENT_PASSWORD = CURRENT_USER
+# got from https://github.com/docker-library/docs/blob/master/odoo/README.md
+# I think that this params supported by postgres docker image creators
+POSTGRES_ODOO_USER = "odoo"
+POSTGRES_ODOO_PASS = "odoo"
