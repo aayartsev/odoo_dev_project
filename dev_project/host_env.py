@@ -114,11 +114,14 @@ class CreateEnvironment():
             ODOO_IMAGE=self.config["odoo_image_name"],
             MAPPED_VOLUMES=mapped_volumes,
             DEBUGGER_PORT=self.config.get("debugger_port", DEBUGGER_DEFAULT_PORT),
+            ODOO_PORT=self.config.get("odoo_port", ODOO_DEFAULT_PORT),
             START_STRING=self.config["start_string"],
             CURRENT_USER=CURRENT_USER,
             CURRENT_PASSWORD=CURRENT_PASSWORD,
             POSTGRES_ODOO_USER=POSTGRES_ODOO_USER,
             POSTGRES_ODOO_PASS=POSTGRES_ODOO_PASS,
+            ODOO_DOCKER_PORT=ODOO_DOCKER_PORT,
+            DEBUGGER_DOCKER_PORT=DEBUGGER_DOCKER_PORT,
         )
         dockerfile_path = os.path.join(self.config["project_dir"], "docker-compose.yml")
         with open(dockerfile_path, 'w') as writer:

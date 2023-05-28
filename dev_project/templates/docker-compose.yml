@@ -21,8 +21,8 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     ports:
-      - 8069:8069
-      - {DEBUGGER_PORT}:5678
+      - {ODOO_PORT}:{ODOO_DOCKER_PORT}
+      - {DEBUGGER_PORT}:{DEBUGGER_DOCKER_PORT}
 
     volumes: {MAPPED_VOLUMES}
 
