@@ -20,7 +20,9 @@ CURRENT_USER_UID = os.getuid()
 CURRENT_USER_GID = os.getgid()
 CURRENT_USER = pwd.getpwuid(os.getuid())[0]
 CURRENT_PASSWORD = CURRENT_USER
-# got from https://github.com/docker-library/docs/blob/master/odoo/README.md
-# I think that this params supported by postgres docker image creators
-POSTGRES_ODOO_USER = "odoo"
-POSTGRES_ODOO_PASS = "odoo"
+# If you have already used this image of postgres, you can have situation when your variables are not enabled
+# https://github.com/docker-library/docs/blob/master/postgres/README.md
+# Warning: the Docker specific variables will only have an effect if you start the container with a data directory that is empty; any pre-existing database will be left untouched on container startup.
+# In this case you need to delete old data or use old variables
+POSTGRES_ODOO_USER = CURRENT_USER
+POSTGRES_ODOO_PASS = CURRENT_PASSWORD
