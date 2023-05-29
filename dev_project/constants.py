@@ -5,6 +5,7 @@ import platform
 
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"
+ENV_FILE_NAME = ".env"
 DOCKER_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "Dockerfile")
 DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "docker-compose.yml")
 ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "dev_odoo_docker_config_file.conf")
