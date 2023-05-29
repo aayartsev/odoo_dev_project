@@ -1,6 +1,5 @@
 import os
 import pathlib
-import pwd
 import platform
 
 DEV_PROJECT_DIR = "dev_project"
@@ -36,6 +35,7 @@ POSTGRES_ODOO_PASS = CURRENT_PASSWORD
 
 ARCH = str(platform.machine()).lower()
 if platform.system() == "Linux":
+    import pwd
     if ARCH == "x86_64":
         ARCH = "amd64"
     CURRENT_USER_UID = os.getuid()
