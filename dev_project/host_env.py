@@ -23,10 +23,7 @@ class CreateEnvironment():
         self.config["dependencies_dirs"] = []
         self.config["docker_dirs_with_addons"] = []
         self.config["debugger_path_mappings"] = []
-        self.config["arch"] = str(platform.machine()).lower()
-        if platform.system() == "Linux" and self.config["arch"] == "x86_64":
-            self.config["arch"] = "amd64"
-        self.config["odoo_image_name"] = f"""odoo-{self.config["arch"]}"""
+        self.config["odoo_image_name"] = f"""odoo-{ARCH}"""
         self.config["venv_dir"] = os.path.join(self.config["project_dir"], "venv")
         self.config["docker_home"] = os.path.join(self.config["project_dir"], "docker_home")
         self.config["docker_project_dir"] = str(pathlib.PurePosixPath("/home", CURRENT_USER))
@@ -86,7 +83,7 @@ class CreateEnvironment():
         with open(dockerfile_template_path) as f:
             lines = f.readlines()
         content = "".join(lines).format(
-            PROCESSOR_ARCH=self.config["arch"],
+            PROCESSOR_ARCH=ARCH,
             CURRENT_USER_UID=CURRENT_USER_UID,
             CURRENT_USER_GID=CURRENT_USER_GID,
             CURRENT_USER=CURRENT_USER,

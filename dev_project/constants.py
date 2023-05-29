@@ -1,6 +1,7 @@
 import os
 import pathlib
 import pwd
+import platform
 
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"
@@ -19,9 +20,9 @@ GITLINK_TYPE_HTTP = "http"
 GITLINK_TYPE_FILE = "local_filesystem"
 TYPE_PROJECT_PROJECT = "project"
 TYPE_PROJECT_MODULE = "module"
-CURRENT_USER_UID = os.getuid()
-CURRENT_USER_GID = os.getgid()
-CURRENT_USER = pwd.getpwuid(os.getuid())[0]
+CURRENT_USER_UID = "9999"
+CURRENT_USER_GID = CURRENT_USER_UID
+CURRENT_USER = "odoo"
 CURRENT_PASSWORD = CURRENT_USER
 # If you have already used this image of postgres, you can have situation when your variables are not enabled
 # https://github.com/docker-library/docs/blob/master/postgres/README.md
@@ -29,3 +30,11 @@ CURRENT_PASSWORD = CURRENT_USER
 # In this case you need to delete old data or use old variables
 POSTGRES_ODOO_USER = CURRENT_USER
 POSTGRES_ODOO_PASS = CURRENT_PASSWORD
+
+ARCH = str(platform.machine()).lower()
+if platform.system() == "Linux":
+    if ARCH == "x86_64":
+        ARCH = "amd64"
+    CURRENT_USER_UID = os.getuid()
+    CURRENT_USER_GID = os.getgid()
+    CURRENT_USER = pwd.getpwuid(os.getuid())[0]
