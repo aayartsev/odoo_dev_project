@@ -6,7 +6,7 @@ services:
     user: root
     tty: true
     ports:
-      - 5432:5432
+      - {POSTGRES_PORT}:{POSTGRES_DOCKER_PORT}
     environment:
       - POSTGRES_PASSWORD={POSTGRES_ODOO_PASS}
       - POSTGRES_USER={POSTGRES_ODOO_USER}

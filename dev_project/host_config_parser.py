@@ -12,6 +12,7 @@ class ConfParser():
         self.env_file = os.path.join(self.project_dir, ENV_FILE_NAME)
         self.config = None
         self.parse_json_config()
+        self.parse_env_file()
 
     def parse_json_config(self):
         with open(self.config_path) as config_file:
@@ -27,3 +28,6 @@ class ConfParser():
         }
         self.config["odoo_src_dir"] = parser["env"]["ODDO_SRC_DIR"]
         self.config["odoo_projects_dir"] = parser["env"]["ODDO_PROJECTS_DIR"]
+        self.config["debugger_port"] = parser["env"].get("DEBUGGER_PORT", DEBUGGER_DEFAULT_PORT)
+        self.config["odoo_port"] = parser["env"].get("ODOO_PORT", ODOO_DEFAULT_PORT)
+        self.config["postgres_port"] = parser["env"].get("POSTGRES_PORT", POSTGRES_DEFAULT_PORT)

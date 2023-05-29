@@ -112,6 +112,7 @@ class CreateEnvironment():
             MAPPED_VOLUMES=mapped_volumes,
             DEBUGGER_PORT=self.config.get("debugger_port", DEBUGGER_DEFAULT_PORT),
             ODOO_PORT=self.config.get("odoo_port", ODOO_DEFAULT_PORT),
+            POSTGRES_PORT=self.config.get("postgres_port", POSTGRES_DEFAULT_PORT),
             START_STRING=self.config["start_string"],
             CURRENT_USER=CURRENT_USER,
             CURRENT_PASSWORD=CURRENT_PASSWORD,
@@ -119,6 +120,7 @@ class CreateEnvironment():
             POSTGRES_ODOO_PASS=POSTGRES_ODOO_PASS,
             ODOO_DOCKER_PORT=ODOO_DOCKER_PORT,
             DEBUGGER_DOCKER_PORT=DEBUGGER_DOCKER_PORT,
+            POSTGRES_DOCKER_PORT=POSTGRES_DOCKER_PORT,
         )
         dockerfile_path = os.path.join(self.config["project_dir"], "docker-compose.yml")
         with open(dockerfile_path, 'w') as writer:

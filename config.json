@@ -1,8 +1,6 @@
 {
     "init_modules":"first_module",
     "update_modules":"first_module",
-    "debugger_port": 5678,
-    "odoo_port":8069,
     "db_creation_data":{
         "db_lang": "en_US",
         "db_country_code": null,
