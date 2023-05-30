@@ -24,10 +24,12 @@ class ConfParser():
         with open(self.env_file) as stream:
             parser.read_string("[env]\n" + stream.read())
         self.config["backups"] = {
-            "local_dir": parser["env"]["LOCAL_DIR"],
+            "local_dir": parser["env"]["BACKUP_DIR"],
         }
-        self.config["odoo_src_dir"] = parser["env"]["ODDO_SRC_DIR"]
-        self.config["odoo_projects_dir"] = parser["env"]["ODDO_PROJECTS_DIR"]
+        self.config["odoo_src_dir"] = parser["env"]["ODOO_SRC_DIR"]
+        self.config["odoo_projects_dir"] = parser["env"]["ODOO_PROJECTS_DIR"]
         self.config["debugger_port"] = parser["env"].get("DEBUGGER_PORT", DEBUGGER_DEFAULT_PORT)
         self.config["odoo_port"] = parser["env"].get("ODOO_PORT", ODOO_DEFAULT_PORT)
         self.config["postgres_port"] = parser["env"].get("POSTGRES_PORT", POSTGRES_DEFAULT_PORT)
+        self.config["path_to_ssh_key"] = parser["env"].get("PATH_TO_SSH_KEY", False)
+
