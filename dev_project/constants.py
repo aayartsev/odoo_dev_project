@@ -5,7 +5,8 @@ import platform
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"
 ENV_FILE_NAME = ".env"
-DOCKER_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "Dockerfile")
+DOCKERFILE = "Dockerfile"
+DOCKER_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", DOCKERFILE)
 DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "docker-compose.yml")
 ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "dev_odoo_docker_config_file.conf")
 DB_MANAGEMENT_RELATIVE_PATH = pathlib.PurePosixPath(DEV_PROJECT_DIR, "db_management.py")
@@ -16,7 +17,6 @@ ODOO_DOCKER_PORT = ODOO_DEFAULT_PORT
 POSTGRES_DEFAULT_PORT = "5432"
 POSTGRES_DOCKER_PORT = POSTGRES_DEFAULT_PORT
 DEBUGGER_UNIT_NAME = "Odoo: Remote Attach"
-DOCKERFILE = "Dockerfile"
 GITLINK_TYPE_SSH = "ssh"
 GITLINK_TYPE_HTTP = "http"
 GITLINK_TYPE_FILE = "local_filesystem"
