@@ -94,20 +94,20 @@ python3 /path/to/your/new/project/docker_start.py -d new_db -i -u
 
 ## Параметры config.json:
 
-- `init_modules` - ...
-- `update_modules` - ...
-- `db_creation_data` - ...
-    - `db_lang` - `en_US`
-    - `db_country_code` - `ru`
-    - `create_demo` - `true`
-    - `db_default_admin_login` - ...
-    - `db_default_admin_password` - ...
-- `odoo_version` - ...
-- `update_git_repos` - `false`
-- `developing_project` - `"git@github.com:aayartsev/odoo_demo_project.git"`
-- `pre_commit_map_files` - ...
-- `dependencies` - ...
-- `requirements_txt` - ...
+- `init_modules` - Строка. Параметр, в котором указываются модули через запятую, без пробелов, которые будут проинициированы(установлены) при (пере)запуске системы.
+- `update_modules` - Строка. Параметр, в котором указываются модули через запятую, без пробелов, которые будут обновлены при (пере)запуске системы
+- `db_creation_data` - Объект. Параметры которые определяют создание новой базы
+    - `db_lang` - Строка. Укажите язык системы по умолчанию про создании новой базы, например: `"en_US"` или `"ru_RU"`
+    - `db_country_code` - Строка или `false` Укажите код страны по умолчанию про создании новой базы, например:`"ru"`
+    - `create_demo` - Булево. Указывает на то, нужно ли создавать в системе демо данные при создании новой базы.
+    - `db_default_admin_login` - Строка. Логин для учетной записи администратора
+    - `db_default_admin_password` - Строка. Пароль для учетной записи администратора
+- `odoo_version` - Строка. Версия системы. Примеры: `"16.0"`, `"15.0"`, `"11.0"`
+- `update_git_repos` - Булево. Указывает на то, будут ли обновлены репозитории зависимостей и самой odoo при перезапуске системы
+- `developing_project` - Строка. Ссылка на проект, который вы разрабатываете. Пример: `"git@github.com:aayartsev/odoo_demo_project.git"`
+- `pre_commit_map_files` - Список. Список файлов для системы `pre-commit`, которые выносятся из проекта и пробрасываются туда через сопоставление файлов docker. Нужно для работы не на Linux системах
+- `dependencies` - Список. Список ссылок на репозитории проектов, от которых зависит ваш проект
+- `requirements_txt` - Список. Список python модулей, каждый элемент может оформляться так же как и строка в файле requirements.txt
 
 В проекте уже лежит настроенный пример `config.json`, который расчитан на работу с учебным демо-проектом `https://github.com/aayartsev/odoo_demo_project`
 
