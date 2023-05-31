@@ -126,4 +126,4 @@ class HandleOdooProjectGitLink():
         if not path_to_ssh_key:
             subprocess.run(["git", "clone", self.gitlink])
         else:
-            subprocess.run(["git", "clone", self.gitlink, "--config", f"""core.sshCommand='ssh -i {path_to_ssh_key}'"""])
+            subprocess.call(f'git clone {self.gitlink} --config core.sshCommand="ssh -i {path_to_ssh_key}"', shell=True)
