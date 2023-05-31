@@ -31,5 +31,8 @@ class ConfParser():
         self.config["debugger_port"] = parser["env"].get("DEBUGGER_PORT", DEBUGGER_DEFAULT_PORT)
         self.config["odoo_port"] = parser["env"].get("ODOO_PORT", ODOO_DEFAULT_PORT)
         self.config["postgres_port"] = parser["env"].get("POSTGRES_PORT", POSTGRES_DEFAULT_PORT)
-        self.config["path_to_ssh_key"] = parser["env"].get("PATH_TO_SSH_KEY", False)
+        path_to_ssh_key = parser["env"].get("PATH_TO_SSH_KEY", False)
+        if path_to_ssh_key and platform.system() == "Windows":
+            path_to_ssh_key = path_to_ssh_key.replace("\\","\\\\")
+        self.config["path_to_ssh_key"] = path_to_ssh_key
 
