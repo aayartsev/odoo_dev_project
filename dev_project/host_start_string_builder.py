@@ -20,8 +20,14 @@ class StartStringBuilder():
             self.config["docker_dirs_with_addons"]
         )
         odoo_config["options"]["addons_path"] = addons_string
-        my_config_parser_dict = {s:dict(odoo_config.items(s)) for s in odoo_config.sections()}
+        odoo_config["options"]["db_password"] = POSTGRES_ODOO_PASS
+        odoo_config["options"]["db_user"] = POSTGRES_ODOO_USER
+        odoo_config["options"]["http_port"] = ODOO_DOCKER_PORT
+        odoo_config["options"]["db_port"] = POSTGRES_DOCKER_PORT
 
+        data_dir = str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".local/share/Odoo"))
+        odoo_config["options"]["data_dir"] = data_dir
+        my_config_parser_dict = {s:dict(odoo_config.items(s)) for s in odoo_config.sections()}
         data = json.dumps(my_config_parser_dict).encode("utf-8")
         config_base64_data = base64.b64encode(data)
         db_management_params = {
@@ -37,7 +43,7 @@ class StartStringBuilder():
         db_management_start_string=f"""python3 {pathlib.PurePosixPath(self.config["docker_project_dir"], DB_MANAGEMENT_RELATIVE_PATH)}"""
         for param, param_value in db_management_params.items():
             db_management_start_string += f" {param} {param_value}"
-        start_python_command = f"""python3 -u -m debugpy --listen 0.0.0.0:5678 {self.config["docker_odoo_dir"]}/odoo-bin -c {self.config["docker_project_dir"]}/odoo.conf --limit-time-real 99999"""
+        start_python_command = f"""python3 -u -m debugpy --listen 0.0.0.0:{DEBUGGER_DOCKER_PORT} {self.config["docker_odoo_dir"]}/odoo-bin -c {self.config["docker_project_dir"]}/odoo.conf --limit-time-real 99999"""
         test_command = " --test-enable --stop-after-init"
 
         db_name = self.args_dict.get("-d", False)
@@ -55,7 +61,7 @@ class StartStringBuilder():
             return start_string
         
         if start_pre_commit:
-            start_string = f"""/bin/bash -c 'cd {self.config["docker_odoo_project_dir_path"]} && ls && pre-commit run --all-files'"""
+            start_string = f"""/bin/bash -c 'cd {self.config["docker_odoo_project_dir_path"]} && ls && git config --global --add safe.directory {self.config["docker_odoo_project_dir_path"]} && pre-commit run --all-files'"""
             return start_string
 
         if db_name:

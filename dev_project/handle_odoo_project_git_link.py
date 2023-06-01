@@ -122,4 +122,8 @@ class HandleOdooProjectGitLink():
         if not os.path.exists(self.dir_to_clone):
             os.makedirs(self.dir_to_clone)
         os.chdir(self.dir_to_clone)
-        subprocess.run(["git", "clone", self.gitlink])
+        path_to_ssh_key = self.config.get("path_to_ssh_key", False)
+        if not path_to_ssh_key:
+            subprocess.run(["git", "clone", self.gitlink])
+        else:
+            subprocess.call(f'git clone {self.gitlink} --config core.sshCommand="ssh -i {path_to_ssh_key}"', shell=True)

@@ -1,27 +1,24 @@
 FROM python:3.7.12-bullseye  
   
 # Переменные проекта
-ARG USER_UID=9999  
-ARG USER_GID=$USER_UID  
+ARG USER_UID={CURRENT_USER_UID}
+ARG USER_GID={CURRENT_USER_GID}
 
-ARG USER_NAME=odoo
-ARG PASSWORD=odoo
-# Если используете, например, макбук на M1 посатавьте arm64
-# If you use mac on M1 set to arm64
-ARG PROCESSOR_ARCH=arm64
-  
+ARG USER_NAME={CURRENT_USER}
+ARG PASSWORD={CURRENT_PASSWORD}
+
 # Подготавливаем внутреннего пользователя
-RUN groupadd --gid $USER_GID $USER_NAME \  
+RUN groupadd --gid $USER_GID $USER_NAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USER_NAME -p $(openssl passwd -crypt $PASSWORD) \
-    && apt-get update \  
-    && apt-get install -y sudo \  
-    && echo $USER_NAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USER_NAME \  
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USER_NAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USER_NAME \
     && chmod 0440 /etc/sudoers.d/$USER_NAME\
-    && mkdir /home/$USER_NAME/.ssh\  
-    && chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh\   
-    && mkdir -p /home/$USER_NAME/.vscode-server\  
-    && chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/.vscode-server\  
-    && apt-get -y install git postgresql-client node-less npm ssh  \  
+    && mkdir /home/$USER_NAME/.ssh\
+    && chown $USER_NAME:$USER_NAME /home/$USER_NAME/.ssh\
+    && mkdir -p /home/$USER_NAME/.vscode-server\
+    && chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/.vscode-server\
+    && apt-get -y install git postgresql-client node-less npm ssh  \
     && python3 -m pip install pre-commit
  
 # устанавливаем все необходимые зависимости 

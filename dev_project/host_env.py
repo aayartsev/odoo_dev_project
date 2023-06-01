@@ -5,6 +5,7 @@ import shutil
 import logging
 import pathlib
 import platform
+from pathlib import Path
 
 from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 from .constants import *
@@ -22,11 +23,10 @@ class CreateEnvironment():
         self.config["dependencies_dirs"] = []
         self.config["docker_dirs_with_addons"] = []
         self.config["debugger_path_mappings"] = []
-        self.config["arch"] = platform.machine()
-        self.config["odoo_image_name"] = f"odoo-{str.lower(self.config['arch'])}"
-        
+        self.config["odoo_image_name"] = f"""odoo-{ARCH}"""
         self.config["venv_dir"] = os.path.join(self.config["project_dir"], "venv")
         self.config["docker_home"] = os.path.join(self.config["project_dir"], "docker_home")
+        self.config["docker_project_dir"] = str(pathlib.PurePosixPath("/home", CURRENT_USER))
         self.config["docker_odoo_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo"))
         self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "addons")))
         self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "odoo", "addons")))
@@ -35,7 +35,7 @@ class CreateEnvironment():
         self.config["docker_extra_addons"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "extra-addons"))
         developing_project = self.handle_git_link(self.config.get("developing_project"))
         self.config["odoo_project_dir_path"] = developing_project.project_path
-        #TODO create check for odoo project if its type module
+        #TODO create check for odoo project if its type is module
         self.config["docker_odoo_project_dir_path"] = str(pathlib.PurePosixPath(self.config["docker_extra_addons"], developing_project.project_data.name))
         self.config["docker_dirs_with_addons"].append(self.config["docker_odoo_project_dir_path"])
         self.config["docker_backups_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "backups"))
@@ -82,7 +82,14 @@ class CreateEnvironment():
         dockerfile_template_path = os.path.join(self.config["project_dir"], DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
         with open(dockerfile_template_path) as f:
             lines = f.readlines()
-        content = "".join(lines).format(PROCESSOR_ARCH=self.config["arch"])
+        content = "".join(lines).format(
+            PROCESSOR_ARCH=ARCH,
+            CURRENT_USER_UID=CURRENT_USER_UID,
+            CURRENT_USER_GID=CURRENT_USER_GID,
+            CURRENT_USER=CURRENT_USER,
+            CURRENT_PASSWORD=CURRENT_PASSWORD,
+
+        )
         dockerfile_path = os.path.join(self.config["project_dir"], DOCKERFILE)
         self.config["dockerfile_path"] = dockerfile_path
         with open(dockerfile_path, 'w') as writer:
@@ -96,11 +103,24 @@ class CreateEnvironment():
         mapped_volumes = "\n"
         for mapped_volume in self.mapped_folders:
             mapped_volumes += " " * 6 + f"- {mapped_volume[0]}:{mapped_volume[1]}\n"
+            if not os.path.exists(mapped_volume[0]):
+                path = Path(mapped_volume[0])
+                path.mkdir(parents=True)
 
         content = "".join(lines).format(
             ODOO_IMAGE=self.config["odoo_image_name"],
             MAPPED_VOLUMES=mapped_volumes,
             DEBUGGER_PORT=self.config.get("debugger_port", DEBUGGER_DEFAULT_PORT),
+            ODOO_PORT=self.config.get("odoo_port", ODOO_DEFAULT_PORT),
+            POSTGRES_PORT=self.config.get("postgres_port", POSTGRES_DEFAULT_PORT),
+            START_STRING=self.config["start_string"],
+            CURRENT_USER=CURRENT_USER,
+            CURRENT_PASSWORD=CURRENT_PASSWORD,
+            POSTGRES_ODOO_USER=POSTGRES_ODOO_USER,
+            POSTGRES_ODOO_PASS=POSTGRES_ODOO_PASS,
+            ODOO_DOCKER_PORT=ODOO_DOCKER_PORT,
+            DEBUGGER_DOCKER_PORT=DEBUGGER_DOCKER_PORT,
+            POSTGRES_DOCKER_PORT=POSTGRES_DOCKER_PORT,
         )
         dockerfile_path = os.path.join(self.config["project_dir"], "docker-compose.yml")
         with open(dockerfile_path, 'w') as writer:

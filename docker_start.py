@@ -15,6 +15,7 @@ build_image = args_dict.get("--build_image", False)
 config = ConfParser(current_dir_path).config
 environment = CreateEnvironment(config)
 environment.update_config()
+config["start_string"] = StartStringBuilder(config, args_dict).get_start_string()
 environment.generate_dockerfile()
 if build_image:
     subprocess.run(["docker", "build", "-f", config["dockerfile_path"], "-t", config["odoo_image_name"], "."])
@@ -24,7 +25,6 @@ environment.checkout_dependencies()
 environment.update_links()
 environment.update_vscode_debugger_launcher()
 
-os.environ["START_STRING"] = StartStringBuilder(config, args_dict).get_start_string()
 os.chdir(config["project_dir"])
 
 try:

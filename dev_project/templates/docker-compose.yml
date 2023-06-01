@@ -6,24 +6,24 @@ services:
     user: root
     tty: true
     ports:
-      - 5432:5432
+      - {POSTGRES_PORT}:{POSTGRES_DOCKER_PORT}
     environment:
-      - POSTGRES_PASSWORD=odoo
-      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD={POSTGRES_ODOO_PASS}
+      - POSTGRES_USER={POSTGRES_ODOO_USER}
       - POSTGRES_DB=postgres
 
   odoo:
     image: {ODOO_IMAGE}
-    user: odoo
+    user: {CURRENT_USER}
     tty: true
     depends_on:
       - db
     environment:
       - PYTHONUNBUFFERED=1
     ports:
-      - 8069:8069
-      - {DEBUGGER_PORT}:5678
+      - {ODOO_PORT}:{ODOO_DOCKER_PORT}
+      - {DEBUGGER_PORT}:{DEBUGGER_DOCKER_PORT}
 
     volumes: {MAPPED_VOLUMES}
 
-    command: $START_STRING
+    command: {START_STRING}
