@@ -37,6 +37,11 @@ class SystemChecker():
         try:
             docker_compose_version = output_string.split("\n")[0].split(" ")[3].strip(",").strip("v")
         except BaseException:
-                logging.warning(f"""We can not detect docker-compose versions, we will use default settings. If your system is not starting you can change param 'version:' in file ./dev_project/templates/docker-compose.yml manualy. Try to start command 'docker-compose  config' and read carefully""")
+                logging.warning(
+                    "We can not detect docker-compose versions, we will use default settings. "
+                    "If your system is not starting you can change param 'version:' in file "
+                    "./dev_project/templates/docker-compose.yml manualy. Try to start command "
+                    "'docker-compose  config' and read carefully"
+                )
         self.config["compose_file_version"] = DOCKER_COMPOSE_VERSION_DATA[docker_compose_version]["file_version"]
         self.config["no_log_prefix"] = DOCKER_COMPOSE_VERSION_DATA[docker_compose_version]["no_log_prefix"]

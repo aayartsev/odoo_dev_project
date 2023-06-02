@@ -146,6 +146,15 @@ class CreateEnvironment():
         list_for_checkout.extend(self.config["dependencies_dirs"])
         for source_dir in list_for_checkout:
             os.chdir(source_dir)
+            current_branch_bytes = subprocess.run(["git", "branch", "--show-current"], capture_output=True)
+            current_branch_string = current_branch_bytes.decode("utf-8")
+            try:
+                current_branch_float = float(current_branch_bytes)
+            except:
+                current_branch_float = 0.0
+            if current_branch_float and current_branch_string != self.config["odoo_version"]:
+                subprocess.run(["git", "stash"], capture_output=True)
+                subprocess.run(["git", "checkout", self.config["odoo_version"]], capture_output=True)
             if self.config.get("clean_git_repos", True):
                 subprocess.run(["git", "stash"], capture_output=True)
                 subprocess.run(["git", "checkout", self.config["odoo_version"]], capture_output=True)

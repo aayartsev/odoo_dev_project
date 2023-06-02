@@ -59,20 +59,20 @@ git clone https://github.com/odoo/odoo.git
 
 Пример для Windows:
 ```
-BACKUP_DIR = C:\Users\User\odoo_backups
-ODOO_SRC_DIR = C:\Users\User\odoo
-ODOO_PROJECTS_DIR = C:\Users\User\odoo_projects
-PATH_TO_SSH_KEY = C:\Users\User\.ssh\my_ssh_key
-ODOO_PORT = 8069
-POSTGRES_PORT = 5432
-DEBUGGER_PORT = 5678
+BACKUP_DIR=C:\Users\User\odoo_backups
+ODOO_SRC_DIR=C:\Users\User\odoo
+ODOO_PROJECTS_DIR=C:\Users\User\odoo_projects
+PATH_TO_SSH_KEY=C:\Users\User\.ssh\my_ssh_key
+ODOO_PORT=8069
+POSTGRES_PORT=5432
+DEBUGGER_PORT=5678
 ```
 
 ## Как начать работать
 
 Запускаем `VSCode` затем через меню Файл - Открыть (File - Open Folder) Каталог, открываем ранее созданный каталог со скопированными в него файлами данного проекта `odoo_demo_project-16`.
 
-Теперь запускаем терминал через меню Терминал - Создать Терминал (Terminal - New Terminal) и уже в нем вводите указанные ниже команды
+Теперь запускаем терминал через меню Терминал - Создать Терминал (Terminal - New Terminal) и уже в нем вводите указанные ниже команды. Если кто-то, глядя на python скрипт захочет запустить его внутри виртуального окружения, то не надо этого делать. В данном случае он используется вместо системных скриптовых языков и вы только усложните себе жизнь. Виртуальное окружение для проекта будет установлено внутрь контейнера в следующих шагах
 
 Теперь надо подготовить образ Docker
 ```
