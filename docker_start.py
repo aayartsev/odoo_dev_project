@@ -17,7 +17,7 @@ SystemChecker(config)
 environment = CreateEnvironment(config)
 environment.update_config()
 environment.generate_dockerfile()
-StartStringBuilder(config, args_dict)mc
+StartStringBuilder(config, args_dict)
 environment.generate_docker_compose_file()
 environment.checkout_dependencies()
 environment.update_links()
