@@ -16,9 +16,8 @@ config = ConfParser(current_dir_path).config
 SystemChecker(config)
 environment = CreateEnvironment(config)
 environment.update_config()
-StartStringBuilder(config, args_dict)
-
 environment.generate_dockerfile()
+StartStringBuilder(config, args_dict)mc
 environment.generate_docker_compose_file()
 environment.checkout_dependencies()
 environment.update_links()
