@@ -121,6 +121,7 @@ class CreateEnvironment():
             ODOO_DOCKER_PORT=ODOO_DOCKER_PORT,
             DEBUGGER_DOCKER_PORT=DEBUGGER_DOCKER_PORT,
             POSTGRES_DOCKER_PORT=POSTGRES_DOCKER_PORT,
+            COMPOSE_FILE_VERSION=self.config["compose_file_version"]
         )
         dockerfile_path = os.path.join(self.config["project_dir"], "docker-compose.yml")
         with open(dockerfile_path, 'w') as writer:
@@ -145,8 +146,9 @@ class CreateEnvironment():
         list_for_checkout.extend(self.config["dependencies_dirs"])
         for source_dir in list_for_checkout:
             os.chdir(source_dir)
-            subprocess.run(["git", "stash"], capture_output=True)
-            subprocess.run(["git", "checkout", self.config["odoo_version"]], capture_output=True)
+            if self.config.get("clean_git_repos", True):
+                subprocess.run(["git", "stash"], capture_output=True)
+                subprocess.run(["git", "checkout", self.config["odoo_version"]], capture_output=True)
             if self.config["update_git_repos"]:
                 subprocess.run(["git", "pull"], capture_output=True)
     

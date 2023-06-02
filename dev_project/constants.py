@@ -41,3 +41,17 @@ if platform.system() == "Linux":
     CURRENT_USER_UID = os.getuid()
     CURRENT_USER_GID = os.getgid()
     CURRENT_USER = pwd.getpwuid(os.getuid())[0]
+
+DOCKER_COMPOSE_VERSION_DATA = {
+    "1.25.0": {
+        "file_version": "3.3",
+        "no_log_prefix": False,
+    },
+    "default": {
+        "file_version": "3.8",
+        "no_log_prefix": True,
+    },
+}
+
+DOCKER_WORKING_MESSAGE = "Server Version"
+GIT_WORKING_MESSAGE = "git version"
