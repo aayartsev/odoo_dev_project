@@ -2,6 +2,7 @@ import configparser
 import json
 import base64
 import pathlib
+import subprocess
 
 from .constants import *
 
@@ -10,6 +11,7 @@ class StartStringBuilder():
     def __init__(self, config, args_dict):
         self.config = config
         self.args_dict = args_dict
+        self.config["start_string"] = self.get_start_string()
     
     def get_start_string(self):
         # Reading of config file
@@ -54,6 +56,11 @@ class StartStringBuilder():
         get_dbs_list = self.args_dict.get("--get_dbs_list", False)
         start_pre_commit = self.args_dict.get("--start_precommit", False)
         set_admin_pass = self.args_dict.get("--set_admin_pass", False)
+        build_image = self.args_dict.get("--build_image", False)
+        
+        if build_image:
+            subprocess.run(["docker", "build", "-f", self.config["dockerfile_path"], "-t", self.config["odoo_image_name"], "."])
+            exit()
 
         if install_pip:
             pip_install_command = f"""cd {self.config["docker_project_dir"]} && python3 -m venv {self.config["docker_venv_dir"]} && . {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && wget -O odoo_requirements.txt https://raw.githubusercontent.com/odoo/odoo/{self.config["odoo_version"]}/requirements.txt && python3 -m pip install -r odoo_requirements.txt && python3 -m pip install {" ".join([req for req in self.config["requirements_txt"]])}"""

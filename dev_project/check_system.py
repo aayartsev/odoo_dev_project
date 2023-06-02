@@ -29,11 +29,14 @@ class SystemChecker():
     def check_docker_compose(self):
         process_result = subprocess.run(["docker-compose",  "version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
+        output_string = output_string.lower().replace("-"," ")
+        if DOCKER_COMPOSE_WORKING_MESSAGE not in output_string:
+            logging.error(f"""Cannot get docker-compose info, did you install it?""")
+            exit()
         docker_compose_version = "default"
-        if platform.system() == "Linux":
-            try:
-                docker_compose_version = output_string.split("\n")[0].split(" ")[2].strip(",")
-            except BaseException:
-                logging.warning(f"""We can not detect docker-compose versions, we will use default settings""")
+        try:
+            docker_compose_version = output_string.split("\n")[0].split(" ")[3].strip(",").strip("v")
+        except BaseException:
+                logging.warning(f"""We can not detect docker-compose versions, we will use default settings. If your system is not starting you can change param 'version:' in file ./dev_project/templates/docker-compose.yml manualy. Try to start command 'docker-compose  config' and read carefully""")
         self.config["compose_file_version"] = DOCKER_COMPOSE_VERSION_DATA[docker_compose_version]["file_version"]
         self.config["no_log_prefix"] = DOCKER_COMPOSE_VERSION_DATA[docker_compose_version]["no_log_prefix"]
