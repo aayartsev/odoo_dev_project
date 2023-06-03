@@ -10,6 +10,8 @@
     },
     "odoo_version": "16.0",
     "update_git_repos": false,
+    "clean_git_repos": false,
+    "check_system": true,
     "developing_project":"git@github.com:aayartsev/odoo_demo_project.git",
     "pre_commit_map_files":[
         ".flake8",
