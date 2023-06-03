@@ -147,9 +147,9 @@ class CreateEnvironment():
         for source_dir in list_for_checkout:
             os.chdir(source_dir)
             current_branch_bytes = subprocess.run(["git", "branch", "--show-current"], capture_output=True)
-            current_branch_string = current_branch_bytes.decode("utf-8")
+            current_branch_string = current_branch_bytes.stdout.decode("utf-8").strip()
             try:
-                current_branch_float = float(current_branch_bytes)
+                current_branch_float = float(current_branch_string)
             except:
                 current_branch_float = 0.0
             if current_branch_float and current_branch_string != self.config["odoo_version"]:
