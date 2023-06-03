@@ -2,6 +2,7 @@ import os
 import pathlib
 import platform
 
+ARCH = str(platform.machine()).lower()
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"
 ENV_FILE_NAME = ".env"
@@ -26,14 +27,7 @@ CURRENT_USER_UID = "9999"
 CURRENT_USER_GID = CURRENT_USER_UID
 CURRENT_USER = "odoo"
 CURRENT_PASSWORD = CURRENT_USER
-# If you have already used this image of postgres, you can have situation when your variables are not enabled
-# https://github.com/docker-library/docs/blob/master/postgres/README.md
-# Warning: the Docker specific variables will only have an effect if you start the container with a data directory that is empty; any pre-existing database will be left untouched on container startup.
-# In this case you need to delete old data or use old variables
-POSTGRES_ODOO_USER = CURRENT_USER
-POSTGRES_ODOO_PASS = CURRENT_PASSWORD
 
-ARCH = str(platform.machine()).lower()
 if platform.system() == "Linux":
     import pwd
     if ARCH == "x86_64":
@@ -42,16 +36,15 @@ if platform.system() == "Linux":
     CURRENT_USER_GID = os.getgid()
     CURRENT_USER = pwd.getpwuid(os.getuid())[0]
 
-DOCKER_COMPOSE_VERSION_DATA = {
-    "1.25.0": {
-        "file_version": "3.3",
-        "no_log_prefix": False,
-    },
-    "default": {
-        "file_version": "3.8",
-        "no_log_prefix": True,
-    },
-}
+# If you have already used this image of postgres, you can have situation when your variables are not enabled
+# https://github.com/docker-library/docs/blob/master/postgres/README.md
+# Warning: the Docker specific variables will only have an effect if you start the container with a data directory that is empty; any pre-existing database will be left untouched on container startup.
+# In this case you need to delete old data or use old variables
+POSTGRES_ODOO_USER = CURRENT_USER
+POSTGRES_ODOO_PASS = CURRENT_PASSWORD
+
+NO_LOG_PREFIX = "--no-log-prefix"
+DOCKER_COMPOSE_DEFAULT_FILE_VERSION = "3.3"
 
 DOCKER_WORKING_MESSAGE = "Server Version"
 GIT_WORKING_MESSAGE = "git version"

@@ -10,7 +10,7 @@ class SystemChecker():
         if self.config["check_system"]:
             self.check_git()
             self.check_docker()
-        self.check_docker_compose()
+            self.check_docker_compose()
         self.check_file_system()
     
     def check_git(self):
@@ -28,24 +28,19 @@ class SystemChecker():
             exit()
 
     def check_docker_compose(self):
+        self.config["no_log_prefix"] = True
         process_result = subprocess.run(["docker-compose",  "version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         output_string = output_string.lower().replace("-"," ")
         if DOCKER_COMPOSE_WORKING_MESSAGE not in output_string:
             logging.error("Cannot get docker-compose info, did you install it?")
             exit()
-        docker_compose_version = "default"
-        try:
-            docker_compose_version = output_string.split("\n")[0].split(" ")[3].strip(",").strip("v")
-        except BaseException:
-                logging.warning(
-                    "We can not detect docker-compose versions, we will use default settings. "
-                    "If your system is not starting you can change param 'version:' in file "
-                    "./dev_project/templates/docker-compose.yml manualy. Try to start command "
-                    "'docker-compose  config' and read carefully"
-                )
-        self.config["compose_file_version"] = DOCKER_COMPOSE_VERSION_DATA[docker_compose_version]["file_version"]
-        self.config["no_log_prefix"] = DOCKER_COMPOSE_VERSION_DATA[docker_compose_version]["no_log_prefix"]
+        up_help_result = subprocess.run(["docker-compose",  "up", "--help"], capture_output=True)
+        up_help_string = up_help_result.stdout.decode("utf-8")
+        output_string = output_string.lower().replace("-"," ")
+        if NO_LOG_PREFIX not in up_help_string:
+            self.config["no_log_prefix"] = False
+        self.config["compose_file_version"] = DOCKER_COMPOSE_DEFAULT_FILE_VERSION
     
     def check_file_system(self):
         for dir_path in [
