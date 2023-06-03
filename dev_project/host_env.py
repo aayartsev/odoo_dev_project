@@ -206,8 +206,24 @@ class CreateEnvironment():
         # TODO compare old pathMapping records and current debugger_path_mappings
         # and delete not used folders and add new
         debugger_unit_exists = False
-        for debugger_unit in content["configurations"]:
+        list_of_mapped_sources = self.get_list_of_mapped_sources()
+        for dir_with_sources in list_of_mapped_sources:
+            self.config["debugger_path_mappings"].append({
+                "localRoot": dir_with_sources[0], 
+                "remoteRoot": dir_with_sources[1],
+            })
+        port = self.config.get("debugger_port", DEBUGGER_DEFAULT_PORT)
+        odoo_debugger_uint = {
+            "name": DEBUGGER_UNIT_NAME,
+            "type": "python",
+            "request": "attach",
+            "port": int(port),
+            "host": "localhost",
+            "pathMappings": self.config["debugger_path_mappings"],
+        }
+        for index, debugger_unit in enumerate(content["configurations"]):
             if debugger_unit["name"] == DEBUGGER_UNIT_NAME:
+                content["configurations"][index] = odoo_debugger_uint
                 debugger_unit_exists = True
         if not debugger_unit_exists:
             list_of_mapped_sources = self.get_list_of_mapped_sources()
