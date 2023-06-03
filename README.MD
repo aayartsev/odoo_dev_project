@@ -59,20 +59,20 @@ git clone https://github.com/odoo/odoo.git
 
 Пример для Windows:
 ```
-BACKUP_DIR = C:\Users\User\odoo_backups
-ODOO_SRC_DIR = C:\Users\User\odoo
-ODOO_PROJECTS_DIR = C:\Users\User\odoo_projects
-PATH_TO_SSH_KEY = C:\Users\User\.ssh\my_ssh_key
-ODOO_PORT = 8069
-POSTGRES_PORT = 5432
-DEBUGGER_PORT = 5678
+BACKUP_DIR=C:\Users\User\odoo_backups
+ODOO_SRC_DIR=C:\Users\User\odoo
+ODOO_PROJECTS_DIR=C:\Users\User\odoo_projects
+PATH_TO_SSH_KEY=C:\Users\User\.ssh\my_ssh_key
+ODOO_PORT=8069
+POSTGRES_PORT=5432
+DEBUGGER_PORT=5678
 ```
 
 ## Как начать работать
 
 Запускаем `VSCode` затем через меню Файл - Открыть (File - Open Folder) Каталог, открываем ранее созданный каталог со скопированными в него файлами данного проекта `odoo_demo_project-16`.
 
-Теперь запускаем терминал через меню Терминал - Создать Терминал (Terminal - New Terminal) и уже в нем вводите указанные ниже команды
+Теперь запускаем терминал через меню Терминал - Создать Терминал (Terminal - New Terminal) и уже в нем вводите указанные ниже команды. Если кто-то, глядя на python скрипт захочет запустить его внутри виртуального окружения, то не надо этого делать. В данном случае он используется вместо системных скриптовых языков и вы только усложните себе жизнь. Виртуальное окружение для проекта будет установлено внутрь контейнера в следующих шагах
 
 Теперь надо подготовить образ Docker
 ```
@@ -104,6 +104,8 @@ python3 /path/to/your/new/project/docker_start.py -d new_db -i -u
     - `db_default_admin_password` - Строка. Пароль для учетной записи администратора
 - `odoo_version` - Строка. Версия системы. Примеры: `"16.0"`, `"15.0"`, `"11.0"`
 - `update_git_repos` - Булево. Указывает на то, будут ли обновлены репозитории зависимостей и самой odoo при перезапуске системы
+- `clean_git_repos` - Булево. Указывает на то, будут ли при перезапуске сбрасываться изменения в самой odoo и проектах зависимостей
+- `check_system` - Булево. Указывает на то, будет ли запускаться проверка системы при старте. Полезно для новичков. Проверяет наличие устновленного git, docker и docker-compose.
 - `developing_project` - Строка. Ссылка на проект, который вы разрабатываете. Пример: `"git@github.com:aayartsev/odoo_demo_project.git"`
 - `pre_commit_map_files` - Список. Список файлов для системы `pre-commit`, которые выносятся из проекта и пробрасываются туда через сопоставление файлов docker. Нужно для работы не на Linux системах
 - `dependencies` - Список. Список ссылок на репозитории проектов, от которых зависит ваш проект
