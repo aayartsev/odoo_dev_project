@@ -5,6 +5,7 @@ import platform
 ARCH = str(platform.machine()).lower()
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"
+CONFIG_DIR_IN_HOME_DIR = ".odpm"
 ENV_FILE_NAME = ".env"
 DOCKERFILE = "Dockerfile"
 DOCKER_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", DOCKERFILE)
