@@ -7,8 +7,9 @@ import configparser
 import base64
 import contextlib
 from contextlib import closing
-
-from passlib.hash import pbkdf2_sha512
+import venv
+from pip._internal.operations.freeze import freeze
+import logging
 
 args = sys.argv[1:]
 ARGS_DICT = {}
@@ -28,9 +29,62 @@ while current_index < len(args):
         ARGS_DICT[item] = True
         current_index += 1
 
+DOCKER_VENV_DIR = ARGS_DICT["--docker_venv_dir"]
+DOCKER_PROJECT_DIR = ARGS_DICT["--docker_project_dir"]
+REQUIREMENTS_TXT = ARGS_DICT["--requirements_txt"]
+ODOO_VERSION = ARGS_DICT["--version"]
+
+def isvirtualenv():
+    return sys.prefix != sys.base_prefix
+
+def findfile(startdir, pattern):
+    for root, dirs, files in os.walk(startdir):
+        for name in files:
+            if name.find(pattern) >= 0:
+                return root + os.sep + name
+
+    return None
+
+def set_venv():
+    # This is the heart of this script that puts you inside the virtual environment. 
+    # There is no need to undo this. When this script ends, your original path will 
+    # be restored.
+    os.environ['PATH'] = os.path.dirname(findfile(DOCKER_VENV_DIR, 'activate')) + os.pathsep + os.environ['PATH']
+    sys.path.insert(1, os.path.dirname(findfile(DOCKER_VENV_DIR, 'easy_install.py')))
+
+def check_packages_for_install(requirements_txt: list) -> None:
+    # TODO autoinstall packages from requirements_txt if they non in already installed list of pip packages
+    dict_of_packages = {}
+    for line in freeze():
+        dict_of_packages.update({
+            line.split("==")[0]: line.split("==")[1]
+        })
+    for package in requirements_txt:
+        if package not in freeze():
+            os.system(f"""python3 -m pip install {package}""")
+
+if isvirtualenv():
+    logging.info("Already in virtual environment.")
+else:
+    if findfile(DOCKER_VENV_DIR, 'activate') is None:
+        logging.info("No virtual environment found. Creating one.")
+        env = venv.EnvBuilder(with_pip = True)
+        env.create(DOCKER_VENV_DIR)
+        set_venv()
+        os.system(f"""cd {DOCKER_PROJECT_DIR} && wget -O odoo_requirements.txt https://raw.githubusercontent.com/odoo/odoo/{ODOO_VERSION}/requirements.txt && python3 -m pip install -r odoo_requirements.txt""")
+        check_packages_for_install(REQUIREMENTS_TXT.split(" "))
+
+    else:
+        logging.info("Not in virtual environment. Virtual environment directory found.")
+        set_venv()
+        check_packages_for_install(REQUIREMENTS_TXT.split("#"))
+        
+
+
 ODOO_DIR = ARGS_DICT["--odoo_dir"]
 sys.path.append(ODOO_DIR)
 
+from passlib.hash import pbkdf2_sha512
 import odoo
 from odoo.tools import config
 from odoo.api import Environment

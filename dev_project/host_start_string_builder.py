@@ -40,7 +40,12 @@ class StartStringBuilder():
             "--create_demo": self.config["db_creation_data"]["create_demo"],
             "--config_base64_data": config_base64_data.decode(),
             "--odoo_dir": self.config["docker_odoo_dir"],
+            "--docker_venv_dir": self.config["docker_venv_dir"],
+            "--docker_project_dir": self.config["docker_project_dir"],
+            "--requirements_txt": "#".join([req for req in self.config["requirements_txt"]]),
+            "--version": self.config["odoo_version"],
             "-c": self.config["docker_path_odoo_conf"],
+
         }
         db_management_start_string=f"""python3 {pathlib.PurePosixPath(self.config["docker_project_dir"], DB_MANAGEMENT_RELATIVE_PATH)}"""
         for param, param_value in db_management_params.items():
@@ -99,5 +104,6 @@ class StartStringBuilder():
         if translate_lang:
             start_python_command += f" --language {translate_lang} --load-language {translate_lang} --i18n-overwrite"
             
-        start_string = f"""bash -c ' cd {self.config["docker_project_dir"]} && source {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && {db_management_start_string} && {start_python_command}'"""
+        # start_string = f"""bash -c ' cd {self.config["docker_project_dir"]} && source {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && {db_management_start_string} && {start_python_command}'"""
+        start_string = f"""bash -c ' cd {self.config["docker_project_dir"]} && {db_management_start_string} && source {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && {start_python_command}'"""
         return start_string

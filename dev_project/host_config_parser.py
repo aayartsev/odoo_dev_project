@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 from configparser import ConfigParser
 from pathlib import Path
 
@@ -18,9 +19,14 @@ class ConfParser():
         self.parse_env_file()
 
     def parse_json_config(self):
-        with open(self.config_path) as config_file:
-            self.config = json.load(config_file)
-            self.config["project_dir"] = self.project_dir
+        try:
+            with open(self.config_path) as config_file:
+                self.config = json.load(config_file)
+                self.config["project_dir"] = self.project_dir
+        except BaseException:
+            logging.error("Check your 'config.json' file, we can not parse it.")
+            exit()
+
     
     def get_env_file_path(self):
         local_env_file = os.path.join(self.project_dir, ENV_FILE_NAME)
@@ -30,7 +36,7 @@ class ConfParser():
         if not os.path.exists(self.config["config_home_dir"]):
             os.makedirs(self.config["config_home_dir"])
         # TODO we need to write method that will create default .env file
-        local_env_file = os.path.join(self.config["config_home_dir"], CONFIG_DIR_IN_HOME_DIR)
+        local_env_file = os.path.join(self.config["config_home_dir"], ENV_FILE_NAME)
         return local_env_file
 
         
