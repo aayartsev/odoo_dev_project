@@ -72,7 +72,7 @@ else:
         env.create(DOCKER_VENV_DIR)
         set_venv()
         os.system(f"""cd {DOCKER_PROJECT_DIR} && wget -O odoo_requirements.txt https://raw.githubusercontent.com/odoo/odoo/{ODOO_VERSION}/requirements.txt && python3 -m pip install -r odoo_requirements.txt""")
-        check_packages_for_install(REQUIREMENTS_TXT.split(" "))
+        check_packages_for_install(REQUIREMENTS_TXT.split("#"))
 
     else:
         logging.info("Not in virtual environment. Virtual environment directory found.")
