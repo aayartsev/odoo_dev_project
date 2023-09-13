@@ -28,11 +28,11 @@ CURRENT_USER_UID = "9999"
 CURRENT_USER_GID = CURRENT_USER_UID
 CURRENT_USER = "odoo"
 CURRENT_PASSWORD = CURRENT_USER
+if ARCH == "x86_64":
+    ARCH = "amd64"
 
 if platform.system() == "Linux":
     import pwd
-    if ARCH == "x86_64":
-        ARCH = "amd64"
     CURRENT_USER_UID = os.getuid()
     CURRENT_USER_GID = os.getgid()
     CURRENT_USER = pwd.getpwuid(os.getuid())[0]

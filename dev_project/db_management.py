@@ -1,4 +1,3 @@
-print("DB_MANAGEMENT")
 import sys
 import os
 import re
@@ -10,6 +9,8 @@ from contextlib import closing
 import venv
 from pip._internal.operations.freeze import freeze
 import logging
+
+logging.info("Starting DB_MANAGEMENT...")
 
 args = sys.argv[1:]
 ARGS_DICT = {}

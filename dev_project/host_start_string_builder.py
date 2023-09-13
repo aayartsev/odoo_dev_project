@@ -103,7 +103,6 @@ class StartStringBuilder():
 
         if translate_lang:
             start_python_command += f" --language {translate_lang} --load-language {translate_lang} --i18n-overwrite"
-            
-        # start_string = f"""bash -c ' cd {self.config["docker_project_dir"]} && source {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && {db_management_start_string} && {start_python_command}'"""
+
         start_string = f"""bash -c ' cd {self.config["docker_project_dir"]} && {db_management_start_string} && source {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && {start_python_command}'"""
         return start_string
