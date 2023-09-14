@@ -1,5 +1,9 @@
 import subprocess
 import logging
+import platform
+if platform.system() == "Linux":
+    import pwd
+    import grp
 
 from .constants import *
 
@@ -19,8 +23,23 @@ class SystemChecker():
         if GIT_WORKING_MESSAGE not in output_string:
             logging.error("Did you installed git?")
             exit()
+    
+    def get_groups(user):
+        gids = [g.gr_gid for g in grp.getgrall() if user in g.gr_mem]
+        gid = pwd.getpwnam(user).pw_gid
+        gids.append(grp.getgrgid(gid).gr_gid)
+        return [grp.getgrgid(gid).gr_name for gid in gids]
 
     def check_docker(self):
+        if platform.system() == "Linux":
+            groups = self.get_groups(CURRENT_USER)
+            if LINUX_DOCKER_GROUPNAME not in groups:
+                logging.error(
+                    f"""You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME}"""
+                    f"""run this command as root or sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}"""
+                    f"""then reboot your computer"""
+                )
+                exit()
         process_result = subprocess.run(["docker",  "info"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         if DOCKER_WORKING_MESSAGE not in output_string:

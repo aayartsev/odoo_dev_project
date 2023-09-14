@@ -28,6 +28,7 @@ CURRENT_USER_UID = "9999"
 CURRENT_USER_GID = CURRENT_USER_UID
 CURRENT_USER = "odoo"
 CURRENT_PASSWORD = CURRENT_USER
+LINUX_DOCKER_GROUPNAME = "docker"
 if ARCH == "x86_64":
     ARCH = "amd64"
 
@@ -35,7 +36,7 @@ if platform.system() == "Linux":
     import pwd
     CURRENT_USER_UID = os.getuid()
     CURRENT_USER_GID = os.getgid()
-    CURRENT_USER = pwd.getpwuid(os.getuid())[0]
+    CURRENT_USER = pwd.getpwuid(CURRENT_USER_UID)[0]
 
 # If you have already used this image of postgres, you can have situation when your variables are not enabled
 # https://github.com/docker-library/docs/blob/master/postgres/README.md
