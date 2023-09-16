@@ -1,6 +1,7 @@
 import subprocess
 import logging
 import platform
+
 if platform.system() == "Linux":
     import pwd
     import grp
@@ -21,10 +22,10 @@ class SystemChecker():
         process_result = subprocess.run(["git",  "--version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         if GIT_WORKING_MESSAGE not in output_string:
-            logging.error("Did you installed git?")
+            logging.error("Did you install git?")
             exit()
     
-    def get_groups(user):
+    def get_groups(self, user):
         gids = [g.gr_gid for g in grp.getgrall() if user in g.gr_mem]
         gid = pwd.getpwnam(user).pw_gid
         gids.append(grp.getgrgid(gid).gr_gid)

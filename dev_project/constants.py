@@ -2,6 +2,8 @@ import os
 import pathlib
 import platform
 
+from .inside_docker_app.command_line_params import *
+
 ARCH = str(platform.machine()).lower()
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"

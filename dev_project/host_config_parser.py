@@ -10,13 +10,14 @@ from .constants import *
 
 class ConfParser():
 
-    def __init__(self, project_dir):
+    def __init__(self, project_dir, args_dict):
         self.project_dir = project_dir
         self.config_path = os.path.join(self.project_dir, CONFIG_FILE_NAME)
         self.config = None
         self.parse_json_config()
         self.env_file = self.get_env_file_path()
         self.parse_env_file()
+        self.config["args_dict"] = args_dict
 
     def parse_json_config(self):
         try:

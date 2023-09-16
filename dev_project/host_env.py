@@ -27,6 +27,8 @@ class CreateEnvironment():
         self.config["venv_dir"] = os.path.join(self.config["project_dir"], "venv")
         self.config["docker_home"] = os.path.join(self.config["project_dir"], "docker_home")
         self.config["docker_project_dir"] = str(pathlib.PurePosixPath("/home", CURRENT_USER))
+        self.config["docker_dev_project_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], DEV_PROJECT_DIR))
+        self.config["docker_inside_app"] = str(pathlib.PurePosixPath(self.config["docker_dev_project_dir"], "inside_docker_app"))
         self.config["docker_odoo_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo"))
         self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "addons")))
         self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "odoo", "addons")))
@@ -46,7 +48,7 @@ class CreateEnvironment():
         self.mapped_folders = [
             (self.config["odoo_src_dir"], self.config["docker_odoo_dir"]),
             (self.config["venv_dir"], self.config["docker_venv_dir"]),
-            (os.path.join(self.config["project_dir"], DEV_PROJECT_DIR), str(pathlib.PurePosixPath(self.config["docker_project_dir"], DEV_PROJECT_DIR))),
+            (os.path.join(self.config["project_dir"], DEV_PROJECT_DIR), self.config["docker_dev_project_dir"]),
             (self.config.get("backups", {}).get("local_dir", ""), self.config["docker_backups_dir"]),
             (os.path.join(self.config["docker_home"], ".local"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".local"))),
             (os.path.join(self.config["docker_home"], ".cache"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".cache"))),
