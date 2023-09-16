@@ -19,6 +19,7 @@ class OdooChecker():
         self.db_default_admin_password = config["db_creation_data"]["db_default_admin_password"]
         self.db_default_admin_login = config["db_creation_data"]["db_default_admin_login"]
         self.db_create_demo = config["db_creation_data"]["create_demo"]
+        self.db_manager_password = config.get("db_manager_password", False)
 
         sys.path.append(self.odoo_dir)
 
@@ -36,6 +37,9 @@ class OdooChecker():
                 # emits a noisy warning so let's avoid it.
                 yield
         self.environment_manage = environment_manage
+        if self.db_manager_password:
+            db_manager_password_crypt = pbkdf2_sha512.using(rounds=1).hash(self.db_manager_password)
+            self.odoo_config_data["options"]["admin_passwd"] = db_manager_password_crypt
         self.create_config_file()
         odoo.tools.config.parse_config(["-c", self.docker_path_odoo_conf])
         # Enable database manager
@@ -58,8 +62,10 @@ class OdooChecker():
                     final_string += database_name + "\n"
                 final_string = final_string.strip("\n")
 
-            # Ddro database
+            # Drop database
             if drop_db_name:
+                if isinstance(drop_db_name, bool) and db_name:
+                    drop_db_name = db_name
                 db_exist = odoo.service.db.exp_db_exist(drop_db_name)
                 if db_exist:
                     odoo.service.db.exp_drop(drop_db_name)

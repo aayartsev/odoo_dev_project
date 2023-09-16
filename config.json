@@ -12,6 +12,8 @@
     "update_git_repos": false,
     "clean_git_repos": false,
     "check_system": true,
+    "db_manager_password":"admin",
+    "dev_mode": "xml",
     "developing_project":"git@github.com:aayartsev/odoo_demo_project.git",
     "pre_commit_map_files":[
         ".flake8",

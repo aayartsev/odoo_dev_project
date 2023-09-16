@@ -52,9 +52,9 @@ class VirtualenvChecker():
             os.system(f"""cd {self.docker_project_dir} && wget -O {odoo_requirements_path} https://raw.githubusercontent.com/odoo/odoo/{self.odoo_version}/requirements.txt""")
         result = parse_requirements(odoo_requirements_path, session=False)
         # TODO find the way to check if i need to install package in my environment
+        os.system(f"""python3 -m pip install -r {odoo_requirements_path}""")
     
     def check_virtual_env(self):
-        self.update_requirements_list()
         if self.is_virtualenv():
             logging.info("Already in virtual environment.")
         else:
@@ -63,6 +63,7 @@ class VirtualenvChecker():
                 env = venv.EnvBuilder(with_pip = True)
                 env.create(self.docker_venv_dir)
                 self.set_venv()
+                self.update_requirements_list()
             else:
                 logging.info("Not in virtual environment. Virtual environment directory found.")
                 self.set_venv()

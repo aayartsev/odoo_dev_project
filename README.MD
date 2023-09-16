@@ -110,6 +110,9 @@ python3 /path/to/your/new/project/docker_start.py -d new_db -i -u
 - `pre_commit_map_files` - Список. Список файлов для системы `pre-commit`, которые выносятся из проекта и пробрасываются туда через сопоставление файлов docker. Нужно для работы не на Linux системах
 - `dependencies` - Список. Список ссылок на репозитории проектов, от которых зависит ваш проект
 - `requirements_txt` - Список. Список python модулей, каждый элемент может оформляться так же как и строка в файле requirements.txt
+- `dev_mode` - Можно указать через запятую [параметры для разработчиков](https://www.odoo.com/documentation/16.0/developer/reference/cli.html?highlight=dev#cmdoption-odoo-bin-dev). Смотрите официальную документацию для своей версии odoo
+- `db_manager_password` - пароль для менеджера баз данных
+
 
 В проекте уже лежит настроенный пример `config.json`, который расчитан на работу с учебным демо-проектом `https://github.com/aayartsev/odoo_demo_project`
 
