@@ -102,7 +102,11 @@ class CreateEnvironment():
         config_file_template_path = os.path.join(self.config["project_dir"], ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
         with open(config_file_template_path) as f:
             lines = f.readlines()
-        content = "".join(lines).replace("#MESSAGE#", get_translation(MESSAGE_ODOO_CONF))
+        content = "".join(lines)
+        for replace_phrase in {"#DO_NOT_CHANGE#": get_translation(DO_NOT_CHANGE),
+            "#ADMIN_PASSWD_MESSAGE#": get_translation(ADMIN_PASSWD_MESSAGE),
+            "#MESSAGE#": get_translation(MESSAGE_ODOO_CONF)}.items():
+            content = content.replace(replace_phrase[0], replace_phrase[1])
         odoo_config_file_path = os.path.join(self.config["project_dir"], ODOO_CONF_NAME)
         if not os.path.exists(odoo_config_file_path):
             with open(odoo_config_file_path, 'w') as writer:
