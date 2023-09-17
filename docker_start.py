@@ -21,6 +21,7 @@ def main():
     environment = CreateEnvironment(config)
     environment.update_config()
     environment.generate_dockerfile()
+    environment.generate_config_file()
     StartStringBuilder(config)
     environment.generate_docker_compose_file()
     environment.checkout_dependencies()

@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 from .constants import *
+from .translations import *
 
 class CreateEnvironment():
 
@@ -96,6 +97,16 @@ class CreateEnvironment():
         self.config["dockerfile_path"] = dockerfile_path
         with open(dockerfile_path, 'w') as writer:
             writer.write(content)
+    
+    def generate_config_file(self):
+        config_file_template_path = os.path.join(self.config["project_dir"], ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
+        with open(config_file_template_path) as f:
+            lines = f.readlines()
+        content = "".join(lines).replace("#MESSAGE#", get_translation(MESSAGE_ODOO_CONF))
+        odoo_config_file_path = os.path.join(self.config["project_dir"], ODOO_CONF_NAME)
+        if not os.path.exists(odoo_config_file_path):
+            with open(odoo_config_file_path, 'w') as writer:
+                writer.write(content)
     
     def generate_docker_compose_file(self):
         docker_compose_template_path = os.path.join(self.config["project_dir"], DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
