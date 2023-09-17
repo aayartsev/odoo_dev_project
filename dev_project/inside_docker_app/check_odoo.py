@@ -3,13 +3,14 @@ import os
 import configparser
 import contextlib
 from contextlib import closing
-import logging
 
+from logger import get_module_logger
 from command_line_params import *
 
 class OdooChecker():
 
     def __init__(self, config):
+        get_module_logger(__name__).info("Start Odoo Checker")
         self.odoo_dir = config["docker_odoo_dir"]
         self.odoo_config_data = config["odoo_config_data"]
         self.docker_path_odoo_conf = config["docker_path_odoo_conf"]

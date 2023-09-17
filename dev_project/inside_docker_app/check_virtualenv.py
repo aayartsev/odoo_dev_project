@@ -1,10 +1,13 @@
 import sys
 import os
-import logging
 import venv
 
 from pip._internal.operations.freeze import freeze
 from pip._internal.req import parse_requirements
+from pip._internal.req.constructors import install_req_from_req_string
+from pip._internal.network.session import PipSession
+
+from logger import get_module_logger
 
 class VirtualenvChecker():
 
@@ -50,21 +53,21 @@ class VirtualenvChecker():
         odoo_requirements_path = os.path.join(self.odoo_data_dir, "requirements.txt")
         if not os.path.exists(odoo_requirements_path):
             os.system(f"""cd {self.docker_project_dir} && wget -O {odoo_requirements_path} https://raw.githubusercontent.com/odoo/odoo/{self.odoo_version}/requirements.txt""")
-        result = parse_requirements(odoo_requirements_path, session=False)
-        # TODO find the way to check if i need to install package in my environment
         os.system(f"""python3 -m pip install -r {odoo_requirements_path}""")
+        # TODO find the way to check if i need to install package in my environment
     
     def check_virtual_env(self):
         if self.is_virtualenv():
-            logging.info("Already in virtual environment.")
+            get_module_logger(__name__).info("Already in virtual environment.")
         else:
             if self.find_file(self.docker_venv_dir, 'activate') is None:
-                logging.info("No virtual environment found. Creating one.")
+                get_module_logger(__name__).info("No virtual environment found. Creating one.")
                 env = venv.EnvBuilder(with_pip = True)
                 env.create(self.docker_venv_dir)
                 self.set_venv()
                 self.update_requirements_list()
             else:
-                logging.info("Not in virtual environment. Virtual environment directory found.")
+                get_module_logger(__name__).info("Not in virtual environment. Virtual environment directory found.")
                 self.set_venv()
+        
         self.check_packages_for_install()
