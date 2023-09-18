@@ -10,6 +10,7 @@ CONFIG_FILE_NAME = "config.json"
 CONFIG_DIR_IN_HOME_DIR = ".odpm"
 ENV_FILE_NAME = ".env"
 DOCKERFILE = "Dockerfile"
+ODOO_CONF_NAME = "odoo.conf"
 DOCKER_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", DOCKERFILE)
 DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "docker-compose.yml")
 ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "dev_odoo_docker_config_file.conf")
