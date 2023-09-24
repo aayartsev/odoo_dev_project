@@ -100,6 +100,7 @@ class CreateEnvironment():
             CURRENT_PASSWORD=CURRENT_PASSWORD,
 
         )
+        content = content.replace(get_translation(MESSAGE_ODOO_CONF), get_translation(DO_NOT_CHANGE_FILE))
         dockerfile_path = os.path.join(self.config["project_dir"], DOCKERFILE)
         self.config["dockerfile_path"] = dockerfile_path
         with open(dockerfile_path, 'w') as writer:
@@ -110,7 +111,7 @@ class CreateEnvironment():
         with open(config_file_template_path) as f:
             lines = f.readlines()
         content = "".join(lines)
-        for replace_phrase in {"#DO_NOT_CHANGE#": get_translation(DO_NOT_CHANGE),
+        for replace_phrase in {"#DO_NOT_CHANGE_PARAM#": get_translation(DO_NOT_CHANGE_PARAM),
             "#ADMIN_PASSWD_MESSAGE#": get_translation(ADMIN_PASSWD_MESSAGE),
             "#MESSAGE#": get_translation(MESSAGE_ODOO_CONF)}.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
@@ -147,6 +148,7 @@ class CreateEnvironment():
             POSTGRES_DOCKER_PORT=POSTGRES_DOCKER_PORT,
             COMPOSE_FILE_VERSION=self.config["compose_file_version"]
         )
+        content = content.replace(get_translation(MESSAGE_ODOO_CONF), get_translation(DO_NOT_CHANGE_FILE))
         dockerfile_path = os.path.join(self.config["project_dir"], "docker-compose.yml")
         with open(dockerfile_path, 'w') as writer:
             writer.write(content)

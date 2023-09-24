@@ -33,10 +33,14 @@ class ProjectDirManager():
                         PROJECT_NAME=PROJECT_NAME,
                     ))
             exit()
+        self.rebuild_templates()
 
 
     def init_project(self):
         os.makedirs(self.service_directory)
+        self.rebuild_templates()
+    
+    def rebuild_templates(self):
         program_dockerfile_template_path = os.path.join(self.program_dir_path, PROGRAM_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
         project_dockerfile_template_path = os.path.join(self.project_path, PROJECT_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
         self.generate_project_template_files(program_dockerfile_template_path, project_dockerfile_template_path)

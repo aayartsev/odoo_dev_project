@@ -11,7 +11,8 @@ CHECK_ODOO_REPO = """Your odoo src directory {odoo_src_dir} is not git repositor
 "Please fix it, or delete and clone its repo again: "
 "git clone https://github.com/odoo/odoo.git"
 MESSAGE_ODOO_CONF = "If you want drop this file to default values, just delete it"
-DO_NOT_CHANGE = "Do not change, it will generate automatically"
+DO_NOT_CHANGE_PARAM = "Do not change this param, it is generating automatically"
+DO_NOT_CHANGE_FILE = "Do not change this file, its content is generating automatically"
 ADMIN_PASSWD_MESSAGE = """Do not change, it will get from "db_manager_password" param from config.json file"""
 THIS_IS_NOT_PROJECT_DIRECTORY = """This is not {PROJECT_NAME} directory. If you want to init new project use "{PROJECT_NAME} {INIT_PARAM}" command"""
 ALREADY_INITED_PROJECT = """This dir is already {PROJECT_NAME} project"""
@@ -45,8 +46,11 @@ translations = {
     MESSAGE_ODOO_CONF: {
         "ru_RU": "Если вы хотите сбросить настройки этого файла в параметры по умолчанию, просто удалите его."
     },
-    DO_NOT_CHANGE:{
-        "ru_RU": "Не изменяйте данный параметр, его значение будет сгенерировано автоматически"
+    DO_NOT_CHANGE_PARAM:{
+        "ru_RU": "Не изменяйте данный параметр, его значение генерируется автоматически"
+    },
+    DO_NOT_CHANGE_FILE: {
+        "ru_RU": "Не изменяйте данный файл, его содержимое генерируется автоматически"
     },
     ADMIN_PASSWD_MESSAGE:{
         "ru_RU": """Не изменяйте данный параметр, его значение будет взято из"""
