@@ -234,7 +234,6 @@ class CreateEnvironment():
             content = {
                 "configurations": []
             }
-
         else:
             with open(launch_json, "r") as open_file:
                 content = json.load(open_file)
@@ -260,11 +259,6 @@ class CreateEnvironment():
                 debugger_unit_exists = True
         if not debugger_unit_exists:
             list_of_mapped_sources = self.get_list_of_mapped_sources()
-            for dir_with_sources in list_of_mapped_sources:
-                self.config["debugger_path_mappings"].append({
-                    "localRoot": dir_with_sources[0], 
-                    "remoteRoot": dir_with_sources[1],
-                })
             content["configurations"].append({
                 "name": DEBUGGER_UNIT_NAME,
                 "type": "python",
@@ -273,5 +267,5 @@ class CreateEnvironment():
                 "host": "localhost",
                 "pathMappings": self.config["debugger_path_mappings"],
             })
-            with open(launch_json, "w") as outfile:
-                json.dump(content, outfile, indent=4)
+        with open(launch_json, "w") as outfile:
+            json.dump(content, outfile, indent=4)
