@@ -21,7 +21,7 @@ class StartStringBuilder():
     def get_start_string(self):
         # Reading of config file
         odoo_config = configparser.ConfigParser()
-        odoo_config.read(os.path.join(self.config["project_dir"], ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH))
+        odoo_config.read(os.path.join(self.config["project_dir"], PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH))
         # Build string of all addons directories
         addons_string = ",".join(
             self.config["docker_dirs_with_addons"]

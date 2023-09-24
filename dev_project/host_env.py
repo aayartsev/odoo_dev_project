@@ -2,14 +2,17 @@ import os
 import subprocess
 import json
 import shutil
-import logging
+
 import pathlib
-import platform
 from pathlib import Path
 
 from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 from .constants import *
 from .translations import *
+
+from .inside_docker_app.logger import get_module_logger
+
+_logger = get_module_logger(__name__)
 
 class CreateEnvironment():
 
@@ -49,7 +52,7 @@ class CreateEnvironment():
         self.mapped_folders = [
             (self.config["odoo_src_dir"], self.config["docker_odoo_dir"]),
             (self.config["venv_dir"], self.config["docker_venv_dir"]),
-            (os.path.join(self.config["project_dir"], DEV_PROJECT_DIR), self.config["docker_dev_project_dir"]),
+            (os.path.join(self.config["program_dir"], DEV_PROJECT_DIR), self.config["docker_dev_project_dir"]),
             (self.config.get("backups", {}).get("local_dir", ""), self.config["docker_backups_dir"]),
             (os.path.join(self.config["docker_home"], ".local"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".local"))),
             (os.path.join(self.config["docker_home"], ".cache"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".cache"))),
@@ -78,11 +81,15 @@ class CreateEnvironment():
                     str(pathlib.PurePosixPath(self.config["docker_odoo_project_dir_path"],pre_commit_file))
                 ))
             else:
-                logging.warning(f"""Pre-commit file {pre_commit_file} was not found at {self.config["odoo_project_dir_path"]}""")
+                
+                _logger.warning(get_translation(PRE_COMMIT_FILE_WAS_NOT_FOUND).format(
+                    PRE_COMMIT_FILE=pre_commit_file,
+                    ODOO_PROJECT_DIR_PATH=self.config["odoo_project_dir_path"],
+                ))
         
     
     def generate_dockerfile(self):
-        dockerfile_template_path = os.path.join(self.config["project_dir"], DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
+        dockerfile_template_path = os.path.join(self.config["project_dir"], PROJECT_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
         with open(dockerfile_template_path) as f:
             lines = f.readlines()
         content = "".join(lines).format(
@@ -99,7 +106,7 @@ class CreateEnvironment():
             writer.write(content)
     
     def generate_config_file(self):
-        config_file_template_path = os.path.join(self.config["project_dir"], ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
+        config_file_template_path = os.path.join(self.config["project_dir"], PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
         with open(config_file_template_path) as f:
             lines = f.readlines()
         content = "".join(lines)
@@ -113,7 +120,7 @@ class CreateEnvironment():
                 writer.write(content)
     
     def generate_docker_compose_file(self):
-        docker_compose_template_path = os.path.join(self.config["project_dir"], DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
+        docker_compose_template_path = os.path.join(self.config["project_dir"], PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
         with open(docker_compose_template_path) as f:
             lines = f.readlines()
         

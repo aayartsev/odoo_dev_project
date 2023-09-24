@@ -7,10 +7,12 @@ from contextlib import closing
 from logger import get_module_logger
 from command_line_params import *
 
+_logger = get_module_logger(__name__)
+
 class OdooChecker():
 
     def __init__(self, config):
-        get_module_logger(__name__).info("Start Odoo Checker")
+        _logger.info("Start Odoo Checker")
         self.odoo_dir = config["docker_odoo_dir"]
         self.odoo_config_data = config["odoo_config_data"]
         self.docker_path_odoo_conf = config["docker_path_odoo_conf"]
@@ -52,7 +54,7 @@ class OdooChecker():
         db_restore_file_path = self.args_dict.get(DB_RESTORE_PARAM, False)
         set_admin_pass = self.args_dict.get(SET_ADMIN_PASS_PARAM, False)
         if db_restore_file_path:
-            db_restore_file_path = os.path.join(self.odoo_dir, "/../backups/", db_restore_file_path)
+            db_restore_file_path = os.path.join(self.odoo_dir, "../backups/", db_restore_file_path)
         # Запускаем в контексте окружения Odoo
         with self.environment_manage():
 

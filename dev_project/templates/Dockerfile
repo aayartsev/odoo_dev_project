@@ -1,4 +1,5 @@
-FROM python:3.7.12-bullseye  
+##MESSAGE#
+FROM python:3.7.12-bullseye
   
 # Переменные проекта
 ARG USER_UID={CURRENT_USER_UID}

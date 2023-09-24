@@ -9,6 +9,8 @@ from pip._internal.network.session import PipSession
 
 from logger import get_module_logger
 
+_logger = get_module_logger(__name__)
+
 class VirtualenvChecker():
 
     def __init__(self, config):
@@ -58,7 +60,7 @@ class VirtualenvChecker():
     
     def check_virtual_env(self):
         if self.is_virtualenv():
-            get_module_logger(__name__).info("Already in virtual environment.")
+            _logger.info("Already in virtual environment.")
         else:
             if self.find_file(self.docker_venv_dir, 'activate') is None:
                 get_module_logger(__name__).info("No virtual environment found. Creating one.")
@@ -67,7 +69,7 @@ class VirtualenvChecker():
                 self.set_venv()
                 self.update_requirements_list()
             else:
-                get_module_logger(__name__).info("Not in virtual environment. Virtual environment directory found.")
+                _logger.info("Not in virtual environment. Virtual environment directory found.")
                 self.set_venv()
         
         self.check_packages_for_install()

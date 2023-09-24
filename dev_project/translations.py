@@ -13,6 +13,10 @@ CHECK_ODOO_REPO = """Your odoo src directory {odoo_src_dir} is not git repositor
 MESSAGE_ODOO_CONF = "If you want drop this file to default values, just delete it"
 DO_NOT_CHANGE = "Do not change, it will generate automatically"
 ADMIN_PASSWD_MESSAGE = """Do not change, it will get from "db_manager_password" param from config.json file"""
+THIS_IS_NOT_PROJECT_DIRECTORY = """This is not {PROJECT_NAME} directory. If you want to init new project use "{PROJECT_NAME} {INIT_PARAM}" command"""
+ALREADY_INITED_PROJECT = """This dir is already {PROJECT_NAME} project"""
+CHECK_CONFIG_FILE = """Check your '{CONFIG_FILE_NAME}' file, we can not parse it."""
+PRE_COMMIT_FILE_WAS_NOT_FOUND = """Pre-commit file {PRE_COMMIT_FILE} was not found at {ODOO_PROJECT_DIR_PATH}"""
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
@@ -47,7 +51,19 @@ translations = {
     ADMIN_PASSWD_MESSAGE:{
         "ru_RU": """Не изменяйте данный параметр, его значение будет взято из"""
                  """ параметра "db_manager_password" файла конфигурации config.json"""
-    }
+    },
+    THIS_IS_NOT_PROJECT_DIRECTORY: {
+        "ru_RU": """Данный каталог не является odpm проектом. Если вы хотите создать новый проект, используйте команду "{PROJECT_NAME} {INIT_PARAM}". """
+    },
+    ALREADY_INITED_PROJECT: {
+        "ru_RU": """Данный каталог уже является {PROJECT_NAME} проектом"""
+    },
+    CHECK_CONFIG_FILE: {
+        "ru_RU": """Проверьте ваш конфигурационный файл '{CONFIG_FILE_NAME}', его не возможно прочитать."""
+    },
+    PRE_COMMIT_FILE_WAS_NOT_FOUND: {
+        "ru_RU": """Pre-commit файл {PRE_COMMIT_FILE} не был найден в каталоге {ODOO_PROJECT_DIR_PATH}"""
+    },
 }
 
 def get_translation(string_to_translate):

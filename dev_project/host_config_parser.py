@@ -1,18 +1,22 @@
 import os
 import json
-import logging
 from configparser import ConfigParser
 from pathlib import Path
 
 from .constants import *
+from .translations import *
 
+from .inside_docker_app.logger import get_module_logger
+
+_logger = get_module_logger(__name__)
 
 
 class ConfParser():
 
-    def __init__(self, project_dir, args_dict):
+    def __init__(self, project_dir, args_dict, program_dir):
         self.project_dir = project_dir
         self.config_path = os.path.join(self.project_dir, CONFIG_FILE_NAME)
+        self.program_dir = program_dir
         self.config = None
         self.parse_json_config()
         self.env_file = self.get_env_file_path()
@@ -24,8 +28,11 @@ class ConfParser():
             with open(self.config_path) as config_file:
                 self.config = json.load(config_file)
                 self.config["project_dir"] = self.project_dir
+                self.config["program_dir"] = self.program_dir
         except BaseException:
-            logging.error("Check your 'config.json' file, we can not parse it.")
+            _logger.error(get_translation(CHECK_CONFIG_FILE).format(
+                CONFIG_FILE_NAME=CONFIG_FILE_NAME,
+            ))
             exit()
 
     

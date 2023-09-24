@@ -1,5 +1,4 @@
 import subprocess
-import logging
 import platform
 
 if platform.system() == "Linux":
@@ -8,6 +7,10 @@ if platform.system() == "Linux":
 
 from .constants import *
 from .translations import *
+
+from .inside_docker_app.logger import get_module_logger
+
+_logger = get_module_logger(__name__)
 
 class SystemChecker():
 
@@ -23,7 +26,7 @@ class SystemChecker():
         process_result = subprocess.run(["git",  "--version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         if GIT_WORKING_MESSAGE not in output_string:
-            logging.error(get_translation(IS_GIT_INSTALLED))
+            _logger.error(get_translation(IS_GIT_INSTALLED))
             exit()
     
     def get_groups(self, user):
@@ -36,7 +39,7 @@ class SystemChecker():
         if platform.system() == "Linux":
             groups = self.get_groups(CURRENT_USER)
             if LINUX_DOCKER_GROUPNAME not in groups:
-                logging.error(get_translation(USER_NOT_IN_DOCKER_GROUP).format(
+                _logger.error(get_translation(USER_NOT_IN_DOCKER_GROUP).format(
                         CURRENT_USER=CURRENT_USER,
                         LINUX_DOCKER_GROUPNAME=LINUX_DOCKER_GROUPNAME,
                     )
@@ -45,7 +48,7 @@ class SystemChecker():
         process_result = subprocess.run(["docker",  "info"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         if DOCKER_WORKING_MESSAGE not in output_string:
-            logging.error(get_translation(CAN_NOT_CONNECT_DOCKER))
+            _logger.error(get_translation(CAN_NOT_CONNECT_DOCKER))
             exit()
 
     def check_docker_compose(self):
@@ -54,7 +57,7 @@ class SystemChecker():
         output_string = process_result.stdout.decode("utf-8")
         output_string = output_string.lower().replace("-"," ")
         if DOCKER_COMPOSE_WORKING_MESSAGE not in output_string:
-            logging.error(get_translation(CAN_NOT_GET_DOCKER_COMPOSE_INFO))
+            _logger.error(get_translation(CAN_NOT_GET_DOCKER_COMPOSE_INFO))
             exit()
         up_help_result = subprocess.run(["docker-compose",  "up", "--help"], capture_output=True)
         up_help_string = up_help_result.stdout.decode("utf-8")
@@ -72,7 +75,7 @@ class SystemChecker():
                 try:
                     os.makedirs(dir_path)
                 except BaseException:
-                    logging.error(get_translation(CAN_NOT_CREATE_DIR).format(
+                    _logger.error(get_translation(CAN_NOT_CREATE_DIR).format(
                         dir_path=dir_path,
                     ))
                     exit()
@@ -82,7 +85,7 @@ class SystemChecker():
         odoo_src_state_bytes = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         odoo_src_state_string = odoo_src_state_bytes.stdout.decode("utf-8")
         if not "true" in odoo_src_state_string:
-            logging.error(get_translation(CHECK_ODOO_REPO).format(
+            _logger.error(get_translation(CHECK_ODOO_REPO).format(
                 odoo_src_dir= self.config["odoo_src_dir"]
             ))
             exit()

@@ -12,4 +12,6 @@ I_PARAM = "-i"
 U_PARAM = "-u"
 T_PARAM = "-t"
 TEST_PARAM = "--test"
-TEST_COMMAND = " --test-enable --stop-after-init"
+INIT_PARAM = "--init"
+
+
