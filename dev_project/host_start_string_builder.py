@@ -41,6 +41,7 @@ class StartStringBuilder():
         install_pip = self.args_dict.get(INSTALL_PIP_PARAM, False)
         start_pre_commit = self.args_dict.get(START_PRECOMMIT_PARAM, False)
         build_image = self.args_dict.get(BUILD_IMAGE_PARAM, False)
+        dev_mode = self.config.get("dev_mode", False)
         
         if build_image:
             subprocess.run(["docker", "build", "-f", self.config["dockerfile_path"], "-t", self.config["odoo_image_name"], "."])
@@ -69,6 +70,9 @@ class StartStringBuilder():
 
         if translate_lang:
             start_python_command += f" --language {translate_lang} --load-language {translate_lang} --i18n-overwrite"
+
+        if dev_mode:
+            start_python_command += f" --dev {dev_mode}"
 
         start_main = " && ".join([
             f"""cd {self.config["docker_project_dir"]}""",
