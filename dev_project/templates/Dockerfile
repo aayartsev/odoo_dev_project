@@ -1,4 +1,4 @@
-##MESSAGE#
+# #MESSAGE#
 FROM python:3.7.12-bullseye
   
 # Переменные проекта
