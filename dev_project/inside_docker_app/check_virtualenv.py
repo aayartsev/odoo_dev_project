@@ -14,11 +14,10 @@ _logger = get_module_logger(__name__)
 class VirtualenvChecker():
 
     def __init__(self, config):
-        self.docker_venv_dir = config["docker_venv_dir"]
+        self.docker_venv_dir = config.get("docker_venv_dir", False)
         self.docker_project_dir = config["docker_project_dir"]
-        self.requirements_txt = config["requirements_txt"]
-        self.odoo_version = config["requirements_txt"]
-        self.odoo_version = config["odoo_version"]
+        self.requirements_txt = config.get("requirements_txt", [])
+        self.odoo_version = config.get("odoo_version", 0.0)
         self.odoo_data_dir = config["odoo_config_data"]["options"]["data_dir"]
         self.check_virtual_env()
 

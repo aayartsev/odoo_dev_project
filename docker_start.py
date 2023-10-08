@@ -15,15 +15,15 @@ _logger = get_module_logger(__name__)
 
 def main():
     program_dir_path = os.path.dirname(os.path.abspath(__file__))
-    project_dir_path = os.getcwd()
+    start_dir_path = os.getenv("PWD")
     args_list = sys.argv[1:]
     args_dict = ArgumentParser(args_list).args_dict
-    pd_manager = ProjectDirManager(project_dir_path, args_dict, program_dir_path)
+    pd_manager = ProjectDirManager(start_dir_path, args_dict, program_dir_path)
     pd_manager.check_project_dir()
     if not pd_manager.dir_is_project:
         exit()
     config = ConfParser(
-        project_dir_path,
+        pd_manager,
         args_dict,
         program_dir_path,
     ).config

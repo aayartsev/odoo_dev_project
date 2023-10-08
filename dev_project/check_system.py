@@ -16,7 +16,7 @@ class SystemChecker():
 
     def __init__(self, config):
         self.config = config
-        if self.config["check_system"]:
+        if self.config.get("check_system", False):
             self.check_git()
             self.check_docker()
             self.check_docker_compose()

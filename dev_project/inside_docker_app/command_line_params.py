@@ -1,4 +1,4 @@
-INSTALL_PIP_PARAM = "--install_pip"
+INSTALL_PIP_PARAM = "--pip_install"
 BUILD_IMAGE_PARAM = "--build_image"
 CONFIG_BASE64_DATA = "--config_base64_data"
 GET_DB_LIST_PARAM = "--get_dbs_list"
