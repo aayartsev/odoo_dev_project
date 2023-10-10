@@ -8,15 +8,20 @@ from .constants import *
 
 class StartStringBuilder():
 
-    def __init__(self, config, args_dict):
+    def __init__(self, config):
         self.config = config
-        self.args_dict = args_dict
+        self.args_dict = self.config["args_dict"]
         self.config["start_string"] = self.get_start_string()
+    
+    def get_base64_string_config(self):
+        data = json.dumps(self.config).encode("utf-8")
+        config_base64_data = base64.b64encode(data)
+        return config_base64_data.decode()
     
     def get_start_string(self):
         # Reading of config file
         odoo_config = configparser.ConfigParser()
-        odoo_config.read(os.path.join(self.config["project_dir"], ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH))
+        odoo_config.read(os.path.join(self.config["project_dir"], PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH))
         # Build string of all addons directories
         addons_string = ",".join(
             self.config["docker_dirs_with_addons"]
@@ -29,34 +34,14 @@ class StartStringBuilder():
 
         data_dir = str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".local/share/Odoo"))
         odoo_config["options"]["data_dir"] = data_dir
-        my_config_parser_dict = {s:dict(odoo_config.items(s)) for s in odoo_config.sections()}
-        data = json.dumps(my_config_parser_dict).encode("utf-8")
-        config_base64_data = base64.b64encode(data)
-        db_management_params = {
-            "--db-lang": self.config["db_creation_data"]["db_lang"],
-            "--db-country_code": self.config["db_creation_data"]["db_country_code"],
-            "--default_password": self.config["db_creation_data"]["db_default_admin_password"],
-            "--default_login": self.config["db_creation_data"]["db_default_admin_login"],
-            "--create_demo": self.config["db_creation_data"]["create_demo"],
-            "--config_base64_data": config_base64_data.decode(),
-            "--odoo_dir": self.config["docker_odoo_dir"],
-            "-c": self.config["docker_path_odoo_conf"],
-        }
-        db_management_start_string=f"""python3 {pathlib.PurePosixPath(self.config["docker_project_dir"], DB_MANAGEMENT_RELATIVE_PATH)}"""
-        for param, param_value in db_management_params.items():
-            db_management_start_string += f" {param} {param_value}"
+        self.config["odoo_config_data"] = {s:dict(odoo_config.items(s)) for s in odoo_config.sections()}
         start_python_command = f"""python3 -u -m debugpy --listen 0.0.0.0:{DEBUGGER_DOCKER_PORT} {self.config["docker_odoo_dir"]}/odoo-bin -c {self.config["docker_project_dir"]}/odoo.conf --limit-time-real 99999"""
-        test_command = " --test-enable --stop-after-init"
-
-        db_name = self.args_dict.get("-d", False)
-        restore_db_filepath = self.args_dict.get("--db-restore", False)
-        drop_db_name = self.args_dict.get("--db-drop", False)
-        translate_lang = self.args_dict.get("--translate", False)
-        install_pip = self.args_dict.get("--pip_install", False)
-        get_dbs_list = self.args_dict.get("--get_dbs_list", False)
-        start_pre_commit = self.args_dict.get("--start_precommit", False)
-        set_admin_pass = self.args_dict.get("--set_admin_pass", False)
-        build_image = self.args_dict.get("--build_image", False)
+        db_name = self.args_dict.get(D_PARAM, False)
+        translate_lang = self.args_dict.get(TRANSLATE_PARAM, False)
+        install_pip = self.args_dict.get(INSTALL_PIP_PARAM, False)
+        start_pre_commit = self.args_dict.get(START_PRECOMMIT_PARAM, False)
+        build_image = self.args_dict.get(BUILD_IMAGE_PARAM, False)
+        dev_mode = self.config.get("dev_mode", False)
         
         if build_image:
             subprocess.run(["docker", "build", "-f", self.config["dockerfile_path"], "-t", self.config["odoo_image_name"], "."])
@@ -72,32 +57,28 @@ class StartStringBuilder():
             return start_string
 
         if db_name:
-            db_management_start_string +=  f" -d {db_name}"
-            start_python_command +=  f" -d {db_name}"
+            start_python_command +=  f" {D_PARAM} {db_name}"
 
-        if get_dbs_list:
-            db_management_start_string +=  f" --get_dbs_list"
+        if self.args_dict.get(U_PARAM, False):
+            start_python_command += f""" {I_PARAM} {self.config["init_modules"]}"""
 
-        if restore_db_filepath:
-            db_management_start_string += f" --db-restore {restore_db_filepath}"
+        if self.args_dict.get(U_PARAM, False):
+            start_python_command += f""" {I_PARAM} {self.config["update_modules"]}"""
 
-        if drop_db_name:
-            db_management_start_string += f" --db-drop {drop_db_name}"
-        
-        if set_admin_pass:
-            db_management_start_string += f" --set_admin_pass {set_admin_pass}"
-
-        if self.args_dict.get("-i", False):
-            start_python_command += f""" -i {self.config["init_modules"]}"""
-
-        if self.args_dict.get("-u", False):
-            start_python_command += f""" -u {self.config["update_modules"]}"""
-
-        if self.args_dict.get("-t", False) or self.args_dict.get("--test", False):
-            start_python_command += f"{test_command}"
+        if self.args_dict.get(T_PARAM, False) or self.args_dict.get(TEST_PARAM, False):
+            start_python_command += f"{TEST_COMMAND}"
 
         if translate_lang:
             start_python_command += f" --language {translate_lang} --load-language {translate_lang} --i18n-overwrite"
-            
-        start_string = f"""bash -c ' cd {self.config["docker_project_dir"]} && source {pathlib.PurePosixPath(self.config["docker_venv_dir"], "bin", "activate")} && {db_management_start_string} && {start_python_command}'"""
+
+        if dev_mode:
+            start_python_command += f" --dev {dev_mode}"
+
+        start_main = " && ".join([
+            f"""cd {self.config["docker_project_dir"]}""",
+            f""". {pathlib.PurePosixPath(self.config["docker_venv_dir"],"bin", "activate")}""",
+            f"""python3 {pathlib.PurePosixPath(self.config["docker_inside_app"],"main.py")} {CONFIG_BASE64_DATA} {self.get_base64_string_config()}""",
+            f"""{start_python_command}""",
+        ])
+        start_string = f"""bash -c '{start_main}'"""
         return start_string

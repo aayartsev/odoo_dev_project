@@ -2,15 +2,24 @@ import os
 import pathlib
 import platform
 
+from .inside_docker_app.command_line_params import *
+
 ARCH = str(platform.machine()).lower()
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"
+PROJECT_NAME = "odpm"
+CONFIG_DIR_IN_HOME_DIR = f".{PROJECT_NAME.lower()}"
+PROJECT_SERVICE_DIRECTORY = f".{PROJECT_NAME.lower()}"
 ENV_FILE_NAME = ".env"
 DOCKERFILE = "Dockerfile"
-DOCKER_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", DOCKERFILE)
-DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "docker-compose.yml")
-ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "dev_odoo_docker_config_file.conf")
-DB_MANAGEMENT_RELATIVE_PATH = pathlib.PurePosixPath(DEV_PROJECT_DIR, "db_management.py")
+ODOO_CONF_NAME = "odoo.conf"
+PROGRAM_DOCKER_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", DOCKERFILE)
+PROJECT_DOCKER_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(PROJECT_SERVICE_DIRECTORY, DOCKERFILE)
+PROGRAM_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "docker-compose.yml")
+PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(PROJECT_SERVICE_DIRECTORY, "docker-compose.yml")
+PROGRAM_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "dev_odoo_docker_config_file.conf")
+PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(PROJECT_SERVICE_DIRECTORY, "dev_odoo_docker_config_file.conf")
+# DB_MANAGEMENT_RELATIVE_PATH = pathlib.PurePosixPath(DEV_PROJECT_DIR, "db_management.py")
 DEBUGGER_DEFAULT_PORT = "5678"
 DEBUGGER_DOCKER_PORT = DEBUGGER_DEFAULT_PORT
 ODOO_DEFAULT_PORT = "8069"
@@ -27,14 +36,15 @@ CURRENT_USER_UID = "9999"
 CURRENT_USER_GID = CURRENT_USER_UID
 CURRENT_USER = "odoo"
 CURRENT_PASSWORD = CURRENT_USER
+LINUX_DOCKER_GROUPNAME = "docker"
+if ARCH == "x86_64":
+    ARCH = "amd64"
 
 if platform.system() == "Linux":
     import pwd
-    if ARCH == "x86_64":
-        ARCH = "amd64"
     CURRENT_USER_UID = os.getuid()
     CURRENT_USER_GID = os.getgid()
-    CURRENT_USER = pwd.getpwuid(os.getuid())[0]
+    CURRENT_USER = pwd.getpwuid(CURRENT_USER_UID)[0]
 
 # If you have already used this image of postgres, you can have situation when your variables are not enabled
 # https://github.com/docker-library/docs/blob/master/postgres/README.md
@@ -49,3 +59,5 @@ DOCKER_COMPOSE_DEFAULT_FILE_VERSION = "3.3"
 DOCKER_WORKING_MESSAGE = "Server Version"
 GIT_WORKING_MESSAGE = "git version"
 DOCKER_COMPOSE_WORKING_MESSAGE = "docker compose version"
+
+TEST_COMMAND = " --test-enable --stop-after-init"

@@ -1,0 +1,17 @@
+INSTALL_PIP_PARAM = "--pip_install"
+BUILD_IMAGE_PARAM = "--build_image"
+CONFIG_BASE64_DATA = "--config_base64_data"
+GET_DB_LIST_PARAM = "--get_dbs_list"
+START_PRECOMMIT_PARAM = "--start_precommit"
+SET_ADMIN_PASS_PARAM = "--set_admin_pass"
+TRANSLATE_PARAM = "--translate"
+DB_DROP_PARAM = "--db-drop"
+DB_RESTORE_PARAM = "--db-restore"
+D_PARAM = "-d"
+I_PARAM = "-i"
+U_PARAM = "-u"
+T_PARAM = "-t"
+TEST_PARAM = "--test"
+INIT_PARAM = "--init"
+
+

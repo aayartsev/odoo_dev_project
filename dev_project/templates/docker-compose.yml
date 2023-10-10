@@ -1,3 +1,4 @@
+# #MESSAGE#
 version: "{COMPOSE_FILE_VERSION}"
 
 services:

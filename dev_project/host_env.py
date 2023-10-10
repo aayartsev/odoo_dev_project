@@ -2,13 +2,17 @@ import os
 import subprocess
 import json
 import shutil
-import logging
+
 import pathlib
-import platform
 from pathlib import Path
 
 from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 from .constants import *
+from .translations import *
+
+from .inside_docker_app.logger import get_module_logger
+
+_logger = get_module_logger(__name__)
 
 class CreateEnvironment():
 
@@ -27,6 +31,8 @@ class CreateEnvironment():
         self.config["venv_dir"] = os.path.join(self.config["project_dir"], "venv")
         self.config["docker_home"] = os.path.join(self.config["project_dir"], "docker_home")
         self.config["docker_project_dir"] = str(pathlib.PurePosixPath("/home", CURRENT_USER))
+        self.config["docker_dev_project_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], DEV_PROJECT_DIR))
+        self.config["docker_inside_app"] = str(pathlib.PurePosixPath(self.config["docker_dev_project_dir"], "inside_docker_app"))
         self.config["docker_odoo_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo"))
         self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "addons")))
         self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "odoo", "addons")))
@@ -46,7 +52,7 @@ class CreateEnvironment():
         self.mapped_folders = [
             (self.config["odoo_src_dir"], self.config["docker_odoo_dir"]),
             (self.config["venv_dir"], self.config["docker_venv_dir"]),
-            (os.path.join(self.config["project_dir"], DEV_PROJECT_DIR), str(pathlib.PurePosixPath(self.config["docker_project_dir"], DEV_PROJECT_DIR))),
+            (os.path.join(self.config["program_dir"], DEV_PROJECT_DIR), self.config["docker_dev_project_dir"]),
             (self.config.get("backups", {}).get("local_dir", ""), self.config["docker_backups_dir"]),
             (os.path.join(self.config["docker_home"], ".local"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".local"))),
             (os.path.join(self.config["docker_home"], ".cache"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".cache"))),
@@ -75,11 +81,15 @@ class CreateEnvironment():
                     str(pathlib.PurePosixPath(self.config["docker_odoo_project_dir_path"],pre_commit_file))
                 ))
             else:
-                logging.warning(f"""Pre-commit file {pre_commit_file} was not found at {self.config["odoo_project_dir_path"]}""")
+                
+                _logger.warning(get_translation(PRE_COMMIT_FILE_WAS_NOT_FOUND).format(
+                    PRE_COMMIT_FILE=pre_commit_file,
+                    ODOO_PROJECT_DIR_PATH=self.config["odoo_project_dir_path"],
+                ))
         
     
     def generate_dockerfile(self):
-        dockerfile_template_path = os.path.join(self.config["project_dir"], DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
+        dockerfile_template_path = os.path.join(self.config["project_dir"], PROJECT_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
         with open(dockerfile_template_path) as f:
             lines = f.readlines()
         content = "".join(lines).format(
@@ -90,13 +100,28 @@ class CreateEnvironment():
             CURRENT_PASSWORD=CURRENT_PASSWORD,
 
         )
+        content = content.replace(get_translation(MESSAGE_ODOO_CONF), get_translation(DO_NOT_CHANGE_FILE))
         dockerfile_path = os.path.join(self.config["project_dir"], DOCKERFILE)
         self.config["dockerfile_path"] = dockerfile_path
         with open(dockerfile_path, 'w') as writer:
             writer.write(content)
     
+    def generate_config_file(self):
+        config_file_template_path = os.path.join(self.config["project_dir"], PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
+        with open(config_file_template_path) as f:
+            lines = f.readlines()
+        content = "".join(lines)
+        for replace_phrase in {"#DO_NOT_CHANGE_PARAM#": get_translation(DO_NOT_CHANGE_PARAM),
+            "#ADMIN_PASSWD_MESSAGE#": get_translation(ADMIN_PASSWD_MESSAGE),
+            "#MESSAGE#": get_translation(MESSAGE_ODOO_CONF)}.items():
+            content = content.replace(replace_phrase[0], replace_phrase[1])
+        odoo_config_file_path = os.path.join(self.config["project_dir"], ODOO_CONF_NAME)
+        if not os.path.exists(odoo_config_file_path):
+            with open(odoo_config_file_path, 'w') as writer:
+                writer.write(content)
+    
     def generate_docker_compose_file(self):
-        docker_compose_template_path = os.path.join(self.config["project_dir"], DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
+        docker_compose_template_path = os.path.join(self.config["project_dir"], PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
         with open(docker_compose_template_path) as f:
             lines = f.readlines()
         
@@ -123,6 +148,7 @@ class CreateEnvironment():
             POSTGRES_DOCKER_PORT=POSTGRES_DOCKER_PORT,
             COMPOSE_FILE_VERSION=self.config["compose_file_version"]
         )
+        content = content.replace(get_translation(MESSAGE_ODOO_CONF), get_translation(DO_NOT_CHANGE_FILE))
         dockerfile_path = os.path.join(self.config["project_dir"], "docker-compose.yml")
         with open(dockerfile_path, 'w') as writer:
             writer.write(content)
@@ -210,7 +236,6 @@ class CreateEnvironment():
             content = {
                 "configurations": []
             }
-
         else:
             with open(launch_json, "r") as open_file:
                 content = json.load(open_file)
@@ -236,11 +261,6 @@ class CreateEnvironment():
                 debugger_unit_exists = True
         if not debugger_unit_exists:
             list_of_mapped_sources = self.get_list_of_mapped_sources()
-            for dir_with_sources in list_of_mapped_sources:
-                self.config["debugger_path_mappings"].append({
-                    "localRoot": dir_with_sources[0], 
-                    "remoteRoot": dir_with_sources[1],
-                })
             content["configurations"].append({
                 "name": DEBUGGER_UNIT_NAME,
                 "type": "python",
@@ -249,5 +269,5 @@ class CreateEnvironment():
                 "host": "localhost",
                 "pathMappings": self.config["debugger_path_mappings"],
             })
-            with open(launch_json, "w") as outfile:
-                json.dump(content, outfile, indent=4)
+        with open(launch_json, "w") as outfile:
+            json.dump(content, outfile, indent=4)
