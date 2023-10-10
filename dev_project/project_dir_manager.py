@@ -10,6 +10,7 @@ _logger = get_module_logger(__name__)
 class ProjectDirManager():
 
     def __init__(self, start_dir_path, args_dict, program_dir_path):
+        self.start_dir_path = start_dir_path
         self.project_path = start_dir_path
         self.dir_is_project = False
         self.args_dict = args_dict
@@ -35,6 +36,9 @@ class ProjectDirManager():
         self.find_project_dir_in_parents()
         if os.path.exists(self.service_directory):
             self.dir_is_project = True
+        else:
+            self.project_path = self.start_dir_path
+            self.service_directory = os.path.join(self.project_path, PROJECT_SERVICE_DIRECTORY)
         if not self.init and not self.dir_is_project:
             _logger.info(get_translation(THIS_IS_NOT_PROJECT_DIRECTORY).format(
                         PROJECT_NAME=PROJECT_NAME,
