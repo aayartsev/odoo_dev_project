@@ -8,6 +8,7 @@ from dev_project.host_env import CreateEnvironment
 from dev_project.inside_docker_app.parse_args import ArgumentParser
 from dev_project.host_start_string_builder import StartStringBuilder
 from dev_project.project_dir_manager import ProjectDirManager
+from dev_project.config import Config
 
 from dev_project.inside_docker_app.logger import get_module_logger
 
@@ -22,11 +23,11 @@ def main():
     pd_manager.check_project_dir()
     if not pd_manager.dir_is_project:
         exit()
-    config = ConfParser(
+    config = Config(
         pd_manager,
         args_dict,
         program_dir_path,
-    ).config
+    )
     SystemChecker(config)
     environment = CreateEnvironment(config)
     environment.update_config()
@@ -38,10 +39,10 @@ def main():
     environment.update_links()
     environment.update_vscode_debugger_launcher()
 
-    os.chdir(config["project_dir"])
+    os.chdir(config.project_dir)
 
     try:
-        if config["no_log_prefix"]:
+        if config.no_log_prefix:
             os.system(f"""docker-compose up --no-log-prefix --abort-on-container-exit""")
         else:
             os.system(f"""docker-compose up --abort-on-container-exit""")

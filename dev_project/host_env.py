@@ -24,72 +24,50 @@ class CreateEnvironment():
         return odoo_project
 
     def update_config(self):
-        self.config["dependencies_dirs"] = []
-        self.config["docker_dirs_with_addons"] = []
-        self.config["debugger_path_mappings"] = []
-        self.config["odoo_image_name"] = f"""odoo-{ARCH}"""
-        self.config["venv_dir"] = os.path.join(self.config["project_dir"], "venv")
-        self.config["docker_home"] = os.path.join(self.config["project_dir"], "docker_home")
-        self.config["docker_project_dir"] = str(pathlib.PurePosixPath("/home", CURRENT_USER))
-        self.config["docker_dev_project_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], DEV_PROJECT_DIR))
-        self.config["docker_inside_app"] = str(pathlib.PurePosixPath(self.config["docker_dev_project_dir"], "inside_docker_app"))
-        self.config["docker_odoo_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo"))
-        self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "addons")))
-        self.config["docker_dirs_with_addons"].append(str(pathlib.PurePosixPath(self.config["docker_odoo_dir"], "odoo", "addons")))
-        self.config["docker_path_odoo_conf"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "odoo.conf"))
-        self.config["docker_venv_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "venv"))
-        self.config["docker_extra_addons"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "extra-addons"))
-        developing_project = self.handle_git_link(self.config.get("developing_project"))
-        self.config["odoo_project_dir_path"] = developing_project.project_path
-        #TODO create check for odoo project if its type is module
-        self.config["docker_odoo_project_dir_path"] = str(pathlib.PurePosixPath(self.config["docker_extra_addons"], developing_project.project_data.name))
-        self.config["docker_dirs_with_addons"].append(self.config["docker_odoo_project_dir_path"])
-        self.config["docker_backups_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "backups"))
-        self.config["dependencies_dir"] = os.path.join(self.config["project_dir"], "dependencies")
 
         
 
         self.mapped_folders = [
-            (self.config["odoo_src_dir"], self.config["docker_odoo_dir"]),
-            (self.config["venv_dir"], self.config["docker_venv_dir"]),
-            (os.path.join(self.config["program_dir"], DEV_PROJECT_DIR), self.config["docker_dev_project_dir"]),
-            (self.config.get("backups", {}).get("local_dir", ""), self.config["docker_backups_dir"]),
-            (os.path.join(self.config["docker_home"], ".local"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".local"))),
-            (os.path.join(self.config["docker_home"], ".cache"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".cache"))),
-            (developing_project.project_path, self.config["docker_odoo_project_dir_path"]),
+            (self.config.odoo_src_dir, self.config.docker_odoo_dir),
+            (self.config.venv_dir, self.config.docker_venv_dir),
+            (os.path.join(self.config.program_dir, DEV_PROJECT_DIR), self.config.docker_dev_project_dir),
+            (self.config.backups, self.config.docker_backups_dir),
+            (os.path.join(self.config.docker_home, ".local"), str(pathlib.PurePosixPath(self.config.docker_project_dir, ".local"))),
+            (os.path.join(self.config.docker_home, ".cache"), str(pathlib.PurePosixPath(self.config.docker_project_dir, ".cache"))),
+            (self.config.developing_project.project_path, self.config.docker_odoo_project_dir_path),
         ]
-        for dependency_path in self.config["dependencies"]:
+        for dependency_path in self.config.dependencies:
             dependency_project = self.handle_git_link(dependency_path)
             docker_dependency_project_path = dependency_project.docker_dependency_project_path
-            self.config["dependencies_dirs"].append(dependency_project.project_path)
+            self.config.dependencies_dirs.append(dependency_project.project_path)
             docker_dir_with_addons = docker_dependency_project_path
             if dependency_project.project_type == TYPE_PROJECT_MODULE:
                 docker_dir_with_addons = str(pathlib.PurePosixPath(docker_dir_with_addons, os.pardir))
-            self.config["docker_dirs_with_addons"].append(docker_dir_with_addons)
+            self.config.docker_dirs_with_addons.append(docker_dir_with_addons)
             self.mapped_folders.append(
                 (dependency_project.project_path, docker_dependency_project_path)
             )
         
-        for pre_commit_file in self.config["pre_commit_map_files"]:
-            real_file_place = os.path.join(self.config["odoo_project_dir_path"],pre_commit_file)
+        for pre_commit_file in self.config.pre_commit_map_files:
+            real_file_place = os.path.join(self.config.odoo_project_dir_path,pre_commit_file)
             if os.path.exists(real_file_place):
-                full_path_pre_commit_file = os.path.join(self.config["project_dir"],pre_commit_file)
+                full_path_pre_commit_file = os.path.join(self.config.project_dir,pre_commit_file)
                 if not os.path.exists(full_path_pre_commit_file):
                     shutil.copy(real_file_place, full_path_pre_commit_file)
                 self.mapped_folders.append((
                     full_path_pre_commit_file, 
-                    str(pathlib.PurePosixPath(self.config["docker_odoo_project_dir_path"],pre_commit_file))
+                    str(pathlib.PurePosixPath(self.config.docker_odoo_project_dir_path,pre_commit_file))
                 ))
             else:
                 
                 _logger.warning(get_translation(PRE_COMMIT_FILE_WAS_NOT_FOUND).format(
                     PRE_COMMIT_FILE=pre_commit_file,
-                    ODOO_PROJECT_DIR_PATH=self.config["odoo_project_dir_path"],
+                    ODOO_PROJECT_DIR_PATH=self.config.odoo_project_dir_path,
                 ))
         
     
     def generate_dockerfile(self):
-        dockerfile_template_path = os.path.join(self.config["project_dir"], PROJECT_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
+        dockerfile_template_path = os.path.join(self.config.project_dir, PROJECT_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
         with open(dockerfile_template_path) as f:
             lines = f.readlines()
         content = "".join(lines).format(
@@ -101,13 +79,13 @@ class CreateEnvironment():
 
         )
         content = content.replace(get_translation(MESSAGE_ODOO_CONF), get_translation(DO_NOT_CHANGE_FILE))
-        dockerfile_path = os.path.join(self.config["project_dir"], DOCKERFILE)
-        self.config["dockerfile_path"] = dockerfile_path
+        dockerfile_path = os.path.join(self.config.project_dir, DOCKERFILE)
+        self.config.dockerfile_path = dockerfile_path
         with open(dockerfile_path, 'w') as writer:
             writer.write(content)
     
     def generate_config_file(self):
-        config_file_template_path = os.path.join(self.config["project_dir"], PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
+        config_file_template_path = os.path.join(self.config.project_dir, PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
         with open(config_file_template_path) as f:
             lines = f.readlines()
         content = "".join(lines)
@@ -115,13 +93,13 @@ class CreateEnvironment():
             "#ADMIN_PASSWD_MESSAGE#": get_translation(ADMIN_PASSWD_MESSAGE),
             "#MESSAGE#": get_translation(MESSAGE_ODOO_CONF)}.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
-        odoo_config_file_path = os.path.join(self.config["project_dir"], ODOO_CONF_NAME)
+        odoo_config_file_path = os.path.join(self.config.project_dir, ODOO_CONF_NAME)
         if not os.path.exists(odoo_config_file_path):
             with open(odoo_config_file_path, 'w') as writer:
                 writer.write(content)
     
     def generate_docker_compose_file(self):
-        docker_compose_template_path = os.path.join(self.config["project_dir"], PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
+        docker_compose_template_path = os.path.join(self.config.project_dir, PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
         with open(docker_compose_template_path) as f:
             lines = f.readlines()
         
@@ -133,12 +111,12 @@ class CreateEnvironment():
                 path.mkdir(parents=True)
 
         content = "".join(lines).format(
-            ODOO_IMAGE=self.config["odoo_image_name"],
+            ODOO_IMAGE=self.config.odoo_image_name,
             MAPPED_VOLUMES=mapped_volumes,
-            DEBUGGER_PORT=self.config.get("debugger_port", DEBUGGER_DEFAULT_PORT),
-            ODOO_PORT=self.config.get("odoo_port", ODOO_DEFAULT_PORT),
-            POSTGRES_PORT=self.config.get("postgres_port", POSTGRES_DEFAULT_PORT),
-            START_STRING=self.config["start_string"],
+            DEBUGGER_PORT=self.config.debugger_port or DEBUGGER_DEFAULT_PORT,
+            ODOO_PORT=self.config.odoo_port or ODOO_DEFAULT_PORT,
+            POSTGRES_PORT=self.config.postgres_port or POSTGRES_DEFAULT_PORT,
+            START_STRING=self.config.start_string,
             CURRENT_USER=CURRENT_USER,
             CURRENT_PASSWORD=CURRENT_PASSWORD,
             POSTGRES_ODOO_USER=POSTGRES_ODOO_USER,
@@ -146,10 +124,10 @@ class CreateEnvironment():
             ODOO_DOCKER_PORT=ODOO_DOCKER_PORT,
             DEBUGGER_DOCKER_PORT=DEBUGGER_DOCKER_PORT,
             POSTGRES_DOCKER_PORT=POSTGRES_DOCKER_PORT,
-            COMPOSE_FILE_VERSION=self.config["compose_file_version"]
+            COMPOSE_FILE_VERSION=self.config.compose_file_version
         )
         content = content.replace(get_translation(MESSAGE_ODOO_CONF), get_translation(DO_NOT_CHANGE_FILE))
-        dockerfile_path = os.path.join(self.config["project_dir"], "docker-compose.yml")
+        dockerfile_path = os.path.join(self.config.project_dir, "docker-compose.yml")
         with open(dockerfile_path, 'w') as writer:
             writer.write(content)
     
@@ -168,8 +146,8 @@ class CreateEnvironment():
                 pass
     
     def checkout_dependencies(self):
-        list_for_checkout = [self.config.get("odoo_src_dir")]
-        list_for_checkout.extend(self.config["dependencies_dirs"])
+        list_for_checkout = [self.config.odoo_src_dir]
+        list_for_checkout.extend(self.config.dependencies_dirs)
         for source_dir in list_for_checkout:
             os.chdir(source_dir)
             current_branch_bytes = subprocess.run(["git", "branch", "--show-current"], capture_output=True)
@@ -178,20 +156,20 @@ class CreateEnvironment():
                 current_branch_float = float(current_branch_string)
             except:
                 current_branch_float = 0.0
-            if current_branch_float and current_branch_string != self.config["odoo_version"]:
+            if current_branch_float and current_branch_string != self.config.odoo_version:
                 subprocess.run(["git", "stash"], capture_output=True)
-                subprocess.run(["git", "checkout", self.config["odoo_version"]], capture_output=True)
-            if self.config.get("clean_git_repos", True):
+                subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
+            if self.config.clean_git_repos:
                 subprocess.run(["git", "stash"], capture_output=True)
-                subprocess.run(["git", "checkout", self.config["odoo_version"]], capture_output=True)
-            if self.config["update_git_repos"]:
+                subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
+            if self.config.update_git_repos:
                 subprocess.run(["git", "pull"], capture_output=True)
     
     def get_list_of_mapped_sources(self):
         list_of_mapped_links = []
         list_for_links = [
-            self.config.get("odoo_src_dir"),
-            self.config.get("odoo_project_dir_path")
+            self.config.odoo_src_dir,
+            self.config.odoo_project_dir_path,
         ]
         
         for linking_dir in list_for_links:
@@ -200,38 +178,38 @@ class CreateEnvironment():
                 mapped_dir_name = os.path.basename(mapped_folder[1])
                 if dir_name_to_link == mapped_dir_name:
                     list_of_mapped_links.append(
-                        (os.path.join(self.config["project_dir"], dir_name_to_link),mapped_folder[1])
+                        (os.path.join(self.config.project_dir, dir_name_to_link),mapped_folder[1])
                     )
-        for linking_dir in self.config["dependencies_dirs"]:
+        for linking_dir in self.config.dependencies_dirs:
             dir_name_to_link = os.path.basename(linking_dir)
             for mapped_folder in self.mapped_folders:
                 mapped_dir_name = os.path.basename(mapped_folder[1])
                 if dir_name_to_link == mapped_dir_name:
                     list_of_mapped_links.append(
-                        (os.path.join(self.config["dependencies_dir"], dir_name_to_link), mapped_folder[1])
+                        (os.path.join(self.config.dependencies_dir, dir_name_to_link), mapped_folder[1])
                     )
         return list_of_mapped_links
 
     
     def update_links(self):
         list_for_links = [
-            self.config.get("backups", {}).get("local_dir", ""),
-            self.config.get("odoo_src_dir"),
-            self.config.get("odoo_project_dir_path")
+            self.config.backups,
+            self.config.odoo_src_dir,
+            self.config.odoo_project_dir_path
         ]
         
-        if not os.path.exists(self.config["dependencies_dir"]) and self.config["dependencies_dirs"]:
-            os.mkdir(self.config["dependencies_dir"])
-        self.delete_old_links(self.config["project_dir"], list_for_links)
-        self.create_new_links(self.config["project_dir"], list_for_links)
-        if self.config["dependencies_dirs"]:
-            self.delete_old_links(self.config["dependencies_dir"], self.config["dependencies_dirs"])
-            self.create_new_links(self.config["dependencies_dir"], self.config["dependencies_dirs"])
+        if not os.path.exists(self.config.dependencies_dir) and self.config.dependencies_dirs:
+            os.mkdir(self.config.dependencies_dir)
+        self.delete_old_links(self.config.project_dir, list_for_links)
+        self.create_new_links(self.config.project_dir, list_for_links)
+        if self.config.dependencies_dirs:
+            self.delete_old_links(self.config.dependencies_dir, self.config.dependencies_dirs)
+            self.create_new_links(self.config.dependencies_dir, self.config.dependencies_dirs)
     
     def update_vscode_debugger_launcher(self):
-        if not os.path.exists(os.path.join(self.config["project_dir"], ".vscode")):
-            os.mkdir(os.path.join(self.config["project_dir"], ".vscode"))
-        launch_json = os.path.join(self.config["project_dir"], ".vscode", "launch.json")
+        if not os.path.exists(os.path.join(self.config.project_dir, ".vscode")):
+            os.mkdir(os.path.join(self.config.project_dir, ".vscode"))
+        launch_json = os.path.join(self.config.project_dir, ".vscode", "launch.json")
         if not os.path.exists(launch_json):
             content = {
                 "configurations": []
@@ -242,18 +220,18 @@ class CreateEnvironment():
         debugger_unit_exists = False
         list_of_mapped_sources = self.get_list_of_mapped_sources()
         for dir_with_sources in list_of_mapped_sources:
-            self.config["debugger_path_mappings"].append({
+            self.config.debugger_path_mappings.append({
                 "localRoot": dir_with_sources[0], 
                 "remoteRoot": dir_with_sources[1],
             })
-        port = self.config.get("debugger_port", DEBUGGER_DEFAULT_PORT)
+        port = self.config.debugger_port or DEBUGGER_DEFAULT_PORT
         odoo_debugger_uint = {
             "name": DEBUGGER_UNIT_NAME,
             "type": "python",
             "request": "attach",
             "port": int(port),
             "host": "localhost",
-            "pathMappings": self.config["debugger_path_mappings"],
+            "pathMappings": self.config.debugger_path_mappings,
         }
         for index, debugger_unit in enumerate(content["configurations"]):
             if debugger_unit["name"] == DEBUGGER_UNIT_NAME:
@@ -265,9 +243,9 @@ class CreateEnvironment():
                 "name": DEBUGGER_UNIT_NAME,
                 "type": "python",
                 "request": "attach",
-                "port": self.config.get("debugger_port", DEBUGGER_DEFAULT_PORT),
+                "port": self.config.debugger_port or DEBUGGER_DEFAULT_PORT,
                 "host": "localhost",
-                "pathMappings": self.config["debugger_path_mappings"],
+                "pathMappings": self.config.debugger_path_mappings,
             })
         with open(launch_json, "w") as outfile:
             json.dump(content, outfile, indent=4)

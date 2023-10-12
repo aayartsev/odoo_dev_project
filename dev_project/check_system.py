@@ -16,7 +16,7 @@ class SystemChecker():
 
     def __init__(self, config):
         self.config = config
-        if self.config.get("check_system", False):
+        if self.config.check_system:
             self.check_git()
             self.check_docker()
             self.check_docker_compose()
@@ -52,7 +52,7 @@ class SystemChecker():
             exit()
 
     def check_docker_compose(self):
-        self.config["no_log_prefix"] = True
+        self.config.no_log_prefix = True
         process_result = subprocess.run(["docker-compose",  "version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         output_string = output_string.lower().replace("-"," ")
@@ -63,13 +63,12 @@ class SystemChecker():
         up_help_string = up_help_result.stdout.decode("utf-8")
         output_string = output_string.lower().replace("-"," ")
         if NO_LOG_PREFIX not in up_help_string:
-            self.config["no_log_prefix"] = False
-        self.config["compose_file_version"] = DOCKER_COMPOSE_DEFAULT_FILE_VERSION
+            self.config.no_log_prefix = False
     
     def check_file_system(self):
         for dir_path in [
-            self.config["backups"]["local_dir"],
-            self.config["odoo_projects_dir"],
+            self.config.backups,
+            self.config.odoo_projects_dir,
         ]:
             if not os.path.exists(dir_path):
                 try:
@@ -81,11 +80,11 @@ class SystemChecker():
                     exit()
         
         
-        os.chdir(self.config["odoo_src_dir"])
+        os.chdir(self.config.odoo_src_dir)
         odoo_src_state_bytes = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         odoo_src_state_string = odoo_src_state_bytes.stdout.decode("utf-8")
         if not "true" in odoo_src_state_string:
             _logger.error(get_translation(CHECK_ODOO_REPO).format(
-                odoo_src_dir= self.config["odoo_src_dir"]
+                odoo_src_dir= self.config.odoo_src_dir
             ))
             exit()

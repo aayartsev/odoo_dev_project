@@ -31,7 +31,7 @@ class HandleOdooProjectGitLink():
         if self.project_type == TYPE_PROJECT_MODULE:
             inside_docker_path = str(pathlib.PurePosixPath(inside_docker_path, self.project_data.name))
         self.docker_dependency_project_path = str(
-            pathlib.PurePosixPath(self.config["docker_extra_addons"], inside_docker_path))
+            pathlib.PurePosixPath(self.config.docker_extra_addons, inside_docker_path))
         
     def get_git_link_type(self):
         if "file://" in self.gitlink:
@@ -88,7 +88,7 @@ class HandleOdooProjectGitLink():
     def get_project_path(self):
         if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
             return os.path.abspath(os.path.join(
-                self.config["odoo_projects_dir"],
+                self.config.odoo_projects_dir,
                 self.project_data.server,
                 self.project_data.author,
                 self.project_data.name,
