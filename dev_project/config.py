@@ -36,7 +36,7 @@ class Config():
                 module_list = ",".join(module_list)
         
         self.db_creation_data = self.config_file_dict.get("db_creation_data", {})
-        self.odoo_version = self.config_file_dict.get("odoo_version", False)
+        self.odoo_version = self.config_file_dict.get("odoo_version", 0.0)
         self.update_git_repos = self.config_file_dict.get("update_git_repos", False)
         self.clean_git_repos = self.config_file_dict.get("clean_git_repos", False)
         self.check_system = self.config_file_dict.get("check_system", False)
