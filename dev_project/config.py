@@ -27,6 +27,14 @@ class Config():
         self.parse_json_config()
         self.init_modules = self.config_file_dict.get("init_modules", False)
         self.update_modules = self.config_file_dict.get("update_modules", False)
+        for module_list in [self.init_modules, self.update_modules]:
+            if isinstance(module_list, list):
+                module_list = ",".join(module_list)
+            if isinstance(module_list, str):
+                module_list = module_list.split(",")
+                module_list = [module.strip() for module in module_list]
+                module_list = ",".join(module_list)
+        
         self.db_creation_data = self.config_file_dict.get("db_creation_data", {})
         self.odoo_version = self.config_file_dict.get("odoo_version", False)
         self.update_git_repos = self.config_file_dict.get("update_git_repos", False)
