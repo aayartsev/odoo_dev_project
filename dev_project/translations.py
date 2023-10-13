@@ -19,6 +19,20 @@ ALREADY_INITED_PROJECT = """This dir is already {PROJECT_NAME} project"""
 CHECK_CONFIG_FILE = """Check your '{CONFIG_FILE_NAME}' file, we can not parse it."""
 PRE_COMMIT_FILE_WAS_NOT_FOUND = """Pre-commit file {PRE_COMMIT_FILE} was not found at {ODOO_PROJECT_DIR_PATH}"""
 SET_ODOO_SRC_DIR = """Set odoo sources directory, You can leave default {DEFAULT_ODOO_SRC_DIR} or write your own. Press 'Enter' to leave default value:"""
+SET_ODOO_PROJECTS_SRC_DIR = """Set other odoo projects sources directory, You can leave default {DEFAULT_ODOO_PROJECTS_SRC_DIR} or write your own. Press 'Enter' to leave default value:"""
+SET_ODOO_BACKUP_DIR = """Set directory for odoo creating/restoring backups, You can leave default {DEFAULT_ODOO_BACKUP_DIR} or write your own. Press 'Enter' to leave default value:"""
+SET_SSH_KEY_PATH = """Set path to your SSH key for GitHub. How to create it you can read here: https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent. Press 'Enter' leave empty value, in this case system will try to use default system ssh key for GitHub:\n"""
+SET_ODOO_PORT = "Set odoo port which it will listen. You can leave default {DEFAULT_ODOO_PORT} or write your own. Press 'Enter' to leave default value:\n"
+SET_POSTGRES_PORT = "Set PostgreSQL database server port which it will listen. You can leave default {DEFAULT_POSTGRES_PORT} or write your own. Press 'Enter' to leave default value:\n"
+SET_DEBUGGER_PORT = "Set debugger port which it will listen. You can leave default {DEFAULT_DEBUGGER_PORT} or write your own. Press 'Enter' to leave default value:\n"
+YOU_SELECT_ODOO_DIR = "You select this odoo sources dir: {SELECTED_ODOO_DIR}\n"
+YOU_SELECT_ODOO_PROJECTS_DIR = "You select this other odoo projects sources dir: {SELECTED_ODOO_PROJECTS_DIR}\n"
+YOU_SELECT_ODOO_BACKUPS_DIR = "You select this odoo backups dir: {SELECTED_ODOO_BACKUPS_DIR}\n"
+NOTHING_SSH_PATH_NAME = "You did not selected any path to ssh key"
+YOU_SELECT_SSH_KEY_PATH = "You select this ssh path key: {SELECTED_SSH_KEY_PATH}\n"
+YOU_SELECT_ODOO_PORT = "You select this port for which odoo will listen: {SELECTED_ODOO_PORT}\n"
+YOU_SELECT_POSTGRES_PORT = "You select this port for which PostgreSQL database server will listen: {SELECTED_POSTGRES_PORT}\n"
+YOU_SELECT_DEBUGGER_PORT = "You select this port for which Python Debugger will listen: {SELECTED_DEBUGGER_PORT}\n"
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
@@ -74,6 +88,61 @@ translations = {
         "ru_RU": "Укажите каталог хранения исходных текстов odoo, Вы можете оставить "
                  "значение по умолчанию {DEFAULT_ODOO_SRC_DIR} или написать ваше собственное. "
                  "Нажмите 'Enter' чтобы оставить значение по умолчанию:\n"
+    },
+    SET_ODOO_PROJECTS_SRC_DIR: {
+        "ru_RU": "Укажите каталог хранения исходных текстов других проектов odoo, Вы можете оставить "
+                 "значение по умолчанию {DEFAULT_ODOO_PROJECTS_SRC_DIR} или написать ваше собственное. "
+                 "Нажмите 'Enter' чтобы оставить значение по умолчанию:\n"
+    },
+    SET_ODOO_BACKUP_DIR:{
+        "ru_RU": "Укажите каталог создания/восстановления бэкапов odoo, Вы можете оставить "
+                 "значение по умолчанию {DEFAULT_ODOO_BACKUP_DIR} или написать ваше собственное. "
+                 "Нажмите 'Enter' чтобы оставить значение по умолчанию:\n"
+    },
+    SET_SSH_KEY_PATH: {
+        "ru_RU": "Укажите путь к SSH ключу для GitHub. Как его создать, вы можете прочитать здесь:"
+                 " https://docs.github.com/en/authentication/connecting-to-github-with-ssh/"
+                 "generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent. Вы можете оставить значение"
+                 " пустым, нажав 'Enter'. Программа попытается использовать системный ssh ключ для GitHub:\n"
+    },
+    SET_ODOO_PORT: {
+        "ru_RU": "Укажите порт, который будет слушать odoo. Можете оставить значение по умолчанию"
+                 " {DEFAULT_ODOO_PORT} или укажите свой собственный. "
+                 "Нажмите 'Enter' чтобы оставить значение по умолчанию:\n"
+    },
+    SET_POSTGRES_PORT: {
+        "ru_RU": "Укажите порт, который будет слушать сервер PostgreSQL. Можете оставить значение по умолчанию"
+                 " {DEFAULT_POSTGRES_PORT} или укажите свой собственный. "
+                 "Нажмите 'Enter' чтобы оставить значение по умолчанию:\n"
+    },
+    SET_DEBUGGER_PORT: {
+        "ru_RU": "Укажите порт, который будет слушать сервер Отладчик. Можете оставить значение по умолчанию"
+                 " {DEFAULT_DEBUGGER_PORT} или укажите свой собственный. "
+                 "Нажмите 'Enter' чтобы оставить значение по умолчанию:\n"
+    },
+    YOU_SELECT_ODOO_DIR:{
+        "ru_RU": "Вы выбрали следующий каталог для хранения исходных текстов odoo: {SELECTED_ODOO_DIR}\n"
+    },
+    YOU_SELECT_ODOO_PROJECTS_DIR:{
+        "ru_RU": "Вы выбрали следующий каталог для хранения исходных текстов других odoo проектов: {SELECTED_ODOO_PROJECTS_DIR}\n",
+    },
+    YOU_SELECT_ODOO_BACKUPS_DIR:{
+        "ru_RU": "Вы выбрали следующий каталог для использования бэкапов odoo: {SELECTED_ODOO_BACKUPS_DIR}\n",
+    },
+    NOTHING_SSH_PATH_NAME:{
+        "ru_RU": "Вы не выбрали путь к ssh ключу",
+    },
+    YOU_SELECT_SSH_KEY_PATH:{
+        "ru_RU": "Вы выбрали следующий путь для нахождения ssh ключа: {SELECTED_SSH_KEY_PATH}\n",
+    },
+    YOU_SELECT_ODOO_PORT:{
+        "ru_RU": "Вы выбрали следующий порт, который будет слушать odoo: {SELECTED_ODOO_PORT}\n",
+    },
+    YOU_SELECT_POSTGRES_PORT:{
+        "ru_RU": "Вы выбрали следующий порт, который будет слушать сервер PostgreSQL: {SELECTED_POSTGRES_PORT}\n",
+    },
+    YOU_SELECT_DEBUGGER_PORT:{
+        "ru_RU": "Вы выбрали следующий порт, который будет слушать Python Debugger: {SELECTED_DEBUGGER_PORT}\n",
     }
 }
 
