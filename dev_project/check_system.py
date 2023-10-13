@@ -67,8 +67,8 @@ class SystemChecker():
     
     def check_file_system(self):
         for dir_path in [
-            self.config.backups,
-            self.config.odoo_projects_dir,
+            self.config.env.backups,
+            self.config.env.odoo_projects_dir,
         ]:
             if not os.path.exists(dir_path):
                 try:
@@ -80,11 +80,11 @@ class SystemChecker():
                     exit()
         
         
-        os.chdir(self.config.odoo_src_dir)
+        os.chdir(self.config.env.odoo_src_dir)
         odoo_src_state_bytes = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         odoo_src_state_string = odoo_src_state_bytes.stdout.decode("utf-8")
         if not "true" in odoo_src_state_string:
             _logger.error(get_translation(CHECK_ODOO_REPO).format(
-                odoo_src_dir= self.config.odoo_src_dir
+                odoo_src_dir= self.config.env.odoo_src_dir
             ))
             exit()

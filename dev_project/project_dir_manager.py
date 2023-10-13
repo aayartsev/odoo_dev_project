@@ -76,7 +76,7 @@ class ProjectDirManager():
             lines = f.readlines()
         content = "".join(lines)
         for replace_phrase in {
-                "#MESSAGE#": get_translation(MESSAGE_ODOO_CONF),
+                MESSAGE_MARKER: get_translation(MESSAGE_ODOO_CONF),
             }.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
         if not os.path.exists(project_template_file):

@@ -2,13 +2,12 @@
 import os
 import sys
 
-from dev_project.host_config_parser import ConfParser
 from dev_project.check_system import SystemChecker
 from dev_project.host_env import CreateEnvironment
 from dev_project.inside_docker_app.parse_args import ArgumentParser
 from dev_project.host_start_string_builder import StartStringBuilder
 from dev_project.project_dir_manager import ProjectDirManager
-from dev_project.config import Config
+from dev_project.host_config import Config
 
 from dev_project.inside_docker_app.logger import get_module_logger
 
@@ -20,6 +19,8 @@ def main():
     args_list = sys.argv[1:]
     args_dict = ArgumentParser(args_list).args_dict
     pd_manager = ProjectDirManager(start_dir_path, args_dict, program_dir_path)
+    environment = CreateEnvironment(pd_manager)
+    environment.init_env()
     pd_manager.check_project_dir()
     if not pd_manager.dir_is_project:
         exit()
@@ -27,10 +28,12 @@ def main():
         pd_manager,
         args_dict,
         program_dir_path,
+        environment,
     )
+    environment.set_config(config)
     SystemChecker(config)
-    environment = CreateEnvironment(config)
-    environment.update_config()
+    
+    environment.map_folders()
     environment.generate_dockerfile()
     environment.generate_config_file()
     StartStringBuilder(config)

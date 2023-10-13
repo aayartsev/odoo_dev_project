@@ -88,7 +88,7 @@ class HandleOdooProjectGitLink():
     def get_project_path(self):
         if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
             return os.path.abspath(os.path.join(
-                self.config.odoo_projects_dir,
+                self.config.env.odoo_projects_dir,
                 self.project_data.server,
                 self.project_data.author,
                 self.project_data.name,

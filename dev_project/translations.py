@@ -18,6 +18,7 @@ THIS_IS_NOT_PROJECT_DIRECTORY = """This is not {PROJECT_NAME} directory. If you 
 ALREADY_INITED_PROJECT = """This dir is already {PROJECT_NAME} project"""
 CHECK_CONFIG_FILE = """Check your '{CONFIG_FILE_NAME}' file, we can not parse it."""
 PRE_COMMIT_FILE_WAS_NOT_FOUND = """Pre-commit file {PRE_COMMIT_FILE} was not found at {ODOO_PROJECT_DIR_PATH}"""
+SET_ODOO_SRC_DIR = """Set odoo sources directory, You can leave default {DEFAULT_ODOO_SRC_DIR} or write your own. Press 'Enter' to leave default value:"""
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
@@ -57,7 +58,8 @@ translations = {
                  """ параметра "db_manager_password" файла конфигурации config.json"""
     },
     THIS_IS_NOT_PROJECT_DIRECTORY: {
-        "ru_RU": """Данный каталог не является odpm проектом. Если вы хотите создать новый проект, используйте команду "{PROJECT_NAME} {INIT_PARAM}". """
+        "ru_RU": "Данный каталог не является odpm проектом. Если вы хотите создать"
+                 " новый проект, используйте команду '{PROJECT_NAME} {INIT_PARAM}'. "
     },
     ALREADY_INITED_PROJECT: {
         "ru_RU": """Данный каталог уже является {PROJECT_NAME} проектом"""
@@ -68,6 +70,11 @@ translations = {
     PRE_COMMIT_FILE_WAS_NOT_FOUND: {
         "ru_RU": """Pre-commit файл {PRE_COMMIT_FILE} не был найден в каталоге {ODOO_PROJECT_DIR_PATH}"""
     },
+    SET_ODOO_SRC_DIR: {
+        "ru_RU": "Укажите каталог хранения исходных текстов odoo, Вы можете оставить "
+                 "значение по умолчанию {DEFAULT_ODOO_SRC_DIR} или написать ваше собственное. "
+                 "Нажмите 'Enter' чтобы оставить значение по умолчанию:\n"
+    }
 }
 
 def get_translation(string_to_translate):

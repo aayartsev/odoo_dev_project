@@ -53,7 +53,7 @@ class StartStringBuilder():
             return start_string
         
         if start_pre_commit:
-            start_string = f"""/bin/bash -c 'cd {self.config["docker_odoo_project_dir_path"]} && ls && git config --global --add safe.directory {self.config.docker_odoo_project_dir_path} && pre-commit run --all-files'"""
+            start_string = f"""/bin/bash -c 'cd {self.config.docker_odoo_project_dir_path} && ls && git config --global --add safe.directory {self.config.docker_odoo_project_dir_path} && pre-commit run --all-files'"""
             return start_string
 
         if db_name:

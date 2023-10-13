@@ -1,8 +1,6 @@
 import os
 import pathlib
 import json
-import platform
-from configparser import ConfigParser
 
 from . import constants
 from .translations import *
@@ -14,7 +12,7 @@ _logger = get_module_logger(__name__)
 
 class Config():
 
-    def __init__(self, pd_manager, arguments, program_dir):
+    def __init__(self, pd_manager, arguments, program_dir, env):
         
         self.pd_manager = pd_manager
         self.program_dir = program_dir
@@ -23,6 +21,7 @@ class Config():
         self.project_dir = self.pd_manager.project_path
         self.config_path = os.path.join(self.pd_manager.project_path, constants.CONFIG_FILE_NAME)
         self.config_home_dir = self.pd_manager.home_config_dir
+        self.env = env
 
         self.parse_json_config()
         self.init_modules = self.config_file_dict.get("init_modules", False)
@@ -47,8 +46,6 @@ class Config():
         self.dependencies = self.config_file_dict.get("dependencies", [])
         self.requirements_txt = self.config_file_dict.get("requirements_txt", [])
 
-        self.env_file = self.get_env_file_path()
-        self.parse_env_file()
 
         self.dependencies_dirs = []
         self.docker_dirs_with_addons = []
@@ -88,34 +85,7 @@ class Config():
     def handle_git_link(self, gitlink):
         odoo_project = HandleOdooProjectGitLink(gitlink, self)
         return odoo_project
-    
-    def get_env_file_path(self):
-        local_env_file = os.path.join(self.pd_manager.project_path, constants.ENV_FILE_NAME)
-        if os.path.exists(local_env_file):
-            return local_env_file
-        if not os.path.exists(self.config_home_dir):
-            os.makedirs(self.config_home_dir)
-        # TODO we need to write method that will create default .env file
-        local_env_file = os.path.join(self.config_home_dir, constants.ENV_FILE_NAME)
-        return local_env_file
 
-        
-    
-    def parse_env_file(self):
-        parser = ConfigParser()
-        with open(self.env_file) as stream:
-            parser.read_string("[env]\n" + stream.read())
-        self.backups = parser["env"]["BACKUP_DIR"]
-        self.odoo_src_dir = parser["env"]["ODOO_SRC_DIR"]
-        self.odoo_projects_dir = parser["env"]["ODOO_PROJECTS_DIR"]
-        self.debugger_port = parser["env"].get("DEBUGGER_PORT", constants.DEBUGGER_DEFAULT_PORT)
-        self.odoo_port = parser["env"].get("ODOO_PORT", constants.ODOO_DEFAULT_PORT)
-        self.postgres_port = parser["env"].get("POSTGRES_PORT", constants.POSTGRES_DEFAULT_PORT)
-        path_to_ssh_key = parser["env"].get("PATH_TO_SSH_KEY", False)
-        if path_to_ssh_key and platform.system() == "Windows":
-            path_to_ssh_key = path_to_ssh_key.replace("\\","\\\\")
-        self.path_to_ssh_key = path_to_ssh_key
-    
     def config_to_json(self):
         config = {}
         config["docker_odoo_dir"] = self.docker_odoo_dir
