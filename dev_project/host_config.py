@@ -46,7 +46,6 @@ class Config():
         self.dependencies = self.config_file_dict.get("dependencies", [])
         self.requirements_txt = self.config_file_dict.get("requirements_txt", [])
 
-
         self.dependencies_dirs = []
         self.docker_dirs_with_addons = []
         self.debugger_path_mappings = []
@@ -92,12 +91,7 @@ class Config():
         config["odoo_config_data"] = self.odoo_config_data
         config["docker_path_odoo_conf"] = self.docker_path_odoo_conf
         config["arguments"] = self.arguments
-        config["db_creation_data"] = {}
-        config["db_creation_data"]["db_lang"] = self.db_creation_data.get("db_lang",False)
-        config["db_creation_data"]["db_country_code"] = self.db_creation_data.get("db_country_code", False)
-        config["db_creation_data"]["db_default_admin_password"] = self.db_creation_data.get("db_default_admin_password", False)
-        config["db_creation_data"]["db_default_admin_login"] = self.db_creation_data.get("db_default_admin_login", False)
-        config["db_creation_data"]["create_demo"] = self.db_creation_data.get("create_demo", False)
+        config["db_creation_data"] = self.db_creation_data
         config["db_manager_password"] = self.db_manager_password
         config["docker_venv_dir"] = self.docker_venv_dir
         config["docker_project_dir"] = self.docker_project_dir

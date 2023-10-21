@@ -33,6 +33,7 @@ YOU_SELECT_SSH_KEY_PATH = "You select this ssh path key: {SELECTED_SSH_KEY_PATH}
 YOU_SELECT_ODOO_PORT = "You select this port for which odoo will listen: {SELECTED_ODOO_PORT}\n"
 YOU_SELECT_POSTGRES_PORT = "You select this port for which PostgreSQL database server will listen: {SELECTED_POSTGRES_PORT}\n"
 YOU_SELECT_DEBUGGER_PORT = "You select this port for which Python Debugger will listen: {SELECTED_DEBUGGER_PORT}\n"
+DO_YOU_WANT_CLONE_ODOO = "Do you want to clone odoo? y/n\n"
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
@@ -143,6 +144,9 @@ translations = {
     },
     YOU_SELECT_DEBUGGER_PORT:{
         "ru_RU": "Вы выбрали следующий порт, который будет слушать Python Debugger: {SELECTED_DEBUGGER_PORT}\n",
+    },
+    DO_YOU_WANT_CLONE_ODOO: {
+        "ru_RU": "Вы хотите клонировать odoo? y/n\n"
     }
 }
 

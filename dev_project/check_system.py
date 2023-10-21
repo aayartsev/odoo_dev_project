@@ -1,12 +1,14 @@
 import subprocess
 import platform
+import pathlib
+import os
 
 if platform.system() == "Linux":
     import pwd
     import grp
 
-from .constants import *
-from .translations import *
+from . import constants
+from . import translations
 
 from .inside_docker_app.logger import get_module_logger
 
@@ -25,8 +27,8 @@ class SystemChecker():
     def check_git(self):
         process_result = subprocess.run(["git",  "--version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
-        if GIT_WORKING_MESSAGE not in output_string:
-            _logger.error(get_translation(IS_GIT_INSTALLED))
+        if constants.GIT_WORKING_MESSAGE not in output_string:
+            _logger.error(translations.get_translation(translations.IS_GIT_INSTALLED))
             exit()
     
     def get_groups(self, user):
@@ -37,18 +39,18 @@ class SystemChecker():
 
     def check_docker(self):
         if platform.system() == "Linux":
-            groups = self.get_groups(CURRENT_USER)
-            if LINUX_DOCKER_GROUPNAME not in groups:
-                _logger.error(get_translation(USER_NOT_IN_DOCKER_GROUP).format(
-                        CURRENT_USER=CURRENT_USER,
-                        LINUX_DOCKER_GROUPNAME=LINUX_DOCKER_GROUPNAME,
+            groups = self.get_groups(constants.CURRENT_USER)
+            if constants.LINUX_DOCKER_GROUPNAME not in groups:
+                _logger.error(translations.get_translation(translations.USER_NOT_IN_DOCKER_GROUP).format(
+                        CURRENT_USER=constants.CURRENT_USER,
+                        LINUX_DOCKER_GROUPNAME=constants.LINUX_DOCKER_GROUPNAME,
                     )
                 )
                 exit()
         process_result = subprocess.run(["docker",  "info"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
-        if DOCKER_WORKING_MESSAGE not in output_string:
-            _logger.error(get_translation(CAN_NOT_CONNECT_DOCKER))
+        if constants.DOCKER_WORKING_MESSAGE not in output_string:
+            _logger.error(translations.get_translation(translations.CAN_NOT_CONNECT_DOCKER))
             exit()
 
     def check_docker_compose(self):
@@ -56,13 +58,13 @@ class SystemChecker():
         process_result = subprocess.run(["docker-compose",  "version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         output_string = output_string.lower().replace("-"," ")
-        if DOCKER_COMPOSE_WORKING_MESSAGE not in output_string:
-            _logger.error(get_translation(CAN_NOT_GET_DOCKER_COMPOSE_INFO))
+        if constants.DOCKER_COMPOSE_WORKING_MESSAGE not in output_string:
+            _logger.error(translations.get_translation(translations.CAN_NOT_GET_DOCKER_COMPOSE_INFO))
             exit()
         up_help_result = subprocess.run(["docker-compose",  "up", "--help"], capture_output=True)
         up_help_string = up_help_result.stdout.decode("utf-8")
         output_string = output_string.lower().replace("-"," ")
-        if NO_LOG_PREFIX not in up_help_string:
+        if constants.NO_LOG_PREFIX not in up_help_string:
             self.config.no_log_prefix = False
     
     def check_file_system(self):
@@ -74,7 +76,7 @@ class SystemChecker():
                 try:
                     os.makedirs(dir_path)
                 except BaseException:
-                    _logger.error(get_translation(CAN_NOT_CREATE_DIR).format(
+                    _logger.error(translations.get_translation(translations.CAN_NOT_CREATE_DIR).format(
                         dir_path=dir_path,
                     ))
                     exit()
@@ -84,7 +86,11 @@ class SystemChecker():
         odoo_src_state_bytes = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         odoo_src_state_string = odoo_src_state_bytes.stdout.decode("utf-8")
         if not "true" in odoo_src_state_string:
-            _logger.error(get_translation(CHECK_ODOO_REPO).format(
-                odoo_src_dir= self.config.env.odoo_src_dir
-            ))
-            exit()
+            clone_odoo = input(translations.get_translation(translations.DO_YOU_WANT_CLONE_ODOO))
+            if clone_odoo and clone_odoo.lower() == "y":
+                self.config.env.clone_odoo()
+            else:
+                _logger.error(translations.get_translation(translations.CHECK_ODOO_REPO).format(
+                    odoo_src_dir= self.config.env.odoo_src_dir
+                ))
+                exit()

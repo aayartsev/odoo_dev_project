@@ -18,13 +18,16 @@ class HandleOdooProjectGitLink():
     def __init__(self, gitlink, config):
         self.gitlink = gitlink
         self.config = config
+        self.dir_to_clone = None
         self.project_type = None
         self.ssh_regex = r"git@[a-z.]*:"
         self.link_type = self.get_git_link_type()
         self.project_data = self.parse_link_by_type()
         self.project_path = self.get_project_path()
+    
+    def build_project(self):
         if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
-            self.dir_to_clone = self.get_dir_to_clone()
+            self.get_dir_to_clone()
             self.check_project()
         self.get_project_type()
         inside_docker_path = self.project_data.name
@@ -100,10 +103,7 @@ class HandleOdooProjectGitLink():
             return local_path
 
     def get_dir_to_clone(self):
-        return os.path.abspath(os.path.join(
-            self.project_path,
-            ".."
-        ))
+        self.dir_to_clone = pathlib.Path(self.project_path).parent.absolute()
 
     def check_project(self):
         state = False
@@ -112,16 +112,19 @@ class HandleOdooProjectGitLink():
                 os.chdir(self.project_path)
                 state = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         if not state or b"true" not in state.stdout:
-            try:
-                shutil.rmtree(self.project_path)
-            except FileNotFoundError:
-                pass 
-            self.clone_repo()
+            self.force_clone_repo()
     
-    def clone_repo(self):
+    def force_clone_repo(self):
+        try:
+            shutil.rmtree(self.project_path)
+        except FileNotFoundError:
+            pass 
         if not os.path.exists(self.dir_to_clone):
             os.makedirs(self.dir_to_clone)
         os.chdir(self.dir_to_clone)
+        self.clone_repo()
+    
+    def clone_repo(self):
         path_to_ssh_key = self.config.get("path_to_ssh_key", False)
         if not path_to_ssh_key:
             subprocess.run(["git", "clone", self.gitlink])
