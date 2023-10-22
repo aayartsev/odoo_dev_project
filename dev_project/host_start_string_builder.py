@@ -76,7 +76,6 @@ class StartStringBuilder():
 
         start_main = " && ".join([
             f"""cd {self.config.docker_project_dir}""",
-            f""". {pathlib.PurePosixPath(self.config.docker_venv_dir,"bin", "activate")}""",
             f"""python3 {pathlib.PurePosixPath(self.config.docker_inside_app,"main.py")} {CONFIG_BASE64_DATA} {self.get_base64_string_config()}""",
             f"""{start_python_command}""",
         ])

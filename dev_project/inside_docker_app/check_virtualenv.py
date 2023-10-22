@@ -19,6 +19,7 @@ class VirtualenvChecker():
         self.requirements_txt = config.get("requirements_txt", [])
         self.odoo_version = config.get("odoo_version", 0.0)
         self.odoo_data_dir = config["odoo_config_data"]["options"]["data_dir"]
+        self.odoo_requirements_path = os.path.join(config["docker_odoo_dir"], "requirements.txt")
         self.check_virtual_env()
 
     def is_virtualenv(self):
@@ -51,10 +52,7 @@ class VirtualenvChecker():
                 os.system(f"""python3 -m pip install {package}""")
     
     def update_requirements_list(self):
-        odoo_requirements_path = os.path.join(self.odoo_data_dir, "requirements.txt")
-        if not os.path.exists(odoo_requirements_path):
-            os.system(f"""cd {self.docker_project_dir} && wget -O {odoo_requirements_path} https://raw.githubusercontent.com/odoo/odoo/{self.odoo_version}/requirements.txt""")
-        os.system(f"""python3 -m pip install -r {odoo_requirements_path}""")
+        os.system(f"""python3 -m pip install -r {self.odoo_requirements_path}""")
         # TODO find the way to check if i need to install package in my environment
     
     def check_virtual_env(self):
