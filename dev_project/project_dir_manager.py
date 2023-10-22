@@ -47,12 +47,15 @@ class ProjectDirManager():
             exit()
         if self.init and not self.dir_is_project:
             self.init_project()
+            if isinstance(self.init, bool):
+                exit()
             return
         if self.init and self.dir_is_project:
             _logger.info(get_translation(ALREADY_INITED_PROJECT).format(
                         PROJECT_NAME=PROJECT_NAME,
                     ))
-            exit()
+            # exit()
+            return
         self.rebuild_templates()
 
 

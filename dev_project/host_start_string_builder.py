@@ -44,7 +44,7 @@ class StartStringBuilder():
         dev_mode = self.config.dev_mode or False
         
         if build_image:
-            subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, "."])
+            self.config.env.build_image()
             exit()
 
         if install_pip:

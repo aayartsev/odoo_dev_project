@@ -26,16 +26,15 @@ class HandleOdooProjectGitLink():
         self.project_path = self.get_project_path()
     
     def build_project(self):
+        self.path_to_ssh_key = self.config.user_env.path_to_ssh_key
         if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
             self.get_dir_to_clone()
             self.check_project()
         self.get_project_type()
-        inside_docker_path = self.project_data.name
+        self.inside_docker_path = self.project_data.name
         if self.project_type == TYPE_PROJECT_MODULE:
-            inside_docker_path = str(pathlib.PurePosixPath(inside_docker_path, self.project_data.name))
-        self.docker_dependency_project_path = str(
-            pathlib.PurePosixPath(self.config.docker_extra_addons, inside_docker_path))
-        
+            self.inside_docker_path = str(pathlib.PurePosixPath(self.inside_docker_path, self.project_data.name))
+
     def get_git_link_type(self):
         if "file://" in self.gitlink:
             return GITLINK_TYPE_FILE
@@ -91,7 +90,7 @@ class HandleOdooProjectGitLink():
     def get_project_path(self):
         if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
             return os.path.abspath(os.path.join(
-                self.config.env.odoo_projects_dir,
+                self.config.user_env.odoo_projects_dir,
                 self.project_data.server,
                 self.project_data.author,
                 self.project_data.name,
@@ -125,8 +124,7 @@ class HandleOdooProjectGitLink():
         self.clone_repo()
     
     def clone_repo(self):
-        path_to_ssh_key = self.config.get("path_to_ssh_key", False)
-        if not path_to_ssh_key:
+        if not self.path_to_ssh_key:
             subprocess.run(["git", "clone", self.gitlink])
         else:
-            subprocess.call(f'git clone {self.gitlink} --config core.sshCommand="ssh -i {path_to_ssh_key}"', shell=True)
+            subprocess.call(f'git clone {self.gitlink} --config core.sshCommand="ssh -i {self.path_to_ssh_key}"', shell=True)

@@ -1,6 +1,6 @@
 import subprocess
 import platform
-import pathlib
+import json
 import os
 
 if platform.system() == "Linux":
@@ -52,6 +52,17 @@ class SystemChecker():
         if constants.DOCKER_WORKING_MESSAGE not in output_string:
             _logger.error(translations.get_translation(translations.CAN_NOT_CONNECT_DOCKER))
             exit()
+        
+        process_result = subprocess.run(["docker",  "images", "--format", "'{{json .}}'"], capture_output=True)
+        output_string = process_result.stdout.decode("utf-8")
+        result_list = []
+        for record in output_string.split("\n"):
+            if record:
+                new_record = json.loads(record.replace("'", ""))
+                if self.config.odoo_image_name == new_record["Repository"]:
+                    result_list.append(new_record)
+        if not result_list:
+            self.config.env.build_image()
 
     def check_docker_compose(self):
         self.config.no_log_prefix = True
@@ -69,8 +80,8 @@ class SystemChecker():
     
     def check_file_system(self):
         for dir_path in [
-            self.config.env.backups,
-            self.config.env.odoo_projects_dir,
+            self.config.user_env.backups,
+            self.config.user_env.odoo_projects_dir,
         ]:
             if not os.path.exists(dir_path):
                 try:
@@ -82,7 +93,7 @@ class SystemChecker():
                     exit()
         
         
-        os.chdir(self.config.env.odoo_src_dir)
+        os.chdir(self.config.user_env.odoo_src_dir)
         odoo_src_state_bytes = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         odoo_src_state_string = odoo_src_state_bytes.stdout.decode("utf-8")
         if not "true" in odoo_src_state_string:

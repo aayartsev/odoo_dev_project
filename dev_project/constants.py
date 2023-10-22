@@ -7,7 +7,10 @@ from .inside_docker_app.command_line_params import *
 ARCH = str(platform.machine()).lower()
 DEV_PROJECT_DIR = "dev_project"
 CONFIG_FILE_NAME = "config.json"
+
 PROJECT_NAME = "odpm"
+PROJECT_CONFIG_FILE_NAME = f"{PROJECT_NAME.lower()}.json"
+USER_CONFIG_FILE_NAME = "user_settings.json"
 CONFIG_DIR_IN_HOME_DIR = f".{PROJECT_NAME.lower()}"
 PROJECT_SERVICE_DIRECTORY = f".{PROJECT_NAME.lower()}"
 ENV_FILE_NAME = ".env"
@@ -19,7 +22,7 @@ PROGRAM_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DI
 PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(PROJECT_SERVICE_DIRECTORY, "docker-compose.yml")
 PROGRAM_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "dev_odoo_docker_config_file.conf")
 PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(PROJECT_SERVICE_DIRECTORY, "dev_odoo_docker_config_file.conf")
-# DB_MANAGEMENT_RELATIVE_PATH = pathlib.PurePosixPath(DEV_PROJECT_DIR, "db_management.py")
+
 DEBUGGER_DEFAULT_PORT = "5678"
 DEBUGGER_DOCKER_PORT = DEBUGGER_DEFAULT_PORT
 ODOO_DEFAULT_PORT = "8069"

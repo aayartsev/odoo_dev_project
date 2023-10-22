@@ -16,177 +16,35 @@ from .inside_docker_app.logger import get_module_logger
 
 _logger = get_module_logger(__name__)
 
-class CreateEnvironment():
+class CreateProjectEnvironment():
 
-    def __init__(self, pd_manager):
-        self.pd_manager = pd_manager
-        self.config_home_dir = self.pd_manager.home_config_dir
+    def __init__(self, config):
+        # self.pd_manager = pd_manager
+        # self.config_home_dir = self.pd_manager.home_config_dir
+        self.config = config
+        self.user_env = self.config.user_env
+        self.config.project_env = self
 
     def handle_git_link(self, gitlink):
         odoo_project = HandleOdooProjectGitLink(gitlink, self.config)
         odoo_project.build_project()
         return odoo_project
-    
-    def set_config(self, config):
-        self.config = config
-    
-    def init_env(self):
-        self.env_file = self.get_env_file_path()
-        self.parse_env_file()
-    
-    def get_env_file_path(self):
-        local_env_file = os.path.join(self.pd_manager.project_path, constants.ENV_FILE_NAME)
-        if os.path.exists(local_env_file):
-            return local_env_file
-        if not os.path.exists(self.config_home_dir):
-            os.makedirs(self.config_home_dir)
-        # TODO we need to write method that will create default .env file
-        local_env_file = os.path.join(self.config_home_dir, constants.ENV_FILE_NAME)
-        if not os.path.exists(local_env_file):
-            self.create_env_file(local_env_file)
-        return local_env_file
 
-    def parse_env_file(self):
-        parser = ConfigParser()
-        with open(self.env_file) as stream:
-            parser.read_string("[env]\n" + stream.read())
-        self.backups = parser["env"]["BACKUP_DIR"]
-        self.odoo_src_dir = parser["env"]["ODOO_SRC_DIR"]
-        self.odoo_projects_dir = parser["env"]["ODOO_PROJECTS_DIR"]
-        self.debugger_port = parser["env"].get("DEBUGGER_PORT", constants.DEBUGGER_DEFAULT_PORT)
-        self.odoo_port = parser["env"].get("ODOO_PORT", constants.ODOO_DEFAULT_PORT)
-        self.postgres_port = parser["env"].get("POSTGRES_PORT", constants.POSTGRES_DEFAULT_PORT)
-        path_to_ssh_key = parser["env"].get("PATH_TO_SSH_KEY", False)
-        if path_to_ssh_key and platform.system() == "Windows":
-            path_to_ssh_key = path_to_ssh_key.replace("\\","\\\\")
-        self.path_to_ssh_key = path_to_ssh_key
-    
-    def create_env_file(self, local_env_file):
-        odoo_src_dir = self.get_from_user_odoo_src_dir()
-        
-        odoo_projects_src_dir = self.get_from_user_odoo_projects_src_dir()
-        backup_dir = self.get_from_user_backup_dir()
-        path_to_ssh_key = self.get_from_user_path_to_ssh_key()
-        odoo_port = self.get_from_user_odoo_port()
-        postgres_port = self.get_from_user_postgres_port()
-        debugger_port = self.get_from_user_debugger_port()
-        new_env_data = {
-            "BACKUP_DIR": backup_dir,
-            "ODOO_SRC_DIR": odoo_src_dir,
-            "ODOO_PROJECTS_DIR": odoo_projects_src_dir,
-            "PATH_TO_SSH_KEY": path_to_ssh_key,
-            "ODOO_PORT": odoo_port,
-            "POSTGRES_PORT": postgres_port,
-            "DEBUGGER_PORT": debugger_port,
-        }
-        with open(local_env_file, 'w') as env_file:
-            for key_name, value in new_env_data.items():
-                string = f"{key_name}={value}\n"
-                env_file.write(string)
-
-        
-    def get_from_user_odoo_src_dir(self):
-        default_odoo_src_dir = os.path.join(Path.home(), "odoo")
-        user_dir = input(translations.get_translation(translations.SET_ODOO_SRC_DIR).format(
-                    DEFAULT_ODOO_SRC_DIR=default_odoo_src_dir,
-                ))
-        if not user_dir:
-            user_dir = default_odoo_src_dir
-        _logger.info(translations.get_translation(translations.YOU_SELECT_ODOO_DIR).format(
-                SELECTED_ODOO_DIR=user_dir,
-            ))
-        return user_dir
-    
-    def get_from_user_odoo_projects_src_dir(self):
-        default_odoo_projects_src_dir = os.path.join(Path.home(), "odoo_projects")
-        user_dir = input(translations.get_translation(translations.SET_ODOO_PROJECTS_SRC_DIR).format(
-                    DEFAULT_ODOO_PROJECTS_SRC_DIR=default_odoo_projects_src_dir,
-                ))
-        if not user_dir:
-            user_dir = default_odoo_projects_src_dir
-        _logger.info(translations.get_translation(translations.YOU_SELECT_ODOO_PROJECTS_DIR).format(
-                SELECTED_ODOO_PROJECTS_DIR=user_dir,
-            ))
-        return user_dir
-
-    def get_from_user_backup_dir(self):
-        default_backup_dir = os.path.join(Path.home(), "odoo_backups")
-        user_dir = input(translations.get_translation(translations.SET_ODOO_BACKUP_DIR).format(
-                    DEFAULT_ODOO_BACKUP_DIR=default_backup_dir,
-                ))
-        if not user_dir:
-            user_dir = default_backup_dir
-        _logger.info(translations.get_translation(translations.YOU_SELECT_ODOO_BACKUPS_DIR).format(
-                SELECTED_ODOO_BACKUPS_DIR=user_dir,
-            ))
-        return user_dir
-    
-    def get_from_user_path_to_ssh_key(self):
-        ssh_path = input(translations.get_translation(translations.SET_SSH_KEY_PATH))
-        ssh_path_name = ssh_path
-        if not ssh_path:
-            ssh_path_name = translations.get_translation(translations.NOTHING_SSH_PATH_NAME)
-        _logger.info(translations.get_translation(translations.YOU_SELECT_SSH_KEY_PATH).format(
-                SELECTED_SSH_KEY_PATH=ssh_path_name,
-            ))
-        return ssh_path
-    
-    def get_from_user_odoo_port(self):
-        default_port = constants.ODOO_DEFAULT_PORT
-        port = input(translations.get_translation(translations.SET_ODOO_PORT).format(
-                    DEFAULT_ODOO_PORT=default_port,
-                ))
-        if not port:
-            port = default_port
-        _logger.info(translations.get_translation(translations.YOU_SELECT_ODOO_PORT).format(
-                SELECTED_ODOO_PORT=default_port,
-            ))
-        return port
-    
-    def get_from_user_postgres_port(self):
-        default_port = constants.POSTGRES_DEFAULT_PORT
-        port = input(translations.get_translation(translations.SET_POSTGRES_PORT).format(
-                    DEFAULT_POSTGRES_PORT=default_port,
-                ))
-        if not port:
-            port = default_port
-        _logger.info(translations.get_translation(translations.YOU_SELECT_POSTGRES_PORT).format(
-                SELECTED_POSTGRES_PORT=default_port,
-            ))
-        return port
-
-    def get_from_user_debugger_port(self):
-        default_port = constants.DEBUGGER_DEFAULT_PORT
-        port = input(translations.get_translation(translations.SET_DEBUGGER_PORT).format(
-                    DEFAULT_DEBUGGER_PORT=default_port,
-                ))
-        if not port:
-            port = default_port
-        _logger.info(translations.get_translation(translations.YOU_SELECT_DEBUGGER_PORT).format(
-                SELECTED_DEBUGGER_PORT=default_port,
-            ))
-        return port
-    
-    def clone_odoo(self):
-        odoo_crc_project = HandleOdooProjectGitLink(constants.ODOO_GIT_LINK, self.config)
-        odoo_crc_project.project_path = self.config.env.odoo_src_dir
-        odoo_crc_project.get_dir_to_clone()
-        odoo_crc_project.force_clone_repo()
 
 
     def map_folders(self):
         self.mapped_folders = [
-            (self.odoo_src_dir, self.config.docker_odoo_dir),
+            (self.user_env.odoo_src_dir, self.config.docker_odoo_dir),
             (self.config.venv_dir, self.config.docker_venv_dir),
             (os.path.join(self.config.program_dir, constants.DEV_PROJECT_DIR), self.config.docker_dev_project_dir),
-            (self.backups, self.config.docker_backups_dir),
+            (self.user_env.backups, self.config.docker_backups_dir),
             (os.path.join(self.config.docker_home, ".local"), str(pathlib.PurePosixPath(self.config.docker_project_dir, ".local"))),
             (os.path.join(self.config.docker_home, ".cache"), str(pathlib.PurePosixPath(self.config.docker_project_dir, ".cache"))),
             (self.config.developing_project.project_path, self.config.docker_odoo_project_dir_path),
         ]
         for dependency_path in self.config.dependencies:
             dependency_project = self.handle_git_link(dependency_path)
-            docker_dependency_project_path = dependency_project.docker_dependency_project_path
+            docker_dependency_project_path = str(pathlib.PurePosixPath(self.config.docker_extra_addons, dependency_project.inside_docker_path))
             self.config.dependencies_dirs.append(dependency_project.project_path)
             docker_dir_with_addons = docker_dependency_project_path
             if dependency_project.project_type == constants.TYPE_PROJECT_MODULE:
@@ -261,9 +119,9 @@ class CreateEnvironment():
         content = "".join(lines).format(
             ODOO_IMAGE=self.config.odoo_image_name,
             MAPPED_VOLUMES=mapped_volumes,
-            DEBUGGER_PORT=self.debugger_port or constants.DEBUGGER_DEFAULT_PORT,
-            ODOO_PORT=self.odoo_port or constants.ODOO_DEFAULT_PORT,
-            POSTGRES_PORT=self.postgres_port or constants.POSTGRES_DEFAULT_PORT,
+            DEBUGGER_PORT=self.user_env.debugger_port or constants.DEBUGGER_DEFAULT_PORT,
+            ODOO_PORT=self.user_env.odoo_port or constants.ODOO_DEFAULT_PORT,
+            POSTGRES_PORT=self.user_env.postgres_port or constants.POSTGRES_DEFAULT_PORT,
             START_STRING=self.config.start_string,
             CURRENT_USER=constants.CURRENT_USER,
             CURRENT_PASSWORD=constants.CURRENT_PASSWORD,
@@ -294,7 +152,7 @@ class CreateEnvironment():
                 pass
     
     def checkout_dependencies(self):
-        list_for_checkout = [self.odoo_src_dir]
+        list_for_checkout = [self.user_env.odoo_src_dir]
         list_for_checkout.extend(self.config.dependencies_dirs)
         for source_dir in list_for_checkout:
             os.chdir(source_dir)
@@ -316,7 +174,7 @@ class CreateEnvironment():
     def get_list_of_mapped_sources(self):
         list_of_mapped_links = []
         list_for_links = [
-            self.odoo_src_dir,
+            self.user_env.odoo_src_dir,
             self.config.odoo_project_dir_path,
         ]
         
@@ -341,8 +199,8 @@ class CreateEnvironment():
     
     def update_links(self):
         list_for_links = [
-            self.backups,
-            self.odoo_src_dir,
+            self.user_env.backups,
+            self.user_env.odoo_src_dir,
             self.config.odoo_project_dir_path
         ]
         
@@ -372,7 +230,7 @@ class CreateEnvironment():
                 "localRoot": dir_with_sources[0], 
                 "remoteRoot": dir_with_sources[1],
             })
-        port = self.debugger_port or constants.DEBUGGER_DEFAULT_PORT
+        port = self.user_env.debugger_port or constants.DEBUGGER_DEFAULT_PORT
         odoo_debugger_uint = {
             "name": constants.DEBUGGER_UNIT_NAME,
             "type": "python",
@@ -391,7 +249,7 @@ class CreateEnvironment():
                 "name": constants.DEBUGGER_UNIT_NAME,
                 "type": "python",
                 "request": "attach",
-                "port": self.debugger_port or constants.DEBUGGER_DEFAULT_PORT,
+                "port": self.user_env.debugger_port or constants.DEBUGGER_DEFAULT_PORT,
                 "host": "localhost",
                 "pathMappings": self.config.debugger_path_mappings,
             })

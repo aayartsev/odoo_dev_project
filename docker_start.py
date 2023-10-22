@@ -3,7 +3,8 @@ import os
 import sys
 
 from dev_project.check_system import SystemChecker
-from dev_project.host_env import CreateEnvironment
+from dev_project.host_project_env import CreateProjectEnvironment
+from dev_project.host_user_env import CreateUserEnvironment
 from dev_project.inside_docker_app.parse_args import ArgumentParser
 from dev_project.host_start_string_builder import StartStringBuilder
 from dev_project.project_dir_manager import ProjectDirManager
@@ -19,28 +20,27 @@ def main():
     args_list = sys.argv[1:]
     args_dict = ArgumentParser(args_list).args_dict
     pd_manager = ProjectDirManager(start_dir_path, args_dict, program_dir_path)
-    environment = CreateEnvironment(pd_manager)
-    environment.init_env()
+    user_environment = CreateUserEnvironment(pd_manager)
     pd_manager.check_project_dir()
-    if not pd_manager.dir_is_project:
-        exit()
+    # if not pd_manager.dir_is_project:
+    #     print("test-001")
+    #     exit()
     config = Config(
         pd_manager,
         args_dict,
         program_dir_path,
-        environment,
+        user_environment,
     )
-    environment.set_config(config)
+    project_environment = CreateProjectEnvironment(config)
     SystemChecker(config)
-    
-    environment.map_folders()
-    environment.generate_dockerfile()
-    environment.generate_config_file()
+    project_environment.map_folders()
+    project_environment.generate_dockerfile()
+    project_environment.generate_config_file()
     StartStringBuilder(config)
-    environment.generate_docker_compose_file()
-    environment.checkout_dependencies()
-    environment.update_links()
-    environment.update_vscode_debugger_launcher()
+    project_environment.generate_docker_compose_file()
+    project_environment.checkout_dependencies()
+    project_environment.update_links()
+    project_environment.update_vscode_debugger_launcher()
 
     os.chdir(config.project_dir)
 
