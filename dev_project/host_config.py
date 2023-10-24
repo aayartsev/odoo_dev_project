@@ -20,8 +20,8 @@ class Config():
         self.arguments = arguments
         self.config_file = None
         self.repo_odpm_json = None
-        self.project_odpm_json = None
         self.project_dir = self.pd_manager.project_path
+        self.project_odpm_json = os.path.join(self.project_dir, constants.PROJECT_CONFIG_FILE_NAME)
         self.user_settings_json = os.path.join(self.project_dir, constants.USER_CONFIG_FILE_NAME)
         self.config_path = os.path.join(self.project_dir, constants.CONFIG_FILE_NAME)
         self.config_home_dir = self.pd_manager.home_config_dir
@@ -131,10 +131,8 @@ class Config():
             "pre_commit_map_files":[
             ]
         }
-        print("test-001")
         with open(self.user_settings_json, "w", encoding="utf-8") as user_settings_file:
             json.dump(user_settings_dict, user_settings_file, ensure_ascii=False, indent=4)
-        print("self.user_settings_json", self.user_settings_json)
 
 
     def parse_project_config(self):

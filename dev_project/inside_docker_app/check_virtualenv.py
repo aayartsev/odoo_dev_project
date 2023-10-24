@@ -60,7 +60,7 @@ class VirtualenvChecker():
             _logger.info("Already in virtual environment.")
         else:
             if self.find_file(self.docker_venv_dir, 'activate') is None:
-                get_module_logger(__name__).info("No virtual environment found. Creating one.")
+                _logger.info("No virtual environment found. Creating one.")
                 env = venv.EnvBuilder(with_pip = True)
                 env.create(self.docker_venv_dir)
                 self.set_venv()
