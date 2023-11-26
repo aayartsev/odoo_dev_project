@@ -29,6 +29,7 @@ class CreateEnvironment():
         self.config["debugger_path_mappings"] = []
         self.config["odoo_image_name"] = f"""odoo-{ARCH}"""
         self.config["venv_dir"] = os.path.join(self.config["project_dir"], "venv")
+        self.config["odoo_tests"] = os.path.join(self.config["project_dir"], "odoo_tests")
         self.config["docker_home"] = os.path.join(self.config["project_dir"], "docker_home")
         self.config["docker_project_dir"] = str(pathlib.PurePosixPath("/home", CURRENT_USER))
         self.config["docker_dev_project_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], DEV_PROJECT_DIR))
@@ -46,6 +47,7 @@ class CreateEnvironment():
         self.config["docker_dirs_with_addons"].append(self.config["docker_odoo_project_dir_path"])
         self.config["docker_backups_dir"] = str(pathlib.PurePosixPath(self.config["docker_project_dir"], "backups"))
         self.config["dependencies_dir"] = os.path.join(self.config["project_dir"], "dependencies")
+        self.config["docker_temp_tests_dir"] = str(pathlib.PurePosixPath("/tmp", "odoo_tests"))
 
         
 
@@ -57,6 +59,7 @@ class CreateEnvironment():
             (os.path.join(self.config["docker_home"], ".local"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".local"))),
             (os.path.join(self.config["docker_home"], ".cache"), str(pathlib.PurePosixPath(self.config["docker_project_dir"], ".cache"))),
             (developing_project.project_path, self.config["docker_odoo_project_dir_path"]),
+            (self.config["odoo_tests"], self.config["docker_temp_tests_dir"]),
         ]
         for dependency_path in self.config["dependencies"]:
             dependency_project = self.handle_git_link(dependency_path)

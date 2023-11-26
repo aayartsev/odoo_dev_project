@@ -23,13 +23,13 @@ RUN groupadd --gid $USER_GID $USER_NAME \
     && python3 -m pip install pre-commit
  
 # устанавливаем все необходимые зависимости 
-RUN apt-get -y install libxml2-dev libxslt1-dev libldap2-dev\  
+RUN apt-get update && apt-get -y install libxml2-dev libxslt1-dev libldap2-dev\  
         libsasl2-dev libtiff5-dev libjpeg62-turbo-dev libopenjp2-7-dev\  
         zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev\  
         libharfbuzz-dev libfribidi-dev libxcb1-dev libpq-dev\
         openssl build-essential libssl-dev libxrender-dev \
         git-core libx11-dev libxext-dev libfontconfig1-dev libfreetype6-dev fontconfig\
-        xvfb libfontconfig python3-virtualenv virtualenv
+        xvfb libfontconfig python3-virtualenv virtualenv libx11-xcb1 chromium ffmpeg
 # Скачиваем и устанавливаем wkhtmltopdf который будет рендерить PDF файлы как нам нужно, 
 # пакет из официальных репозиториев не рендерит заголовки и подвалы
 # Here we download and install wkhtmltox from its website, because from debian packages it has less functionality, and do not

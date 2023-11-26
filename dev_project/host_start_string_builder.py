@@ -66,7 +66,9 @@ class StartStringBuilder():
             start_python_command += f""" {I_PARAM} {self.config["update_modules"]}"""
 
         if self.args_dict.get(T_PARAM, False) or self.args_dict.get(TEST_PARAM, False):
-            start_python_command += f"{TEST_COMMAND}"
+            start_python_command += f" {TEST_COMMAND}"
+            if self.args_dict.get(SCREENCASTS_PARAM, False):
+                start_python_command += f""" {SCREENCASTS_PARAM} {self.config["docker_temp_tests_dir"]}"""
 
         if translate_lang:
             start_python_command += f" --language {translate_lang} --load-language {translate_lang} --i18n-overwrite"
