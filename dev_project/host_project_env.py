@@ -36,6 +36,7 @@ class CreateProjectEnvironment():
         self.mapped_folders = [
             (self.user_env.odoo_src_dir, self.config.docker_odoo_dir),
             (self.config.venv_dir, self.config.docker_venv_dir),
+            (self.config.odoo_tests_dir, self.config.docker_temp_tests_dir),
             (os.path.join(self.config.program_dir, constants.DEV_PROJECT_DIR), self.config.docker_dev_project_dir),
             (self.user_env.backups, self.config.docker_backups_dir),
             (os.path.join(self.config.docker_home, ".local"), str(pathlib.PurePosixPath(self.config.docker_project_dir, ".local"))),

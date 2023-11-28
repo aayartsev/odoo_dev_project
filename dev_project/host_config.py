@@ -67,9 +67,11 @@ class Config():
         self.docker_venv_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "venv"))
         self.docker_extra_addons = str(pathlib.PurePosixPath(self.docker_project_dir, "extra-addons"))
         self.docker_backups_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "backups"))
+        self.docker_temp_tests_dir = str(pathlib.PurePosixPath("/tmp", "odoo_tests"))
         self.venv_dir = os.path.join(self.project_dir, "venv")
         self.docker_home = os.path.join(self.project_dir, "docker_home")
         self.dependencies_dir = os.path.join(self.project_dir, "dependencies")
+        self.odoo_tests_dir = os.path.join(self.project_dir, "odoo_tests")
         self.compose_file_version = constants.DOCKER_COMPOSE_DEFAULT_FILE_VERSION
         self.odoo_config_data = {}
 
@@ -101,7 +103,7 @@ class Config():
         )
     
     def get_user_settings(self):
-        if not os.path.exists(self.user_settings_json) and not os.path.exists(self.project_odpm_json):
+        if not os.path.exists(self.user_settings_json) or not os.path.exists(self.project_odpm_json):
             self.parse_project_config()
         elif os.path.exists(self.user_settings_json) and os.path.exists(self.project_odpm_json):
             with open(self.user_settings_json) as user_settings_file:
