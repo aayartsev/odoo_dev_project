@@ -80,7 +80,7 @@ class CreateProjectEnvironment():
             CURRENT_USER=constants.CURRENT_USER,
             CURRENT_PASSWORD=constants.CURRENT_PASSWORD,
             PYTHON_VERSION=self.config.python_version,
-            DEBIAN_VERSION=self.config.debian_name,
+            DEBIAN_NAME=self.config.debian_name,
 
         )
         content = content.replace(translations.get_translation(translations.MESSAGE_ODOO_CONF), translations.get_translation(translations.DO_NOT_CHANGE_FILE))

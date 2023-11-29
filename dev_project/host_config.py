@@ -52,8 +52,8 @@ class Config():
         self.pre_commit_map_files = self.config_file_dict.get("pre_commit_map_files", [])
         self.dependencies = self.config_file_dict.get("dependencies", [])
         self.requirements_txt = self.config_file_dict.get("requirements_txt", [])
-        self.python_version = self.config_file_dict.get("python_versions", constants.DEFAULT_PYTHON_VERSION)
-        self.debian_version = self.config_file_dict.get("python_versions", constants.DEFAULT_DEBIAN_VERSION)
+        self.python_version = self.config_file_dict.get("python_version", constants.DEFAULT_PYTHON_VERSION)
+        self.debian_version = self.config_file_dict.get("debian_version", constants.DEFAULT_DEBIAN_VERSION)
         self.debian_name = constants.DEBIAN_NAMES.get(self.debian_version)
 
         self.dependencies_dirs = []
