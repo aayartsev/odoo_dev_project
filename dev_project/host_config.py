@@ -52,11 +52,14 @@ class Config():
         self.pre_commit_map_files = self.config_file_dict.get("pre_commit_map_files", [])
         self.dependencies = self.config_file_dict.get("dependencies", [])
         self.requirements_txt = self.config_file_dict.get("requirements_txt", [])
+        self.python_version = self.config_file_dict.get("python_versions", constants.DEFAULT_PYTHON_VERSION)
+        self.debian_version = self.config_file_dict.get("python_versions", constants.DEFAULT_DEBIAN_VERSION)
+        self.debian_name = constants.DEBIAN_NAMES.get(self.debian_version)
 
         self.dependencies_dirs = []
         self.docker_dirs_with_addons = []
         self.debugger_path_mappings = []
-        self.odoo_image_name = f"""odoo-{constants.ARCH}"""
+        self.odoo_image_name = f"""odoo-{constants.ARCH}-python-{self.python_version}-debian-{self.debian_version}"""
         self.docker_project_dir = str(pathlib.PurePosixPath("/home", constants.CURRENT_USER))
         self.docker_dev_project_dir = str(pathlib.PurePosixPath(self.docker_project_dir, constants.DEV_PROJECT_DIR))
         self.docker_inside_app = str(pathlib.PurePosixPath(self.docker_dev_project_dir, "inside_docker_app"))

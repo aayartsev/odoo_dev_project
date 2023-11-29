@@ -156,12 +156,3 @@ class CreateUserEnvironment():
                 SELECTED_DEBUGGER_PORT=default_port,
             ))
         return port
-    
-    def clone_odoo(self):
-        odoo_crc_project = HandleOdooProjectGitLink(constants.ODOO_GIT_LINK, self.config)
-        odoo_crc_project.project_path = self.config.env.odoo_src_dir
-        odoo_crc_project.get_dir_to_clone()
-        odoo_crc_project.force_clone_repo()
-    
-    def build_image(self):
-        subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, "."])

@@ -1,5 +1,5 @@
 # #MESSAGE#
-FROM python:3.7.12-bullseye
+FROM python:{PYTHON_VERSION}-{DEBIAN_NAME}
   
 # Переменные проекта
 ARG USER_UID={CURRENT_USER_UID}

@@ -20,8 +20,6 @@ class SystemChecker():
         self.config = config
         if self.config.check_system:
             self.check_git()
-            self.check_docker()
-            self.check_docker_compose()
         self.check_file_system()
     
     def check_git(self):
@@ -62,7 +60,7 @@ class SystemChecker():
                 if self.config.odoo_image_name == new_record["Repository"]:
                     result_list.append(new_record)
         if not result_list:
-            self.config.env.build_image()
+            self.config.project_env.build_image()
 
     def check_docker_compose(self):
         self.config.no_log_prefix = True

@@ -19,8 +19,6 @@ _logger = get_module_logger(__name__)
 class CreateProjectEnvironment():
 
     def __init__(self, config):
-        # self.pd_manager = pd_manager
-        # self.config_home_dir = self.pd_manager.home_config_dir
         self.config = config
         self.user_env = self.config.user_env
         self.config.project_env = self
@@ -29,8 +27,6 @@ class CreateProjectEnvironment():
         odoo_project = HandleOdooProjectGitLink(gitlink, self.config)
         odoo_project.build_project()
         return odoo_project
-
-
 
     def map_folders(self):
         self.mapped_folders = [
@@ -83,6 +79,8 @@ class CreateProjectEnvironment():
             CURRENT_USER_GID=constants.CURRENT_USER_GID,
             CURRENT_USER=constants.CURRENT_USER,
             CURRENT_PASSWORD=constants.CURRENT_PASSWORD,
+            PYTHON_VERSION=self.config.python_version,
+            DEBIAN_VERSION=self.config.debian_name,
 
         )
         content = content.replace(translations.get_translation(translations.MESSAGE_ODOO_CONF), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
@@ -256,3 +254,12 @@ class CreateProjectEnvironment():
             })
         with open(launch_json, "w") as outfile:
             json.dump(content, outfile, indent=4)
+    
+    def clone_odoo(self):
+        odoo_crc_project = HandleOdooProjectGitLink(constants.ODOO_GIT_LINK, self.config)
+        odoo_crc_project.project_path = self.config.user_env.odoo_src_dir
+        odoo_crc_project.get_dir_to_clone()
+        odoo_crc_project.force_clone_repo()
+    
+    def build_image(self):
+        subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, "."])
