@@ -20,6 +20,7 @@ class VirtualenvChecker():
         self.odoo_version = config.get("odoo_version", 0.0)
         self.odoo_data_dir = config["odoo_config_data"]["options"]["data_dir"]
         self.odoo_requirements_path = os.path.join(config["docker_odoo_dir"], "requirements.txt")
+        self.python_version = config["python_version"]
         self.check_virtual_env()
 
     def is_virtualenv(self):
@@ -37,8 +38,14 @@ class VirtualenvChecker():
         # This is the heart of this script that puts you inside the virtual environment. 
         # There is no need to undo this. When this script ends, your original path will 
         # be restored.
-        os.environ['PATH'] = os.path.dirname(self.find_file(self.docker_venv_dir, 'activate')) + os.pathsep + os.environ['PATH']
-        sys.path.insert(1, os.path.dirname(self.find_file(self.docker_venv_dir, 'easy_install.py')))
+        # finding venv/bin dir
+        venv_bin_dir = os.path.dirname(self.find_file(self.docker_venv_dir, "activate"))
+        # defining path to the venv`s dirs
+        venv_lib_path = os.path.join(self.docker_venv_dir,"lib",f"python{self.python_version}","site-packages")
+        # update PATH environment variable
+        os.environ['PATH'] = venv_bin_dir + os.pathsep + os.environ["PATH"]
+        # inserting path to the venv`s dirs in system path
+        sys.path.insert(1, venv_lib_path)
 
     def check_packages_for_install(self) -> None:
         # TODO autoinstall packages from requirements_txt if they non in already installed list of pip packages

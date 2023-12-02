@@ -1,14 +1,9 @@
 import os
-import subprocess
-import json
-import shutil
 import platform
 from configparser import ConfigParser
 
-import pathlib
 from pathlib import Path
 
-from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 from . import constants
 from . import translations
 

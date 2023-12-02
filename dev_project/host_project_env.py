@@ -197,16 +197,10 @@ class CreateProjectEnvironment():
 
     
     def update_links(self):
-        list_for_links = [
-            self.user_env.backups,
-            self.user_env.odoo_src_dir,
-            self.config.odoo_project_dir_path
-        ]
-        
         if not os.path.exists(self.config.dependencies_dir) and self.config.dependencies_dirs:
             os.mkdir(self.config.dependencies_dir)
-        self.delete_old_links(self.config.project_dir, list_for_links)
-        self.create_new_links(self.config.project_dir, list_for_links)
+        self.delete_old_links(self.config.project_dir, self.config.list_for_symlinks)
+        self.create_new_links(self.config.project_dir, self.config.list_for_symlinks)
         if self.config.dependencies_dirs:
             self.delete_old_links(self.config.dependencies_dir, self.config.dependencies_dirs)
             self.create_new_links(self.config.dependencies_dir, self.config.dependencies_dirs)

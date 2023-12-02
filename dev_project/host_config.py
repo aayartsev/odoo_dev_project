@@ -48,8 +48,8 @@ class Config():
         self.developing_project = self.handle_git_link(self.developing_project)
         self.odoo_project_dir_path = self.developing_project.project_path
         # init project settings from odpm.json
-        self.developing_project_dir = os.path.join(self.project_dir, self.developing_project.project_data.name)
-        self.project_odpm_json = os.path.join(self.developing_project_dir, constants.PROJECT_CONFIG_FILE_NAME)
+        self.repo_odpm_json = os.path.join(self.developing_project.project_path, constants.PROJECT_CONFIG_FILE_NAME)
+        self.project_odpm_json = os.path.join(self.project_dir, constants.PROJECT_CONFIG_FILE_NAME)
         self.get_odpm_settings()
         self.odoo_version = self.config_file_dict.get("odoo_version", 0.0)
         self.python_version = self.config_file_dict.get("python_version", constants.DEFAULT_PYTHON_VERSION)
@@ -88,6 +88,14 @@ class Config():
         self.odoo_tests_dir = os.path.join(self.project_dir, "odoo_tests")
         self.compose_file_version = constants.DOCKER_COMPOSE_DEFAULT_FILE_VERSION
         self.odoo_config_data = {}
+
+        # list of dirs and files which symlinks must be inside of project dir
+        self.list_for_symlinks = [
+            self.user_env.backups,
+            self.user_env.odoo_src_dir,
+            self.odoo_project_dir_path,
+            self.repo_odpm_json,
+        ]
 
     def clone_project_and_find_config(self):
         dev_project=self.handle_git_link(self.pd_manager.init)
@@ -190,6 +198,7 @@ class Config():
         config["docker_project_dir"] = self.docker_project_dir
         config["requirements_txt"] = self.requirements_txt
         config["odoo_version"] = self.odoo_version
+        config["python_version"] = self.python_version
         return json.dumps(config).encode("utf-8")
             
 
