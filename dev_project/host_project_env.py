@@ -262,4 +262,6 @@ class CreateProjectEnvironment():
         odoo_crc_project.force_clone_repo()
     
     def build_image(self):
+        os.chdir(self.config.project_dir)
+        # i need to create .dockerignore file (because it tries to send docker context)
         subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, "."])

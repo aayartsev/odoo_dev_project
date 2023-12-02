@@ -21,7 +21,7 @@ class Config():
         self.config_file = None
         self.repo_odpm_json = None
         self.project_dir = self.pd_manager.project_path
-        self.project_odpm_json = os.path.join(self.project_dir, constants.PROJECT_CONFIG_FILE_NAME)
+        
         self.user_settings_json = os.path.join(self.project_dir, constants.USER_CONFIG_FILE_NAME)
         self.config_path = os.path.join(self.project_dir, constants.CONFIG_FILE_NAME)
         self.config_home_dir = self.pd_manager.home_config_dir
@@ -30,19 +30,12 @@ class Config():
             self.clone_project_and_find_config()
             self.create_user_setting_json_file_with_default_values(self.pd_manager.init)
 
+        # init user settings from json file
         self.get_user_settings()
         self.init_modules = self.config_file_dict.get("init_modules", False)
         self.update_modules = self.config_file_dict.get("update_modules", False)
-        for module_list in [self.init_modules, self.update_modules]:
-            if isinstance(module_list, list):
-                module_list = ",".join(module_list)
-            if isinstance(module_list, str):
-                module_list = module_list.split(",")
-                module_list = [module.strip() for module in module_list]
-                module_list = ",".join(module_list)
-        
+        self.beautify_module_list()
         self.db_creation_data = self.config_file_dict.get("db_creation_data", {})
-        self.odoo_version = self.config_file_dict.get("odoo_version", 0.0)
         self.update_git_repos = self.config_file_dict.get("update_git_repos", False)
         self.clean_git_repos = self.config_file_dict.get("clean_git_repos", False)
         self.check_system = self.config_file_dict.get("check_system", False)
@@ -50,25 +43,43 @@ class Config():
         self.dev_mode = self.config_file_dict.get("dev_mode", False)
         self.developing_project = self.config_file_dict.get("developing_project", False)
         self.pre_commit_map_files = self.config_file_dict.get("pre_commit_map_files", [])
-        self.dependencies = self.config_file_dict.get("dependencies", [])
-        self.requirements_txt = self.config_file_dict.get("requirements_txt", [])
+
+        # prepare developing project
+        self.developing_project = self.handle_git_link(self.developing_project)
+        self.odoo_project_dir_path = self.developing_project.project_path
+        # init project settings from odpm.json
+        self.developing_project_dir = os.path.join(self.project_dir, self.developing_project.project_data.name)
+        self.project_odpm_json = os.path.join(self.developing_project_dir, constants.PROJECT_CONFIG_FILE_NAME)
+        self.get_odpm_settings()
+        self.odoo_version = self.config_file_dict.get("odoo_version", 0.0)
         self.python_version = self.config_file_dict.get("python_version", constants.DEFAULT_PYTHON_VERSION)
         self.debian_version = self.config_file_dict.get("debian_version", constants.DEFAULT_DEBIAN_VERSION)
         self.debian_name = constants.DEBIAN_NAMES.get(self.debian_version)
+        self.dependencies = self.config_file_dict.get("dependencies", [])
+        self.requirements_txt = self.config_file_dict.get("requirements_txt", [])
 
+        # prepare list of mapped dirs for  third party modules from which our project depends on
         self.dependencies_dirs = []
-        self.docker_dirs_with_addons = []
+        # prepare list of mapped dirs for building config file for debugger usage
         self.debugger_path_mappings = []
+
         self.odoo_image_name = f"""odoo-{constants.ARCH}-python-{self.python_version}-debian-{self.debian_version}"""
         self.docker_project_dir = str(pathlib.PurePosixPath("/home", constants.CURRENT_USER))
         self.docker_dev_project_dir = str(pathlib.PurePosixPath(self.docker_project_dir, constants.DEV_PROJECT_DIR))
         self.docker_inside_app = str(pathlib.PurePosixPath(self.docker_dev_project_dir, "inside_docker_app"))
         self.docker_odoo_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "odoo"))
+        
+        # prepare of mapped dirs for odoo addons
+        self.docker_dirs_with_addons = []
+        self.docker_extra_addons = str(pathlib.PurePosixPath(self.docker_project_dir, "extra-addons"))
+        self.docker_odoo_project_dir_path = str(pathlib.PurePosixPath(self.docker_extra_addons, self.developing_project.project_data.name))
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "addons")))
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "odoo", "addons")))
+        self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
+
         self.docker_path_odoo_conf = str(pathlib.PurePosixPath(self.docker_project_dir, "odoo.conf"))
         self.docker_venv_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "venv"))
-        self.docker_extra_addons = str(pathlib.PurePosixPath(self.docker_project_dir, "extra-addons"))
+        
         self.docker_backups_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "backups"))
         self.docker_temp_tests_dir = str(pathlib.PurePosixPath("/tmp", "odoo_tests"))
         self.venv_dir = os.path.join(self.project_dir, "venv")
@@ -78,11 +89,6 @@ class Config():
         self.compose_file_version = constants.DOCKER_COMPOSE_DEFAULT_FILE_VERSION
         self.odoo_config_data = {}
 
-        self.developing_project = self.handle_git_link(self.developing_project)
-        self.odoo_project_dir_path = self.developing_project.project_path
-        self.docker_odoo_project_dir_path = str(pathlib.PurePosixPath(self.docker_extra_addons, self.developing_project.project_data.name))
-        self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
-    
     def clone_project_and_find_config(self):
         dev_project=self.handle_git_link(self.pd_manager.init)
         if constants.BRANCH_PARAM in self.arguments and isinstance(constants.BRANCH_PARAM, str):
@@ -106,15 +112,32 @@ class Config():
         )
     
     def get_user_settings(self):
-        if not os.path.exists(self.user_settings_json) or not os.path.exists(self.project_odpm_json):
-            self.parse_project_config()
-        elif os.path.exists(self.user_settings_json) and os.path.exists(self.project_odpm_json):
+        if os.path.exists(self.user_settings_json):
             with open(self.user_settings_json) as user_settings_file:
                 user_settings_dict = json.load(user_settings_file)
+                self.config_file_dict = user_settings_dict
+        else:
+            self.check_for_config()
+    
+    def get_odpm_settings(self):
+        if os.path.exists(self.project_odpm_json):
             with open(self.project_odpm_json) as project_odpm_file:
                 project_odpm_dict = json.load(project_odpm_file)
-            project_odpm_dict.update(user_settings_dict)
-            self.config_file_dict = project_odpm_dict
+                self.config_file_dict.update(project_odpm_dict)
+        else:
+            self.check_for_config()
+
+    def check_for_config(self):
+        self.parse_project_config()
+    
+    def beautify_module_list(self):
+        for module_list in [self.init_modules, self.update_modules]:
+            if isinstance(module_list, list):
+                module_list = ",".join(module_list)
+            if isinstance(module_list, str):
+                module_list = module_list.split(",")
+                module_list = [module.strip() for module in module_list]
+                module_list = ",".join(module_list)
     
     def create_user_setting_json_file_with_default_values(self, git_link):
         user_settings_dict = {
