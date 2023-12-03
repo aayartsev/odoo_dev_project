@@ -4,7 +4,7 @@ import json
 import subprocess
 
 from . import constants
-from .translations import *
+from . import translations
 from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 
 from .inside_docker_app.logger import get_module_logger
@@ -20,6 +20,7 @@ class Config():
         self.arguments = arguments
         self.config_file = None
         self.repo_odpm_json = None
+        self.config_json_loaded = False
         self.project_dir = self.pd_manager.project_path
         
         self.user_settings_json = os.path.join(self.project_dir, constants.USER_CONFIG_FILE_NAME)
@@ -94,8 +95,10 @@ class Config():
             self.user_env.backups,
             self.user_env.odoo_src_dir,
             self.odoo_project_dir_path,
-            self.repo_odpm_json,
         ]
+
+        if os.path.exists(self.repo_odpm_json):
+            self.list_for_symlinks.append(self.repo_odpm_json)
 
     def clone_project_and_find_config(self):
         dev_project=self.handle_git_link(self.pd_manager.init)
@@ -107,7 +110,7 @@ class Config():
         self.repo_odpm_json = os.path.join(dev_project.project_path, constants.PROJECT_CONFIG_FILE_NAME)
         self.project_odpm_json = os.path.join(self.project_dir, constants.PROJECT_CONFIG_FILE_NAME)
         if not os.path.exists(self.repo_odpm_json):
-            _logger.error(get_translation(CHECK_CONFIG_FILE).format(
+            _logger.error(translations.get_translation(translations.CHECK_CONFIG_FILE).format(
                 CONFIG_FILE_NAME=constants.PROJECT_CONFIG_FILE_NAME,
             ))
             # TODO find mor correct way to handle this situation
@@ -172,14 +175,21 @@ class Config():
 
 
     def parse_project_config(self):
+        if not self.config_json_loaded:
+            _logger.warning(translations.get_translation(translations.CONFIG_JSON_IS_DEPRECATED).format(
+                    CONFIG_FILE_NAME=constants.CONFIG_FILE_NAME,
+                ))
+            self.config_json_loaded = True
         try:
             with open(self.config_path) as config_file:
                 self.config_file_dict = json.load(config_file)
         except BaseException:
-            _logger.error(get_translation(CHECK_CONFIG_FILE).format(
+            _logger.error(translations.get_translation(translations.CHECK_CONFIG_FILE).format(
                 CONFIG_FILE_NAME=constants.CONFIG_FILE_NAME,
             ))
             exit()
+
+
     
     def handle_git_link(self, gitlink):
         odoo_project = HandleOdooProjectGitLink(gitlink, self)

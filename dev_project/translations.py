@@ -34,12 +34,13 @@ YOU_SELECT_ODOO_PORT = "You select this port for which odoo will listen: {SELECT
 YOU_SELECT_POSTGRES_PORT = "You select this port for which PostgreSQL database server will listen: {SELECTED_POSTGRES_PORT}\n"
 YOU_SELECT_DEBUGGER_PORT = "You select this port for which Python Debugger will listen: {SELECTED_DEBUGGER_PORT}\n"
 DO_YOU_WANT_CLONE_ODOO = "Do you want to clone odoo? y/n\n"
+CONFIG_JSON_IS_DEPRECATED = """ "config.json" is deprecated. Please read documentation"""
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
-        "ru_RU": """Вам необходимо добавить пользователя {CURRENT_USER} в группу {LINUX_DOCKER_GROUPNAME}"""
-                 """запустите следующую команду от имени root или с помощью sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}"""
-                 """Затем перезапустите ваш компьтер""",
+        "ru_RU": """Вам необходимо добавить пользователя {CURRENT_USER} в группу {LINUX_DOCKER_GROUPNAME}\n"""
+                 """запустите следующую команду от имени root или с помощью sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}\n"""
+                 """Затем перезапустите ваш компьютер""",
     },
     IS_GIT_INSTALLED:{
         "ru_RU": "Вы установили git?"
@@ -147,7 +148,10 @@ translations = {
     },
     DO_YOU_WANT_CLONE_ODOO: {
         "ru_RU": "Вы хотите клонировать odoo? y/n\n"
-    }
+    },
+    CONFIG_JSON_IS_DEPRECATED:{
+        "ru_RU": """ Файл с параметрами "config.json" является устаревшим. Пожалуйста обратитесь к документации """,
+    },
 }
 
 def get_translation(string_to_translate):

@@ -3,9 +3,6 @@ import os
 import venv
 
 from pip._internal.operations.freeze import freeze
-from pip._internal.req import parse_requirements
-from pip._internal.req.constructors import install_req_from_req_string
-from pip._internal.network.session import PipSession
 
 from logger import get_module_logger
 
@@ -48,15 +45,11 @@ class VirtualenvChecker():
         sys.path.insert(1, venv_lib_path)
 
     def check_packages_for_install(self) -> None:
-        # TODO autoinstall packages from requirements_txt if they non in already installed list of pip packages
-        dict_of_packages = {}
-        for line in freeze():
-            dict_of_packages.update({
-                line.split("==")[0]: line.split("==")[1]
-            })
+        # TODO i need to find a way how to check if i can install package in current system
         for package in self.requirements_txt:
             if package not in freeze():
                 os.system(f"""python3 -m pip install {package}""")
+
     
     def update_requirements_list(self):
         os.system(f"""python3 -m pip install -r {self.odoo_requirements_path}""")
