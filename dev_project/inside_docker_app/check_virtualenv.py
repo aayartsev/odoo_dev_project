@@ -1,6 +1,7 @@
 import sys
 import os
 import venv
+import shutil
 
 from pip._internal.operations.freeze import freeze
 
@@ -14,10 +15,12 @@ class VirtualenvChecker():
         self.docker_venv_dir = config.get("docker_venv_dir", False)
         self.docker_project_dir = config["docker_project_dir"]
         self.requirements_txt = config.get("requirements_txt", [])
-        self.odoo_version = config.get("odoo_version", 0.0)
-        self.odoo_data_dir = config["odoo_config_data"]["options"]["data_dir"]
+        # self.odoo_version = config.get("odoo_version", 0.0)
+        # self.odoo_data_dir = config["odoo_config_data"]["options"]["data_dir"]
         self.odoo_requirements_path = os.path.join(config["docker_odoo_dir"], "requirements.txt")
+        self.venv_lock_file_path = os.path.join(self.docker_venv_dir, "venv.lock")
         self.python_version = config["python_version"]
+        self.arch = config["arch"]
         self.check_virtual_env()
 
     def is_virtualenv(self):
@@ -40,20 +43,44 @@ class VirtualenvChecker():
         # defining path to the venv`s dirs
         venv_lib_path = os.path.join(self.docker_venv_dir,"lib",f"python{self.python_version}","site-packages")
         # update PATH environment variable
-        os.environ['PATH'] = venv_bin_dir + os.pathsep + os.environ["PATH"]
+        os.environ["PATH"] = venv_bin_dir + os.pathsep + os.environ["PATH"]
         # inserting path to the venv`s dirs in system path
         sys.path.insert(1, venv_lib_path)
+    
+    def delete_files_in_directory(self, directory_path):
+        for filename in os.listdir(directory_path):
+            file_path = os.path.join(directory_path, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                _logger.warning(f"Failed to delete {file_path}. Reason: {e}")
+                exit()
 
     def check_packages_for_install(self) -> None:
-        # TODO i need to find a way how to check if i can install package in current system
+        if not os.path.exists(self.venv_lock_file_path):
+            self.recreate_venv()
+        else:
+            with open(self.venv_lock_file_path) as f:
+                content = f.readlines()
+            if self.arch != content[0]:
+                self.recreate_venv()
         for package in self.requirements_txt:
             if package not in freeze():
                 os.system(f"""python3 -m pip install {package}""")
 
     
-    def update_requirements_list(self):
-        os.system(f"""python3 -m pip install -r {self.odoo_requirements_path}""")
-        # TODO find the way to check if i need to install package in my environment
+    def recreate_venv(self):
+        self.delete_files_in_directory(self.docker_venv_dir)
+        exit_code = os.system(f"""python3 -m pip install -r {self.odoo_requirements_path}""")
+        if os.WEXITSTATUS(exit_code) == 0:
+            with open(self.venv_lock_file_path, 'w') as f:
+                f.write(self.arch)
+        else:
+            _logger.warning(f"Failed to delete {file_path}. Reason: {e}")
+            exit()
     
     def check_virtual_env(self):
         if self.is_virtualenv():
@@ -64,7 +91,6 @@ class VirtualenvChecker():
                 env = venv.EnvBuilder(with_pip = True)
                 env.create(self.docker_venv_dir)
                 self.set_venv()
-                self.update_requirements_list()
             else:
                 _logger.info("Not in virtual environment. Virtual environment directory found.")
                 self.set_venv()

@@ -22,9 +22,6 @@ def main():
     pd_manager = ProjectDirManager(start_dir_path, args_dict, program_dir_path)
     user_environment = CreateUserEnvironment(pd_manager)
     pd_manager.check_project_dir()
-    # if not pd_manager.dir_is_project:
-    #     print("test-001")
-    #     exit()
     config = Config(
         pd_manager,
         args_dict,

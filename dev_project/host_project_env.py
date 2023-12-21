@@ -74,7 +74,7 @@ class CreateProjectEnvironment():
         with open(dockerfile_template_path) as f:
             lines = f.readlines()
         content = "".join(lines).format(
-            PROCESSOR_ARCH=constants.ARCH,
+            PROCESSOR_ARCH=self.config.arch,
             CURRENT_USER_UID=constants.CURRENT_USER_UID,
             CURRENT_USER_GID=constants.CURRENT_USER_GID,
             CURRENT_USER=constants.CURRENT_USER,
@@ -258,4 +258,4 @@ class CreateProjectEnvironment():
     def build_image(self):
         os.chdir(self.config.project_dir)
         # i need to create .dockerignore file (because it tries to send docker context)
-        subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, "."])
+        subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, f"--platform=linux/{self.config.arch}", "."])

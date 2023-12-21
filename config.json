@@ -8,7 +8,10 @@
         "db_default_admin_login": "admin",
         "db_default_admin_password": "admin"
     },
+    "arch":"auto",
     "odoo_version": "16.0",
+    "python_version": "3.7",
+    "debian_version": "11.0",
     "update_git_repos": false,
     "clean_git_repos": false,
     "check_system": true,

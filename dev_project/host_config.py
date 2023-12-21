@@ -64,7 +64,12 @@ class Config():
         # prepare list of mapped dirs for building config file for debugger usage
         self.debugger_path_mappings = []
 
-        self.odoo_image_name = f"""odoo-{constants.ARCH}-python-{self.python_version}-debian-{self.debian_version}"""
+        # set processor architecture
+        self.arch = self.config_file_dict.get("arch", constants.ARCH)
+        if self.arch == "auto":
+            self.arch = constants.ARCH
+        
+        self.odoo_image_name = f"""odoo-{self.arch}-python-{self.python_version}-debian-{self.debian_version}"""
         self.docker_project_dir = str(pathlib.PurePosixPath("/home", constants.CURRENT_USER))
         self.docker_dev_project_dir = str(pathlib.PurePosixPath(self.docker_project_dir, constants.DEV_PROJECT_DIR))
         self.docker_inside_app = str(pathlib.PurePosixPath(self.docker_dev_project_dir, "inside_docker_app"))
@@ -209,6 +214,7 @@ class Config():
         config["requirements_txt"] = self.requirements_txt
         config["odoo_version"] = self.odoo_version
         config["python_version"] = self.python_version
+        config["arch"] = self.arch
         return json.dumps(config).encode("utf-8")
             
 
