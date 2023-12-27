@@ -15,8 +15,6 @@ class VirtualenvChecker():
         self.docker_venv_dir = config.get("docker_venv_dir", False)
         self.docker_project_dir = config["docker_project_dir"]
         self.requirements_txt = config.get("requirements_txt", [])
-        # self.odoo_version = config.get("odoo_version", 0.0)
-        # self.odoo_data_dir = config["odoo_config_data"]["options"]["data_dir"]
         self.odoo_requirements_path = os.path.join(config["docker_odoo_dir"], "requirements.txt")
         self.venv_lock_file_path = os.path.join(self.docker_venv_dir, "venv.lock")
         self.python_version = config["python_version"]
@@ -60,39 +58,43 @@ class VirtualenvChecker():
                 exit()
 
     def check_packages_for_install(self) -> None:
-        if not os.path.exists(self.venv_lock_file_path):
-            self.recreate_venv()
-        else:
-            with open(self.venv_lock_file_path) as f:
-                content = f.readlines()
-            if self.arch != content[0]:
-                self.recreate_venv()
+        list_of_packages = [pkg for pkg in freeze()]
         for package in self.requirements_txt:
-            if package not in freeze():
+            if package not in list_of_packages:
                 os.system(f"""python3 -m pip install {package}""")
 
     
     def recreate_venv(self):
         self.delete_files_in_directory(self.docker_venv_dir)
+        self.create_venv()
+        self.set_venv()
+        lock_venv = True
         exit_code = os.system(f"""python3 -m pip install -r {self.odoo_requirements_path}""")
-        if os.WEXITSTATUS(exit_code) == 0:
+        if os.WEXITSTATUS(exit_code) != 0:
+            lock_venv = False
+        for package in self.requirements_txt:
+            exit_code = os.system(f"""python3 -m pip install {package}""")
+            if os.WEXITSTATUS(exit_code) != 0:
+                lock_venv = False
+        if lock_venv:
             with open(self.venv_lock_file_path, 'w') as f:
                 f.write(self.arch)
         else:
-            _logger.warning(f"Failed to delete {file_path}. Reason: {e}")
+            _logger.warning(f"""Installation of requirements.txt was failed.""")
             exit()
+        
+    
+    def create_venv(self):
+        env = venv.EnvBuilder(with_pip = True)
+        env.create(self.docker_venv_dir)
     
     def check_virtual_env(self):
-        if self.is_virtualenv():
-            _logger.info("Already in virtual environment.")
-        else:
-            if self.find_file(self.docker_venv_dir, 'activate') is None:
-                _logger.info("No virtual environment found. Creating one.")
-                env = venv.EnvBuilder(with_pip = True)
-                env.create(self.docker_venv_dir)
-                self.set_venv()
-            else:
-                _logger.info("Not in virtual environment. Virtual environment directory found.")
-                self.set_venv()
-        
+        if not os.path.exists(self.venv_lock_file_path):
+            self.recreate_venv()
+        elif os.path.exists(self.venv_lock_file_path):
+            with open(self.venv_lock_file_path) as f:
+                content = f.readlines()
+            if self.arch != content[0]:
+                self.recreate_venv()
+        self.set_venv()
         self.check_packages_for_install()
