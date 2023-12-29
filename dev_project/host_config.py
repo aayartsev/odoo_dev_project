@@ -204,7 +204,7 @@ class Config():
                 "init_modules": self.config_json_content.get("init_modules", ""),
                 "update_modules": self.config_json_content.get("update_modules", ""),
                 "db_creation_data":{
-                    "db_lang": self.config_json_content.get("db_creation_data", {}).get("update_modules", "en_US"),
+                    "db_lang": self.config_json_content.get("db_creation_data", {}).get("db_lang", "en_US"),
                     "db_country_code": self.config_json_content.get("db_creation_data", {}).get("db_country_code", None),
                     "create_demo": self.config_json_content.get("db_creation_data", {}).get("create_demo", True),
                     "db_default_admin_login": self.config_json_content.get("db_creation_data", {}).get("db_default_admin_login", "admin"),
@@ -213,7 +213,7 @@ class Config():
                 "update_git_repos": self.config_json_content.get("update_git_repos", False),
                 "clean_git_repos": self.config_json_content.get("clean_git_repos", False),
                 "check_system": self.config_json_content.get("check_system", True),
-                "db_manager_password": self.config_json_content.get("check_system", "1"),
+                "db_manager_password": self.config_json_content.get("db_manager_password", "1"),
                 "dev_mode": self.config_json_content.get("dev_mode", False),
                 "developing_project": self.config_json_content.get("developing_project", self.pd_manager.init),
                 "pre_commit_map_files": self.config_json_content.get("pre_commit_map_files", []),
