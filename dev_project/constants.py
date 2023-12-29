@@ -70,9 +70,44 @@ ADMIN_PASSWD_MESSAGE = "#ADMIN_PASSWD_MESSAGE#"
 DO_NOT_CHANGE_PARAM = "#DO_NOT_CHANGE_PARAM#"
 ODOO_GIT_LINK = "https://github.com/odoo/odoo.git"
 
+DEBUGPY = "debugpy==1.6.3"
+
 DEFAULT_PYTHON_VERSION = "3.7"
 DEFAULT_DEBIAN_VERSION = "11"
 DEBIAN_NAMES = {
     "11": "bullseye",
     "12": "bookworm",
+}
+
+# git rev-parse --abbrev-ref HEAD
+ODOO_LATEST_VERSION = "17.0"
+ODOO_VERSION_DEFAULT_ENV = {
+    "17.0": {
+        "python_version": "3.10",
+        "debian_version": DEFAULT_DEBIAN_VERSION,
+    },
+    "16.0": {
+        "python_version": DEFAULT_PYTHON_VERSION,
+        "debian_version": DEFAULT_DEBIAN_VERSION,
+    },
+    "15.0": {
+        "python_version": DEFAULT_PYTHON_VERSION,
+        "debian_version": DEFAULT_DEBIAN_VERSION,
+    },
+    "14.0": {
+        "python_version": DEFAULT_PYTHON_VERSION,
+        "debian_version": DEFAULT_DEBIAN_VERSION,
+    },
+    "13.0": {
+        "python_version": DEFAULT_PYTHON_VERSION,
+        "debian_version": DEFAULT_DEBIAN_VERSION,
+    },
+    "12.0": {
+        "python_version": DEFAULT_PYTHON_VERSION,
+        "debian_version": DEFAULT_DEBIAN_VERSION,
+    },
+    "11.0": {
+        "python_version": DEFAULT_PYTHON_VERSION,
+        "debian_version": DEFAULT_DEBIAN_VERSION,
+    },
 }

@@ -35,6 +35,8 @@ YOU_SELECT_POSTGRES_PORT = "You select this port for which PostgreSQL database s
 YOU_SELECT_DEBUGGER_PORT = "You select this port for which Python Debugger will listen: {SELECTED_DEBUGGER_PORT}\n"
 DO_YOU_WANT_CLONE_ODOO = "Do you want to clone odoo? y/n\n"
 CONFIG_JSON_IS_DEPRECATED = """ "config.json" is deprecated. Please read documentation"""
+SET_ODOO_VERSION = """Please, enter odoo versions of this project. There is list of supported versions: {AVAILABEL_ODOO_VERSIONS_ARE}. You can leave default {ODOO_LATEST_VERSION} or write your own. Press 'Enter' to leave default value:\n"""
+YOU_SELECT_ODOO_VERSION = """You select this odoo version: {SELECTED_ODOO_VERSION}\n"""
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
@@ -152,6 +154,12 @@ translations = {
     CONFIG_JSON_IS_DEPRECATED:{
         "ru_RU": """ Файл с параметрами "config.json" является устаревшим. Пожалуйста обратитесь к документации """,
     },
+    SET_ODOO_VERSION: {
+        "ru_RU": """Пожалуйста, выберите версию Odoo для текущего проекта. Вот список поддерживаемых версий: {AVAILABEL_ODOO_VERSIONS_ARE}. Вы можете оставить значение по умолчанию {ODOO_LATEST_VERSION} или написать свою версию из списка. Нажмите 'Enter' чтобы оставить значение по умолчанию:\n""",
+    },
+    YOU_SELECT_ODOO_VERSION:{
+        "ru_RU": """Вы выбрали следующую версию odoo: {SELECTED_ODOO_VERSION}\n"""
+    }
 }
 
 def get_translation(string_to_translate):

@@ -68,20 +68,21 @@ class VirtualenvChecker():
         self.delete_files_in_directory(self.docker_venv_dir)
         self.create_venv()
         self.set_venv()
-        lock_venv = True
         exit_code = os.system(f"""python3 -m pip install -r {self.odoo_requirements_path}""")
         if os.WEXITSTATUS(exit_code) != 0:
-            lock_venv = False
+            self.package_installation_error(f"""Installation of odoo requirements.txt was failed """)
+
         for package in self.requirements_txt:
             exit_code = os.system(f"""python3 -m pip install {package}""")
             if os.WEXITSTATUS(exit_code) != 0:
-                lock_venv = False
-        if lock_venv:
-            with open(self.venv_lock_file_path, 'w') as f:
-                f.write(self.arch)
-        else:
-            _logger.warning(f"""Installation of requirements.txt was failed.""")
-            exit()
+                self.package_installation_error(f"""Installation of package {package} was failed """)
+        with open(self.venv_lock_file_path, 'w') as f:
+            f.write(self.arch)
+
+    
+    def package_installation_error(self, txt):
+        _logger.error(txt)
+        exit(1)
         
     
     def create_venv(self):
