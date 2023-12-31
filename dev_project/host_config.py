@@ -58,6 +58,15 @@ class Config():
         self.requirements_txt = self.config_dict.get("requirements_txt", [])
         if constants.DEBUGPY not in self.requirements_txt:
             self.requirements_txt.append(constants.DEBUGPY)
+        
+        # prepare dockerfile template
+        self.dockerfile_template_name = f"""debian_{self.debian_version}_dockerfile"""
+        self.project_dockerfile_template_path = os.path.join(
+            self.pd_manager.project_path,
+            os.path.join(constants.PROJECT_SERVICE_DIRECTORY, self.dockerfile_template_name)
+        )
+        if not os.path.exists(self.project_dockerfile_template_path):
+            self.pd_manager.rebuild_dockerfile_template(debian_template_filename=self.dockerfile_template_name)
 
         # prepare list of mapped dirs for  third party modules from which our project depends on
         self.dependencies_dirs = []

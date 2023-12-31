@@ -70,8 +70,7 @@ class CreateProjectEnvironment():
         
     
     def generate_dockerfile(self):
-        dockerfile_template_path = os.path.join(self.config.project_dir, constants.PROJECT_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
-        with open(dockerfile_template_path) as f:
+        with open(self.config.project_dockerfile_template_path) as f:
             lines = f.readlines()
         content = "".join(lines).format(
             PROCESSOR_ARCH=self.config.arch,
@@ -132,8 +131,8 @@ class CreateProjectEnvironment():
             COMPOSE_FILE_VERSION=self.config.compose_file_version
         )
         content = content.replace(translations.get_translation(translations.MESSAGE_ODOO_CONF), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
-        dockerfile_path = os.path.join(self.config.project_dir, "docker-compose.yml")
-        with open(dockerfile_path, 'w') as writer:
+        dockerfile_compose_path = os.path.join(self.config.project_dir, "docker-compose.yml")
+        with open(dockerfile_compose_path, 'w') as writer:
             writer.write(content)
     
     def delete_old_links(self, dir_to_clean, current_links):

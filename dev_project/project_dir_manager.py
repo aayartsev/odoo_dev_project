@@ -1,7 +1,8 @@
+import os
 from pathlib import Path
 
-from .constants import *
-from .translations import *
+from . import constants
+from . import translations
 
 from .inside_docker_app.logger import get_module_logger
 
@@ -14,10 +15,10 @@ class ProjectDirManager():
         self.project_path = start_dir_path
         self.dir_is_project = False
         self.args_dict = args_dict
-        self.init = self.args_dict.get(INIT_PARAM, False)
-        self.service_directory = os.path.join(self.project_path, PROJECT_SERVICE_DIRECTORY)
+        self.init = self.args_dict.get(constants.INIT_PARAM, False)
+        self.service_directory = os.path.join(self.project_path, constants.PROJECT_SERVICE_DIRECTORY)
         self.program_dir_path = program_dir_path
-        self.home_config_dir = os.path.join(Path.home(), CONFIG_DIR_IN_HOME_DIR)
+        self.home_config_dir = os.path.join(Path.home(), constants.CONFIG_DIR_IN_HOME_DIR)
     
     def find_project_dir_in_parents(self):
         exist_service_directory = os.path.exists(self.service_directory)
@@ -26,23 +27,22 @@ class ProjectDirManager():
             if self.project_path == parent_dir:
                 break
             self.project_path = parent_dir
-            self.service_directory = os.path.join(self.project_path, PROJECT_SERVICE_DIRECTORY)
+            self.service_directory = os.path.join(self.project_path, constants.PROJECT_SERVICE_DIRECTORY)
             if self.home_config_dir == self.service_directory:
                 continue
             exist_service_directory = os.path.exists(self.service_directory)
 
     def check_project_dir(self):
-
         self.find_project_dir_in_parents()
         if os.path.exists(self.service_directory):
             self.dir_is_project = True
         else:
             self.project_path = self.start_dir_path
-            self.service_directory = os.path.join(self.project_path, PROJECT_SERVICE_DIRECTORY)
+            self.service_directory = os.path.join(self.project_path, constants.PROJECT_SERVICE_DIRECTORY)
         if not self.init and not self.dir_is_project:
-            _logger.info(get_translation(THIS_IS_NOT_PROJECT_DIRECTORY).format(
-                        PROJECT_NAME=PROJECT_NAME,
-                        INIT_PARAM=INIT_PARAM,
+            _logger.info(translations.get_translation(translations.THIS_IS_NOT_PROJECT_DIRECTORY).format(
+                        PROJECT_NAME=constants.PROJECT_NAME,
+                        INIT_PARAM=constants.INIT_PARAM,
                     ))
             exit()
         if self.init and not self.dir_is_project:
@@ -51,10 +51,9 @@ class ProjectDirManager():
                 exit()
             return
         if self.init and self.dir_is_project:
-            _logger.info(get_translation(ALREADY_INITED_PROJECT).format(
-                        PROJECT_NAME=PROJECT_NAME,
+            _logger.info(translations.get_translation(translations.ALREADY_INITED_PROJECT).format(
+                        PROJECT_NAME=constants.PROJECT_NAME,
                     ))
-            # exit()
             return
         self.rebuild_templates()
 
@@ -64,14 +63,28 @@ class ProjectDirManager():
         self.rebuild_templates()
     
     def rebuild_templates(self):
-        program_dockerfile_template_path = os.path.join(self.program_dir_path, PROGRAM_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
-        project_dockerfile_template_path = os.path.join(self.project_path, PROJECT_DOCKER_TEMPLATE_FILE_RELATIVE_PATH)
+        self.rebuild_docker_compose_template()
+        self.rebuild_odoo_config_file_template()
+    
+    def rebuild_dockerfile_template(self, debian_template_filename=constants.DOCKERFILE):
+        program_dockerfile_template_path = os.path.join(
+            self.program_dir_path,
+            os.path.join(constants.DEV_PROJECT_DIR, "templates", debian_template_filename)
+        )
+        project_dockerfile_template_path = os.path.join(
+            self.project_path,
+            os.path.join(constants.PROJECT_SERVICE_DIRECTORY, debian_template_filename)
+        )
         self.generate_project_template_files(program_dockerfile_template_path, project_dockerfile_template_path)
-        program_docker_compose_template_path = os.path.join(self.program_dir_path, PROGRAM_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
-        project_docker_compose_template_path = os.path.join(self.project_path, PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
+    
+    def rebuild_docker_compose_template(self):
+        program_docker_compose_template_path = os.path.join(self.program_dir_path, constants.PROGRAM_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
+        project_docker_compose_template_path = os.path.join(self.project_path, constants.PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH)
         self.generate_project_template_files(program_docker_compose_template_path, project_docker_compose_template_path)
-        program_odoo_config_file_template_path = os.path.join(self.program_dir_path, PROGRAM_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
-        project_odoo_config_file_template_path = os.path.join(self.project_path, PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
+    
+    def rebuild_odoo_config_file_template(self):
+        program_odoo_config_file_template_path = os.path.join(self.program_dir_path, constants.PROGRAM_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
+        project_odoo_config_file_template_path = os.path.join(self.project_path, constants.PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
         self.generate_project_template_files(program_odoo_config_file_template_path, project_odoo_config_file_template_path)
 
     def generate_project_template_files(self, program_template_file, project_template_file):
@@ -79,7 +92,7 @@ class ProjectDirManager():
             lines = f.readlines()
         content = "".join(lines)
         for replace_phrase in {
-                MESSAGE_MARKER: get_translation(MESSAGE_ODOO_CONF),
+                constants.MESSAGE_MARKER: translations.get_translation(translations.MESSAGE_ODOO_CONF),
             }.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
         if not os.path.exists(project_template_file):
