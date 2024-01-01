@@ -16,7 +16,7 @@ class OdooChecker():
         self.odoo_dir = config["docker_odoo_dir"]
         self.odoo_config_data = config["odoo_config_data"]
         self.docker_path_odoo_conf = config["docker_path_odoo_conf"]
-        self.args_dict = config["args_dict"]
+        self.args_dict = config["arguments"]
         self.db_lang = config["db_creation_data"]["db_lang"]
         self.db_country_code = config["db_creation_data"]["db_country_code"]
         self.db_default_admin_password = config["db_creation_data"]["db_default_admin_password"]
@@ -41,8 +41,9 @@ class OdooChecker():
                 yield
         self.environment_manage = environment_manage
         if self.db_manager_password:
-            db_manager_password_crypt = pbkdf2_sha512.using(rounds=1).hash(self.db_manager_password)
-            self.odoo_config_data["options"]["admin_passwd"] = db_manager_password_crypt
+            if odoo_version_info[0] not in [11,12]:
+                db_manager_password_crypt = pbkdf2_sha512.using(rounds=1).hash(self.db_manager_password)
+                self.odoo_config_data["options"]["admin_passwd"] = db_manager_password_crypt
         self.create_config_file()
         odoo.tools.config.parse_config(["-c", self.docker_path_odoo_conf])
         # Enable database manager

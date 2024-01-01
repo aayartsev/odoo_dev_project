@@ -2,12 +2,13 @@
 import os
 import sys
 
-from dev_project.host_config_parser import ConfParser
 from dev_project.check_system import SystemChecker
-from dev_project.host_env import CreateEnvironment
+from dev_project.host_project_env import CreateProjectEnvironment
+from dev_project.host_user_env import CreateUserEnvironment
 from dev_project.inside_docker_app.parse_args import ArgumentParser
 from dev_project.host_start_string_builder import StartStringBuilder
 from dev_project.project_dir_manager import ProjectDirManager
+from dev_project.host_config import Config
 
 from dev_project.inside_docker_app.logger import get_module_logger
 
@@ -19,29 +20,31 @@ def main():
     args_list = sys.argv[1:]
     args_dict = ArgumentParser(args_list).args_dict
     pd_manager = ProjectDirManager(start_dir_path, args_dict, program_dir_path)
+    user_environment = CreateUserEnvironment(pd_manager)
     pd_manager.check_project_dir()
-    if not pd_manager.dir_is_project:
-        exit()
-    config = ConfParser(
+    config = Config(
         pd_manager,
         args_dict,
         program_dir_path,
-    ).config
-    SystemChecker(config)
-    environment = CreateEnvironment(config)
-    environment.update_config()
-    environment.generate_dockerfile()
-    environment.generate_config_file()
+        user_environment,
+    )
+    project_environment = CreateProjectEnvironment(config)
+    system_checker = SystemChecker(config)
+    project_environment.map_folders()
+    project_environment.generate_dockerfile()
+    system_checker.check_docker()
+    project_environment.generate_config_file()
     StartStringBuilder(config)
-    environment.generate_docker_compose_file()
-    environment.checkout_dependencies()
-    environment.update_links()
-    environment.update_vscode_debugger_launcher()
+    project_environment.generate_docker_compose_file()
+    system_checker.check_docker_compose()
+    project_environment.checkout_dependencies()
+    project_environment.update_links()
+    project_environment.update_vscode_debugger_launcher()
 
-    os.chdir(config["project_dir"])
+    os.chdir(config.project_dir)
 
     try:
-        if config["no_log_prefix"]:
+        if config.no_log_prefix:
             os.system(f"""docker-compose up --no-log-prefix --abort-on-container-exit""")
         else:
             os.system(f"""docker-compose up --abort-on-container-exit""")
