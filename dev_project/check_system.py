@@ -27,7 +27,7 @@ class SystemChecker():
         output_string = process_result.stdout.decode("utf-8")
         if constants.GIT_WORKING_MESSAGE not in output_string:
             _logger.error(translations.get_translation(translations.IS_GIT_INSTALLED))
-            exit()
+            exit(1)
     
     def get_groups(self, user):
         gids = [g.gr_gid for g in grp.getgrall() if user in g.gr_mem]
@@ -44,12 +44,12 @@ class SystemChecker():
                         LINUX_DOCKER_GROUPNAME=constants.LINUX_DOCKER_GROUPNAME,
                     )
                 )
-                exit()
+                exit(1)
         process_result = subprocess.run(["docker",  "info"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         if constants.DOCKER_WORKING_MESSAGE not in output_string:
             _logger.error(translations.get_translation(translations.CAN_NOT_CONNECT_DOCKER))
-            exit()
+            exit(1)
         
         process_result = subprocess.run(["docker",  "images", "--format", "'{{json .}}'"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
@@ -69,7 +69,7 @@ class SystemChecker():
         output_string = output_string.lower().replace("-"," ")
         if constants.DOCKER_COMPOSE_WORKING_MESSAGE not in output_string:
             _logger.error(translations.get_translation(translations.CAN_NOT_GET_DOCKER_COMPOSE_INFO))
-            exit()
+            exit(1)
         up_help_result = subprocess.run(["docker-compose",  "up", "--help"], capture_output=True)
         up_help_string = up_help_result.stdout.decode("utf-8")
         output_string = output_string.lower().replace("-"," ")
@@ -88,9 +88,7 @@ class SystemChecker():
                     _logger.error(translations.get_translation(translations.CAN_NOT_CREATE_DIR).format(
                         dir_path=dir_path,
                     ))
-                    exit()
-        
-        
+                    exit(1)
         os.chdir(self.config.user_env.odoo_src_dir)
         odoo_src_state_bytes = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         odoo_src_state_string = odoo_src_state_bytes.stdout.decode("utf-8")
@@ -102,4 +100,4 @@ class SystemChecker():
                 _logger.error(translations.get_translation(translations.CHECK_ODOO_REPO).format(
                     odoo_src_dir= self.config.env.odoo_src_dir
                 ))
-                exit()
+                exit(1)

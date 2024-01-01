@@ -4,7 +4,7 @@ import subprocess
 import shutil
 import pathlib
 from dataclasses import dataclass
-from .constants import *
+from . import constants
 
 
 @dataclass
@@ -27,30 +27,30 @@ class HandleOdooProjectGitLink():
     
     def build_project(self):
         self.path_to_ssh_key = self.config.user_env.path_to_ssh_key
-        if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
+        if self.link_type in [constants.GITLINK_TYPE_HTTP, constants.GITLINK_TYPE_SSH]:
             self.get_dir_to_clone()
             self.check_project()
         self.get_project_type()
         self.inside_docker_path = self.project_data.name
-        if self.project_type == TYPE_PROJECT_MODULE:
+        if self.project_type == constants.TYPE_PROJECT_MODULE:
             self.inside_docker_path = str(pathlib.PurePosixPath(self.inside_docker_path, self.project_data.name))
 
     def get_git_link_type(self):
         if "file://" in self.gitlink:
-            return GITLINK_TYPE_FILE
+            return constants.GITLINK_TYPE_FILE
         if "http" in self.gitlink:
-            return GITLINK_TYPE_HTTP
+            return constants.GITLINK_TYPE_HTTP
         ssh_pattern = re.findall(self.ssh_regex, self.gitlink)
         if ssh_pattern:
-            return GITLINK_TYPE_SSH
+            return constants.GITLINK_TYPE_SSH
     
     def parse_link_by_type(self):
         return getattr(self, f"parse_{self.link_type}")()
 
     def get_project_type(self):
-        self.project_type = TYPE_PROJECT_PROJECT
+        self.project_type = constants.TYPE_PROJECT_PROJECT
         if os.path.exists(os.path.join(self.project_path, "__manifest__.py")):
-            self.project_type = TYPE_PROJECT_MODULE
+            self.project_type = constants.TYPE_PROJECT_MODULE
 
     def parse_local_filesystem(self):
         local_path = self.gitlink.replace("file://","")
@@ -88,14 +88,14 @@ class HandleOdooProjectGitLink():
         )
     
     def get_project_path(self):
-        if self.link_type in [GITLINK_TYPE_HTTP, GITLINK_TYPE_SSH]:
+        if self.link_type in [constants.GITLINK_TYPE_HTTP, constants.GITLINK_TYPE_SSH]:
             return os.path.abspath(os.path.join(
                 self.config.user_env.odoo_projects_dir,
                 self.project_data.server,
                 self.project_data.author,
                 self.project_data.name,
             ))
-        if self.link_type in [GITLINK_TYPE_FILE]:
+        if self.link_type in [constants.GITLINK_TYPE_FILE]:
             local_path = self.gitlink.replace("file://","")
             if local_path[-1] == "/":
                 local_path = local_path[:-1]
