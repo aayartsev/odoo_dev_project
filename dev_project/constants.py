@@ -2,7 +2,7 @@ import os
 import pathlib
 import platform
 
-from .inside_docker_app.command_line_params import *
+from .inside_docker_app.cli_params import *
 
 ARCH = str(platform.machine()).lower()
 DEV_PROJECT_DIR = "dev_project"
@@ -60,8 +60,6 @@ DOCKER_COMPOSE_DEFAULT_FILE_VERSION = "3.3"
 DOCKER_WORKING_MESSAGE = "Server Version"
 GIT_WORKING_MESSAGE = "git version"
 DOCKER_COMPOSE_WORKING_MESSAGE = "docker compose version"
-
-TEST_COMMAND = " --test-enable --stop-after-init"
 
 MESSAGE_MARKER = "#MESSAGE#"
 ADMIN_PASSWD_MESSAGE = "#ADMIN_PASSWD_MESSAGE#"

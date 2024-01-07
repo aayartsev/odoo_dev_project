@@ -18,11 +18,12 @@ class Config():
         self.pd_manager = pd_manager
         self.program_dir = program_dir
         self.arguments = arguments
-        self.config_dict = None
-        self.repo_odpm_json = None
+        self.config_dict = {}
+        self.repo_odpm_json = ""
         self.config_json_loaded = False
         self.project_dir = self.pd_manager.project_path
         self.config_home_dir = self.pd_manager.home_config_dir
+        self.no_log_prefix = False
         self.user_env = user_env
         if self.pd_manager.init and isinstance(self.pd_manager.init, str):
             self.clone_project()
@@ -260,7 +261,7 @@ class Config():
         config["docker_odoo_dir"] = self.docker_odoo_dir
         config["odoo_config_data"] = self.odoo_config_data
         config["docker_path_odoo_conf"] = self.docker_path_odoo_conf
-        config["arguments"] = self.arguments
+        config["arguments"] = vars(self.arguments)
         config["db_creation_data"] = self.db_creation_data
         config["db_manager_password"] = self.db_manager_password
         config["docker_venv_dir"] = self.docker_venv_dir

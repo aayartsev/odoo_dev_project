@@ -15,7 +15,7 @@ class ProjectDirManager():
         self.project_path = start_dir_path
         self.dir_is_project = False
         self.args_dict = args_dict
-        self.init = self.args_dict.get(constants.INIT_PARAM, False)
+        self.init = self.args_dict.init
         self.service_directory = os.path.join(self.project_path, constants.PROJECT_SERVICE_DIRECTORY)
         self.program_dir_path = program_dir_path
         self.home_config_dir = os.path.join(Path.home(), constants.CONFIG_DIR_IN_HOME_DIR)

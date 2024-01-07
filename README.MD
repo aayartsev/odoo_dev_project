@@ -1,126 +1,125 @@
-# Менеджер для разработки проектов на odoo (Odoo Developer Project Manager)
+# Odoo Developers Project Manager
 
-## Цель проекта
-Основная цель проекта - создать инструмент для разработчика на платформе odoo, который будет удовлетворять следующим требованиям:
-- не зависеть от операционной системы
-- по возможности не зависеть от архитектуры процессора (Для примера запуск на MacOS на базе M1)
-- для передачи всей информации о проекте, достаточно иметь в репозитории проекта `odpm.json`, и система на его базе сможет легко подготовить новое окружение в полностью автоматическом режиме
-- иметь удобные инструменты, которые часто необходимы разработчику, например:
-    - быстрое удаление БД
-    - быстрое восстановление БД из архива
-    - создание новой БД со своими настройками (страна, язык, демо-данные и прочее)
-    - смена пароля для указанного логина
-    - ... и многое другое
-    - механизмы для расширения функционала, на будущее
+## Goal of the project
+The main goal is - to create tool for developing on odoo platform, which will meet the following requirements:
+- do not depend from operating system
+- do not depend from process architecture if it is possible (For example you can start this project on MacOS on M1)
+- еo transfer all project information, it is enough to have an `odpm.json` in project repository, and the system will be able to easily prepare a new environment in a fully automatic mode based on it.
+- To have convenient tools that are often necessary for the developer, for example:
+    - fast DB recovery from the archive
+    - сreation of a new DB with its own settings (country, language, demo data, etc.)
+    - change password for specified login
+    - ... and more
+    - mechanisms for extending the functionality, for the future
 
-Если вы новичок, то рекомендуется использовать данный проект в связке с учебным демо `https://github.com/aayartsev/odoo_demo_project`
+If you are new, i recommend using this project in conjunction with the training demo `https://github.com/aayartsev/odoo_demo_project`.
 
-## Подготовка
-вам необходимо скачать и установить следующие программы:
+## Prepare
+You need to download and install the following programs:
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 - [git](https://git-scm.com/)
 - [python3](https://www.python.org/)
 - [Visual Studio Code](https://code.visualstudio.com/)
 
 
-## Как начать работать
+## How to start work
 
-Создаете папку где у вас будет располагаться новый проект. В конца имени проекта я добавляю еще через дефис номер версии odoo. Например `odoo_demo_project-17`. Это связано с тем, что разница между версиями весьма существенна и я рассматриваю одни и те же модули для разных версий как разные проекты для разработки, не смотря на то что они могут находится в одном репозитории. В этом каталоге инициируете новый проект с помощью команды параметра `--init` где можем указать ссылку на гит репозиторий и с помощью парметра `--branch` указываем конкретную ветку, на которую хотим переключить разрабатываемый проект:
+Create a folder where your new project will be located. At the end of the project name, I add the odoo version number through a hyphen. For example, `odoo_demo_project-17`. This is due to the fact that the difference between versions is quite significant and I consider the same modules for different versions as different projects for development, despite the fact that they can be in the same repository. In this directory, initiate a new project using the `--init` command option, where we can specify a link to the git repository and using the `--branch` option, we specify the specific branch we want to switch the project under development to:
 
-Запускаем `VSCode` затем через меню Файл - Открыть (File - Open Folder) Каталог, открываем ранее созданный каталог `odoo_demo_project-17`.
+Launch `VSCode` then threw menu File - Open Folder, open our folder `odoo_demo_project-17`.
 
-Теперь запускаем терминал через меню Терминал - Создать Терминал (Terminal - New Terminal) и уже в нем вводите указанные ниже команды. Если кто-то, глядя на python скрипт захочет запустить его внутри виртуального окружения, то не надо этого делать. В данном случае он используется вместо системных скриптовых языков и вы только усложните себе жизнь. Виртуальное окружение для проекта будет установлено внутрь контейнера.
+Now we cat enable Terminal threw menu Terminal - New Terminal. Then in it you can input commands that are written below. If someone, looking at a python script, wants to run it inside a virtual environment, then do not do this. In this case, it is used instead of system scripting languages and you will only complicate your life. The virtual environment for the project will be installed inside the container.
 
-При самом первом запуске ранее описанной команды:
+At the very first launch of the previously described command:
 ```bash
-python3 /путь/к/клонированному/odoo_dev_project/odpm.py --init git@github.com:aayartsev/odoo_demo_project.git --branch 17.0-test_odpm_json
+python3 /path/to/cloned/odoo_dev_project/odpm.py --init git@github.com:aayartsev/odoo_demo_project.git --branch 17.0-test_odpm_json
 ```
-Система будет пытаться подготовить ваш компьютер:
-1. Система будет задавать вопросы о том, какие параметры надо сохранить в файл `.env`
-1. Если вы разворачиваете проект с нуля, система попросит уточнить вас версию odoo и на основании этой информации сделает первоначальные настройки
-1. Будет запущен процесс клонирования основного репозитория odoo. Это занимает весьма значительное время 40 минут и более, поэтому наберитесь терпения
-1. Будет клонирован разрабатываемый репозиторий
-1. Будет автоматически сгенерирован `Dockerfile` для указанной версии python
-1. После этого запустится автоматическая сборка Docker образа
-1. Будет автоматически сгенерирован файл `docker-compose.yml`
-1. Для VSCode будет сгенерирован конфигурационный файлы для корректной работы отладчика
-1. Автоматически запустится `docker-compose.yml`
-1. Будут установлены все python зависимости в виртуальное окружение
-1. Запустится odoo в обычном режиме
+The system will try to prepare your computer:
+1. The system will ask questions about which parameters should be saved to a file `.env`
+1. If you are deploying a project from scratch, the system will ask you to specify the odoo version and make initial settings based on this information
+1. The cloning process of the main odoo repository will be started. This takes a very significant time of 40 minutes or more, so be patient
+1. The repository under development will be cloned
+1. A `Dockerfile` will be automatically generated for the specified `python` and `debian` version.
+1. After that, the automatic build of the `Docker image` will start
+1. The `docker-compose.yml` file will be automatically generated
+1. Configuration files will be generated for VS Code for the debugger to work correctly
+1. `docker-compose up` will start automatically
+1. All python dependencies will be installed in the virtual environment
+1. Odoo will start with all specified addons for selected version
 
-Остановить данный запущенный процесс можно сочетанием клавиш `Ctrl+C`.
+You can stop this running process by using the keyboard shortcut `Ctrl+C`.
 
-После этого можно запустить odoo в режиме разработчика
+After that, you can run odoo in developer mode:
 ```bash
-python3 /путь/к/клонированному/odoo_dev_project/odpm.py -d test_db -i -u
+python3 /path/to/cloned/odoo_dev_project/odpm.py -d test_db -i -u
 ```
-Данная команда запустит odoo внутри Docker контейнера и создаст новую базу с именем new_db и установит туда модуль из указанного проекта
+This command will launch odoo inside the `Docker container` and create a new database named `new_db`` and install the module from the specified project there
 
-После этого вы можете открыть в браузере адрес `http://127.0.0.1:8069` и увидите окно входа в систему.
+After that, you can open the address `http://127.0.0.1:8069` in the browser and you will see the login window.
 
-Для работы системы требуется 2 конфигурационных файла:
-- `odpm.json` -  может находится в репозитории с проектом, содержит в себе необходимой информацию о том, как запустить разработку для данного проекта
-- `user_settings.json` - если файл не найден, он будет создан из значений по умолчанию. Содержит настройки и предпочтения конкретного разработчика
+2 configuration files are required for the system to work:
+- `odpm.json` -  it also can be located in the repository with the developing project, contains the necessary information on how to start this project. If the file is not found, it will be created from the default values.
+- `user_settings.json` - contains the settings and preferences of a specific developer. If the file is not found, it will be created from the default values.
 
-## Параметры .env:
-Система попытается создать в домашнем каталоге пользователя вашей операционной системы каталог `.odpm` внутри которого поместит файл `.env`. Если вы запускаете приложение первый раз, то оно задаст вопрос по каждому ниже описанному пункту данного файла и предложит значения по умолчанию. Если вы не знаете что ответить просто жмите `Enter`. Если вы поместите файл`.env` в каталог с проектом то программа будет считать его приоритетным и попытается взять значения из файла внутри проекта.
-- `BACKUP_DIR` - каталог в котором находятся архивы. Используется для того, чтобы с помощью параметров командной строки указать имя базы для восстановления и тогда система будет искать архив с указанным именем в этом каталоге, или при сохранении базы в архив, он появится в этом каталоге, может применяться для всех проектов
-- `ODOO_SRC_DIR` - Каталог в котором должен находится полный клон репозитория самой платформы `odoo`. Я обычно его складываю в профиль своего пользователя, будет использоваться всеми проектами.
-- `ODOO_PROJECTS_DIR` - создайте каталоге, в котором будут создаваться клоны всех используемых репозиториев. Нужно только его создать и указать путь к этому каталогу, дальше система сама клонирует в него все репозитории и расположит их так, чтобы не возникало конфликтов
-- `PATH_TO_SSH_KEY` = если, по каким либо причинам у вас не получается добавить в ssh агент свой ключ для репозитория, то можете указать путь к нему здесь. На данный момент будет использоваться один ключ для всех репозиториев
-- `ODOO_PORT` - порт на котором по умолчанию будет запускаться odoo на адресе 127.0.0.1
-- `POSTGRES_PORT` - порт на котором по умолчанию будет запускаться СУБД PostgreSQL на адресе 127.0.0.1
-- `DEBUGGER_PORT` - порт на котором по умолчанию будет запускаться отладчик на адресе 127.0.0.1
+## Parameters in .env file:
+The system will try to create a `.odpm` directory in the user's home directory of your operating system. Inside it the system will place the `.env` file. If you are launching the application for the first time, it will ask a question for each item described below in this file and offer default values. If you don't know what to answer, just press `Enter`. If you place the `.env` file in the project directory, the program will consider it a priority and try to take values from the file inside the project.
+- `BACKUP_DIR` - the directory where the archives are located. It is used to specify the name of the database for recovery using command-line parameters and then the system will search for an archive with the specified name in this directory, or when saving the database to the archive, it will appear in this directory, can be used for all projects
+- `ODOO_SRC_DIR` - The directory where the full clone of the repository of the `odoo` platform itself should be located. I usually put it in my user profile. It is used by all projects.
+- `ODOO_PROJECTS_DIR` - create a directory where clones of all used repositories will be created. You just need specify the path to this directory, then the system itself will create this directory and clone all the repositories into it and arrange them so that there are no conflicts
+- `PATH_TO_SSH_KEY` - if, for some reason, you are unable to add your repository key to the ssh agent, then you can specify the path to it here. At the moment, one key will be used for all repositories
+- `ODOO_PORT` - the port on which odoo will be launched by default at the address 127.0.0.1
+- `POSTGRES_PORT` - the port on which the PostgreSQL DBMS will be launched by default at the address 127.0.0.1
+- `DEBUGGER_PORT` - the port on which the debugger will run by default at the address 127.0.0.1
 
 Пример для Lnux:
 ```conf
 BACKUP_DIR=/home/user/odoo_backups
 ODOO_SRC_DIR=/home/user/odoo
 ODOO_PROJECTS_DIR=/home/user/odoo_projects
-PATH_TO_SSH_KEY=/home/user/.ssh\my_ssh_key
+PATH_TO_SSH_KEY=/home/user/.ssh/my_ssh_key
 ODOO_PORT=8069
 POSTGRES_PORT=5432
 DEBUGGER_PORT=5678
 ```
 
-## Параметры user_settings.json:
+## Parameters in user_settings.json:
 
-- `init_modules` - Строка. Параметр, в котором указываются модули через запятую, без пробелов, которые будут про-инициированы(установлены) при (пере)запуске системы.
-- `update_modules` - Строка. Параметр, в котором указываются модули через запятую, без пробелов, которые будут обновлены при (пере)запуске системы
-- `db_creation_data` - Объект. Параметры которые определяют создание новой базы
-    - `db_lang` - Строка. Укажите язык системы по умолчанию про создании новой базы, например: `"en_US"` или `"ru_RU"`
-    - `db_country_code` - Строка или `false` Укажите код страны по умолчанию про создании новой базы, например:`"ru"`
-    - `create_demo` - Булево. Указывает на то, нужно ли создавать в системе демо данные при создании новой базы.
-    - `db_default_admin_login` - Строка. Логин для учетной записи администратора
-    - `db_default_admin_password` - Строка. Пароль для учетной записи администратора
-- `update_git_repos` - Булево. Указывает на то, будут ли обновлены репозитории зависимостей и самой odoo при перезапуске системы
-- `clean_git_repos` - Булево. Указывает на то, будут ли при перезапуске сбрасываться изменения в самой odoo и проектах зависимостей
-- `check_system` - Булево. Указывает на то, будет ли запускаться проверка системы при старте. Полезно для новичков. Проверяет наличие устновленного git, docker и docker-compose.
-- `developing_project` - Строка. Ссылка на проект, который вы разрабатываете. Пример: `"git@github.com:aayartsev/odoo_demo_project.git"`
-- `pre_commit_map_files` - Список. Список файлов для системы `pre-commit`, которые выносятся из проекта и пробрасываются туда через сопоставление файлов docker. Нужно для работы не на Linux системах
-- `dev_mode` - Можно указать через запятую [параметры для разработчиков](https://www.odoo.com/documentation/16.0/developer/reference/cli.html?highlight=dev#cmdoption-odoo-bin-dev). Смотрите официальную документацию для своей версии odoo
-- `db_manager_password` - пароль для менеджера баз данных
+- `init_modules` - `type: String`. Parameter that specifies modules separated by commas, without spaces, which will be initiated (installed) when (re)starting the system.
+- `update_modules` - `type: String` A parameter that specifies modules separated by commas, without spaces, which will be updated when (re)starting the system
+- `db_creation_data` - `type: Object`. The parameters that determine the creation of a new database.
+    - `db_lang` - `type: String`. Specify the default system language when creating a new database, for example: `"en_US"` or `"ru_RU"`
+    - `db_country_code` - `type: String` or `false`. Specify the default country code for creating a new database, for example:`"by"`
+    - `create_demo` - `type: Boolean`. Indicates whether it is necessary to create demo data in the system when creating a new database.
+    - `db_default_admin_login` - `type: String`. Login for the administrator account
+    - `db_default_admin_password` - `type: String`. The password for the administrator account
+- `update_git_repos` - `type: Boolean`. Indicates whether the dependency repositories and odoo itself will be updated when the system is restarted
+- `clean_git_repos` - `type: Boolean`. Indicates whether changes to odoo itself and dependency projects will be reset on restart
+- `check_system` - `type: Boolean`. Indicates whether the system check will be started at startup. Useful for beginners. Checks if `git`, `docker`, and `docker-compose` are installed.
+- `developing_project` - `type: String`. A link to the project you are developing. Example: `"git@github.com:aayartsev/odoo_demo_project.git "`
+- `pre_commit_map_files` - `type: String`. A list of files for the `pre-commit` system that are taken out of the project and pushed there through the docker file mapping. It is necessary to work on non-Linux systems
+- `dev_mode` - `type: String`. You can specify comma-separated [parameters for developers](https://www.oovoo.com/documentation/16.0/developer/reference/cli.html?highlight=dev#cmdoption-odoo-bin-dev). See the official documentation for your version of odoo
+- `db_manager_password` - `type: String`. password for the database manager
 
-## Параметры odpm.json:
-- `python_version` - Строка. Версия python, указывается в текстовом виде его номер, например `"3.10"` или `"3.7"`,
-- `debian_version` - Строка. Версия дистрибутива Debian, указывается в текстовом виде его номер, например `"11"` или `"12"`,
-- `odoo_version` - Строка. Версия системы. Примеры: `"16.0"`, `"15.0"`, `"11.0"`
-- `dependencies` - Список. Список ссылок на репозитории проектов, от которых зависит ваш проект
-- `requirements_txt` - Список. Список python модулей, каждый элемент может оформляться так же как и строка в файле requirements.txt
+## Parameters in odpm.json:
+- `python_version` - `type: String`. The python version is indicated in text form by its number, for example `"3.10"` or `"3.7"`,
+- `debian_version` - `type: String`. The version of the Debian distribution is indicated in text form by its number, for example `"11"` or `"12"`,
+- `odoo_version` - `type: String`. The version of the odoo system. Examples: `"16.0"`, `"15.0"`, `"11.0"`
+- `dependencies` - `type: List`. A list of links to the project repositories on which your project depends
+- `requirements_txt` - `type: List`. A list of python modules, each element can be formatted in the same way as a line in a file requirements.txt
 
-## Параметры командной строки
+## Command Line Interface parameters
 
-- `--init` - инициировать проект в текущем каталоге. В качестве параметра можно указать ссылку на `git` репозиторий
-- `-d` - указать имя базы данных для работы, если такой базы не существует, она будет создана автоматически, на основании параметров `db_creation_data` параметра файла конфигурации `config.json`
-- `-i` - параметр указывает на то что нужно проинициализировать модули указанные в параметре `init_modules` файла конфигурации `config.json`
-- `u` - параметр указывает на то что нужно обновить модули указанные в параметре `update_modules` файла конфигурации `config.json`
-- `-t` - запустит тесты модулей указанных в параметре `init_modules` и `update_modules` файла конфигурации `config.json`, работает только при использовании параметров `-d`, `-i`, `-u`, если база создается с нуля, то для всех устанавливаемых модулей будут запущены тесты, это может занять много времени
-- `--get_dbs_list` - выводит список баз данных
-- `--db-restore` - система попытается восстановить архив БД в качестве параметра указывается путь к архиву, относительно каталога, указанного в параметре `backups/localdir` файла конфигурации `config.json`, имя БД при восстановлении бу[дет взято из параметра `-d`
-- `--db-drop` - в качестве параметра указывается имя базы данных, которую необходимо удалить, если использовать совместно с флагами `-d`, `-i`, `-u`, и указать одно и тоже имя БД, то система сначала удалит базу, а затем создаст новую с таким же именем и установит указанные модули
-- `--translate` - Принимает в качестве параметра код языка, например `ru_RU`, при использовании данного параметра, система добавит соответствующий язык в систему и обновит все термины из модулей указанных в параметре `init_modules` и `update_modules` файла конфигурации `config.json`, работает только при использовании параметров `-d`, `-i`, `-u`
-- `--pip_install` - указывает системе на то, что нужно установить зависимости для указанной в параметре `odoo_version` версии odoo и зависимостей указанных в файле `requirements.txt` в каталоге `dev_project`.
-- `--start_precommit` - запускает проверку прекоммита для разрабатываемого проекта, указанного в параметре `developing_project` файла конфигурации `config.json`.
-- `--build_image` - запустит сборку образа Docker для вашего проекта
-- `--set_admin_pass` - при указании значения данного параметра, у учетной записи администратора(пользователь с id = 2) будет изменен пароль и логин на указанные в параметре `db_default_admin_login` и `db_default_admin_password` в файле конфигурации `config.json`. Обязательно нужно указать имя базы для которой вы хотите поменять пароль и использовать параметр `-d имя_базы`
-- `--branch` - используется совместно с параметром `--init` для того, чтобы указать ветку клонируемого `git` репозитория
+- `--init` - initiate a project in the current directory. As a parameter, you can specify a link to the `git` repository
+- `--branch` - used together with the `--init` parameter to specify the branch of the git repository to be cloned.
+- `-d` - to specify the name of the database to work with. If there is no such database, it will be automatically created based on the `db_creation_data` parameter from the configuration file `user_settings.json`
+- `-i` - the parameter indicates that the modules specified in the `init_modules` parameter of the `user_settings.json` configuration file should be initialized.
+- `-u` - the parameter indicates that the modules specified in the `pdate_modules` parameter of the `user_settings.json` configuration file should be updated.
+- `-t` - will run tests of modules specified in `init_modules` and `update_modules`, works only when using parameters `-d`, `-i`, `-u`. If the database is being created from scratch, tests of all installed modules will be run. This may take a long time.
+- `--get-dbs-list` - will show list of databases
+- `--db-restore` - as a parameter, the path to the archive is specified, relative to the directory specified in the `backups/localdir` parameter of the configuration file `user_settings.json``. The DB name for restoration will be taken from the `-d` parameter."
+- `--db-drop` - accept database name as parameter. Database with selected  name will be deleted. If you will use it with  params `-d`, `-i`, `-u`, and select the same name, system will with first step delete DB and with second step will create new DB with the same name, and will install selected modules.
+- `--translate` - will update translation for selected language, for example `ru_RU` or `eu_US` for database from `-d` param and for modules form `update_modules` and `init_modules` from `user_settings.json` file
+- `--pip-install` - will start install of all python packages from odoo `requirements.txt` and from `requirements_txt` param to environment inside `docker container`.
+- `--start-precommit` - will start pre-commit for your project inside container, specified in parameter `developing_project` from file `user_settings.json`.
+- `--build-image` - will build Docker image for your odoo version
+- `--set-admin-pass` - when you specify the value of this parameter, the administrator account (user with id = 2) will have its password and login changed to those specified in the `db_default_admin_login` and `db_default_admin_password` parameters in the `user_settings.json` configuration file. Be sure to specify the name of the database for which you want to change the password and use the `-d database_name` parameter
