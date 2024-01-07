@@ -14,7 +14,7 @@ The main goal is - to create tool for developing on odoo platform, which will me
     - ... and more
     - mechanisms for extending the functionality, for the future
 
-If you are new, i recommend using this project in conjunction with the training demo `https://github.com/aayartsev/odoo_demo_project`.
+If you are new, i recommend using this project in conjunction with the training demo [`https://github.com/aayartsev/odoo_demo_project`](https://github.com/aayartsev/odoo_demo_project).
 
 ## Prepare
 You need to download and install the following programs:
