@@ -1,3 +1,5 @@
+[![en](https://img.shields.io/badge/lang-ru-red.svg)](https://github.com/aayartsev/odoo_dev_project/blob/3.0-add_types/README.MD)
+
 # Менеджер для разработки проектов на odoo (Odoo Developer Project Manager)
 
 ## Цель проекта
