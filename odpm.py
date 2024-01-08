@@ -14,9 +14,9 @@ from dev_project.inside_docker_app.logger import get_module_logger
 
 _logger = get_module_logger(__name__)
 
-def main():
+def main() -> None:
     program_dir_path = os.path.dirname(os.path.abspath(__file__))
-    start_dir_path = os.getenv("PWD")
+    start_dir_path = os.getenv("PWD", "")
     pd_manager = ProjectDirManager(start_dir_path, args, program_dir_path)
     user_environment = CreateUserEnvironment(pd_manager)
     pd_manager.check_project_dir()

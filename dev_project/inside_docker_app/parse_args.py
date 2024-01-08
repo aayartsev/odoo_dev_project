@@ -104,10 +104,4 @@ arg_parser.add_argument(
     action='store_true',
 )
 
-arg_parser.add_argument(
-    cli_params.SCREENCASTS_PARAM,
-    help="""Used together with the "-t" or "--test" parameter to specify saving of screencast video for tours errors. This videos will be saved to "odoo_tests" directory inside project""",
-    action='store_true',
-)
-
 args = arg_parser.parse_args()

@@ -6,20 +6,21 @@ import os
 
 from . import constants
 from .inside_docker_app import cli_params
+from .host_config import Config
 
 class StartStringBuilder():
 
-    def __init__(self, config):
+    def __init__(self, config: Config) -> None:
         self.config = config
         self.args = self.config.arguments
         self.config.start_string = self.get_start_string()
     
-    def get_base64_string_config(self):
+    def get_base64_string_config(self) -> str:
         data = self.config.config_to_json()
         config_base64_data = base64.b64encode(data)
         return config_base64_data.decode()
     
-    def get_start_string(self):
+    def get_start_string(self) -> str:
         # Reading of config file
         odoo_config = configparser.ConfigParser()
         odoo_config.read(os.path.join(self.config.project_dir, constants.PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH))
@@ -45,7 +46,7 @@ class StartStringBuilder():
         dev_mode = self.config.dev_mode or False
         
         if build_image:
-            self.config.env.build_image()
+            self.config.project_env.build_image()
             exit()
 
         if install_pip:

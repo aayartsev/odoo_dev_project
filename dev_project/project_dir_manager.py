@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from argparse import Namespace
 
 from . import constants
 from . import translations
@@ -10,12 +11,12 @@ _logger = get_module_logger(__name__)
 
 class ProjectDirManager():
 
-    def __init__(self, start_dir_path, args_dict, program_dir_path):
+    def __init__(self, start_dir_path: str, args: Namespace, program_dir_path: str):
         self.start_dir_path = start_dir_path
         self.project_path = start_dir_path
         self.dir_is_project = False
-        self.args_dict = args_dict
-        self.init = self.args_dict.init
+        self.args = args
+        self.init = self.args.init
         self.service_directory = os.path.join(self.project_path, constants.PROJECT_SERVICE_DIRECTORY)
         self.program_dir_path = program_dir_path
         self.home_config_dir = os.path.join(Path.home(), constants.CONFIG_DIR_IN_HOME_DIR)

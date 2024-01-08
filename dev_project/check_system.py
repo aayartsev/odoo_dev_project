@@ -2,6 +2,7 @@ import subprocess
 import platform
 import json
 import os
+from typing import Literal
 
 if platform.system() == "Linux":
     import pwd
@@ -9,6 +10,7 @@ if platform.system() == "Linux":
 
 from . import constants
 from . import translations
+from .host_config import Config
 
 from .inside_docker_app.logger import get_module_logger
 
@@ -16,26 +18,26 @@ _logger = get_module_logger(__name__)
 
 class SystemChecker():
 
-    def __init__(self, config):
+    def __init__(self, config:Config) -> None:
         self.config = config
         if self.config.check_system:
             self.check_git()
         self.check_file_system()
     
-    def check_git(self):
+    def check_git(self) -> None:
         process_result = subprocess.run(["git",  "--version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
         if constants.GIT_WORKING_MESSAGE not in output_string:
             _logger.error(translations.get_translation(translations.IS_GIT_INSTALLED))
             exit(1)
     
-    def get_groups(self, user):
+    def get_groups(self, user:str) -> list:
         gids = [g.gr_gid for g in grp.getgrall() if user in g.gr_mem]
         gid = pwd.getpwnam(user).pw_gid
         gids.append(grp.getgrgid(gid).gr_gid)
         return [grp.getgrgid(gid).gr_name for gid in gids]
 
-    def check_docker(self):
+    def check_docker(self) -> None:
         if platform.system() == "Linux":
             groups = self.get_groups(constants.CURRENT_USER)
             if constants.LINUX_DOCKER_GROUPNAME not in groups:
@@ -62,7 +64,7 @@ class SystemChecker():
         if not result_list:
             self.config.project_env.build_image()
 
-    def check_docker_compose(self):
+    def check_docker_compose(self) -> None:
         self.config.no_log_prefix = True
         process_result = subprocess.run(["docker-compose",  "version"], capture_output=True)
         output_string = process_result.stdout.decode("utf-8")
@@ -76,7 +78,7 @@ class SystemChecker():
         if constants.NO_LOG_PREFIX not in up_help_string:
             self.config.no_log_prefix = False
     
-    def check_file_system(self):
+    def check_file_system(self) -> None:
         for dir_path in [
             self.config.user_env.backups,
             self.config.user_env.odoo_projects_dir,
@@ -95,9 +97,9 @@ class SystemChecker():
         if not "true" in odoo_src_state_string:
             clone_odoo = input(translations.get_translation(translations.DO_YOU_WANT_CLONE_ODOO))
             if clone_odoo and clone_odoo.lower() == "y":
-                self.config.env.clone_odoo()
+                self.config.project_env.clone_odoo()
             else:
                 _logger.error(translations.get_translation(translations.CHECK_ODOO_REPO).format(
-                    odoo_src_dir= self.config.env.odoo_src_dir
+                    odoo_src_dir= self.config.user_env.odoo_src_dir
                 ))
                 exit(1)
