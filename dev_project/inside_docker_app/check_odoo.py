@@ -26,10 +26,10 @@ class OdooChecker():
         sys.path.append(self.odoo_dir)
 
         from passlib.hash import pbkdf2_sha512
-        import odoo
-        from odoo.tools import config
-        from odoo.api import Environment
-        from odoo.release import version_info as odoo_version_info
+        import odoo # type: ignore
+        from odoo.tools import config # type: ignore
+        from odoo.api import Environment # type: ignore
+        from odoo.release import version_info as odoo_version_info # type: ignore
         if odoo_version_info < (15, 0):
             environment_manage = Environment.manage
         else:

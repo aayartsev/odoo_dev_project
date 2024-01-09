@@ -31,8 +31,8 @@ class StartStringBuilder():
         odoo_config["options"]["addons_path"] = addons_string
         odoo_config["options"]["db_password"] = constants.POSTGRES_ODOO_PASS
         odoo_config["options"]["db_user"] = constants.POSTGRES_ODOO_USER
-        odoo_config["options"]["http_port"] = constants.ODOO_DOCKER_PORT
-        odoo_config["options"]["db_port"] = constants.POSTGRES_DOCKER_PORT
+        odoo_config["options"]["http_port"] = str(constants.ODOO_DOCKER_PORT)
+        odoo_config["options"]["db_port"] = str(constants.POSTGRES_DOCKER_PORT)
 
         data_dir = str(pathlib.PurePosixPath(self.config.docker_project_dir, ".local/share/Odoo"))
         odoo_config["options"]["data_dir"] = data_dir

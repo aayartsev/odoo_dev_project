@@ -1,4 +1,6 @@
-class AbstractCreateProjectEnvironment():
+from typing import Protocol
+
+class CreateProjectEnvironmentProtocol(Protocol):
 
     def handle_git_link(self):
         NotImplementedError(

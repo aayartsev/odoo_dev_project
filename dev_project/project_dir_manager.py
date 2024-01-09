@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from argparse import Namespace
 
+from .inside_docker_app import cli_params
 from . import constants
 from . import translations
 
@@ -43,7 +44,7 @@ class ProjectDirManager():
         if not self.init and not self.dir_is_project:
             _logger.info(translations.get_translation(translations.THIS_IS_NOT_PROJECT_DIRECTORY).format(
                         PROJECT_NAME=constants.PROJECT_NAME,
-                        INIT_PARAM=constants.INIT_PARAM,
+                        INIT_PARAM=cli_params.INIT_PARAM,
                     ))
             exit()
         if self.init and not self.dir_is_project:

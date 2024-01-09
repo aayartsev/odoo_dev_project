@@ -8,11 +8,13 @@ from typing import TypedDict
 
 from . import constants
 from . import translations
+from .inside_docker_app import cli_params
+
 from .handle_odoo_project_git_link import HandleOdooProjectGitLink
 from .host_user_env import CreateUserEnvironment
 from .project_dir_manager import ProjectDirManager
 
-from .abstrat_classes import AbstractCreateProjectEnvironment
+from .protocols import CreateProjectEnvironmentProtocol
 
 from .inside_docker_app.logger import get_module_logger
 
@@ -165,17 +167,17 @@ class Config():
             self.list_for_symlinks.append(self.repo_odpm_json)
     
     @property
-    def project_env(self) -> AbstractCreateProjectEnvironment:
+    def project_env(self) -> CreateProjectEnvironmentProtocol:
         """Get project_env property."""
         return self._project_env
 
     @project_env.setter
-    def project_env(self, value: AbstractCreateProjectEnvironment) -> None:
+    def project_env(self, value: CreateProjectEnvironmentProtocol) -> None:
         """Set project_env property."""
         self._project_env = value
 
     def clone_project(self) -> None:
-        if constants.BRANCH_PARAM in self.arguments and isinstance(constants.BRANCH_PARAM, str):
+        if cli_params.BRANCH_PARAM in self.arguments and isinstance(cli_params.BRANCH_PARAM, str):
             subprocess.run(["git", "stash"], capture_output=False)
             subprocess.run(["git", "pull"], capture_output=False)
             subprocess.run(["git", "checkout", self.arguments.branch], capture_output=False)

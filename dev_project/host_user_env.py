@@ -1,6 +1,7 @@
 import os
 import platform
 from configparser import ConfigParser
+from typing import TypedDict
 
 from pathlib import Path
 
@@ -11,6 +12,15 @@ from dev_project.project_dir_manager import ProjectDirManager
 from .inside_docker_app.logger import get_module_logger
 
 _logger = get_module_logger(__name__)
+
+class EnvData(TypedDict):
+    BACKUP_DIR: str
+    ODOO_SRC_DIR: str
+    ODOO_PROJECTS_DIR: str
+    PATH_TO_SSH_KEY: str
+    ODOO_PORT: int
+    POSTGRES_PORT: int
+    DEBUGGER_PORT: int
 
 class CreateUserEnvironment():
 
@@ -39,32 +49,24 @@ class CreateUserEnvironment():
         self.backups = parser["env"]["BACKUP_DIR"]
         self.odoo_src_dir = parser["env"]["ODOO_SRC_DIR"]
         self.odoo_projects_dir = parser["env"]["ODOO_PROJECTS_DIR"]
-        self.debugger_port = parser["env"].get("DEBUGGER_PORT", constants.DEBUGGER_DEFAULT_PORT)
-        self.odoo_port = parser["env"].get("ODOO_PORT", constants.ODOO_DEFAULT_PORT)
-        self.postgres_port = parser["env"].get("POSTGRES_PORT", constants.POSTGRES_DEFAULT_PORT)
+        self.debugger_port = int(parser["env"].get("DEBUGGER_PORT", str(constants.DEBUGGER_DEFAULT_PORT)))
+        self.odoo_port = int(parser["env"].get("ODOO_PORT", str(constants.ODOO_DEFAULT_PORT)))
+        self.postgres_port = int(parser["env"].get("POSTGRES_PORT", str(constants.POSTGRES_DEFAULT_PORT)))
         path_to_ssh_key = parser["env"].get("PATH_TO_SSH_KEY", "")
         if isinstance(path_to_ssh_key, str) and platform.system() == "Windows":
             path_to_ssh_key = path_to_ssh_key.replace("\\","\\\\")
         self.path_to_ssh_key = path_to_ssh_key
     
     def create_env_file(self, local_env_file: str) -> None:
-        odoo_src_dir = self.get_from_user_odoo_src_dir()
-        
-        odoo_projects_src_dir = self.get_from_user_odoo_projects_src_dir()
-        backup_dir = self.get_from_user_backup_dir()
-        path_to_ssh_key = self.get_from_user_path_to_ssh_key()
-        odoo_port = self.get_from_user_odoo_port()
-        postgres_port = self.get_from_user_postgres_port()
-        debugger_port = self.get_from_user_debugger_port()
-        new_env_data = {
-            "BACKUP_DIR": backup_dir,
-            "ODOO_SRC_DIR": odoo_src_dir,
-            "ODOO_PROJECTS_DIR": odoo_projects_src_dir,
-            "PATH_TO_SSH_KEY": path_to_ssh_key,
-            "ODOO_PORT": odoo_port,
-            "POSTGRES_PORT": postgres_port,
-            "DEBUGGER_PORT": debugger_port,
-        }
+        new_env_data = EnvData(
+            BACKUP_DIR=self.get_from_user_backup_dir(),
+            ODOO_SRC_DIR=self.get_from_user_odoo_src_dir(),
+            ODOO_PROJECTS_DIR=self.get_from_user_odoo_projects_src_dir(),
+            PATH_TO_SSH_KEY=self.get_from_user_path_to_ssh_key(),
+            ODOO_PORT=self.get_from_user_odoo_port(),
+            POSTGRES_PORT=self.get_from_user_postgres_port(),
+            DEBUGGER_PORT=self.get_from_user_debugger_port(),
+        )
         with open(local_env_file, 'w') as env_file:
             for key_name, value in new_env_data.items():
                 string = f"{key_name}={value}\n"
@@ -117,7 +119,7 @@ class CreateUserEnvironment():
             ))
         return ssh_path
     
-    def get_from_user_odoo_port(self) -> str:
+    def get_from_user_odoo_port(self) -> int:
         default_port = constants.ODOO_DEFAULT_PORT
         port = input(translations.get_translation(translations.SET_ODOO_PORT).format(
                     DEFAULT_ODOO_PORT=default_port,
@@ -127,9 +129,9 @@ class CreateUserEnvironment():
         _logger.info(translations.get_translation(translations.YOU_SELECT_ODOO_PORT).format(
                 SELECTED_ODOO_PORT=default_port,
             ))
-        return port
+        return int(port)
     
-    def get_from_user_postgres_port(self) -> str:
+    def get_from_user_postgres_port(self) -> int:
         default_port = constants.POSTGRES_DEFAULT_PORT
         port = input(translations.get_translation(translations.SET_POSTGRES_PORT).format(
                     DEFAULT_POSTGRES_PORT=default_port,
@@ -139,9 +141,9 @@ class CreateUserEnvironment():
         _logger.info(translations.get_translation(translations.YOU_SELECT_POSTGRES_PORT).format(
                 SELECTED_POSTGRES_PORT=default_port,
             ))
-        return port
+        return int(port)
 
-    def get_from_user_debugger_port(self) -> str:
+    def get_from_user_debugger_port(self) -> int:
         default_port = constants.DEBUGGER_DEFAULT_PORT
         port = input(translations.get_translation(translations.SET_DEBUGGER_PORT).format(
                     DEFAULT_DEBUGGER_PORT=default_port,
@@ -151,4 +153,4 @@ class CreateUserEnvironment():
         _logger.info(translations.get_translation(translations.YOU_SELECT_DEBUGGER_PORT).format(
                 SELECTED_DEBUGGER_PORT=default_port,
             ))
-        return port
+        return int(port)
