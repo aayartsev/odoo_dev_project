@@ -2,7 +2,7 @@ import subprocess
 import platform
 import json
 import os
-from typing import Literal
+from typing import NamedTuple
 
 if platform.system() == "Linux":
     import pwd
@@ -15,6 +15,10 @@ from .host_config import Config
 from .inside_docker_app.logger import get_module_logger
 
 _logger = get_module_logger(__name__)
+
+class ContainerData(NamedTuple):
+    ports: list[int]
+    container_id: str
 
 class SystemChecker():
 
@@ -63,6 +67,38 @@ class SystemChecker():
                     result_list.append(new_record)
         if not result_list:
             self.config.project_env.build_image()
+    
+    def check_running_containers(self) -> None:
+        ports_to_check = [
+            self.config.user_env.odoo_port,
+            self.config.user_env.debugger_port,
+            self.config.user_env.postgres_port,
+        ]
+        def get_ports(data_port_string):
+            busy_ports = []
+            port_items =  data_port_string.split(",")
+            for port_item in port_items:
+                port_item = port_item.strip()
+                host_port = port_item.split("->")[1].split("/")[0]
+                busy_ports.append(int(host_port))
+            return busy_ports
+        process_result = subprocess.run(["docker",  "container", "ls", "--format", "'{{json .}}'"], capture_output=True)
+        output_string = process_result.stdout.decode("utf-8")
+        result_list = []
+        for record in output_string.split("\n"):
+            if record:
+                new_record = json.loads(record.replace("'", ""))
+                data_port_string = new_record["Ports"]
+                busy_ports = get_ports(data_port_string)
+                result_list.append(ContainerData(
+                    ports=busy_ports,
+                    container_id=new_record["ID"]
+                ))
+
+        for result in result_list:
+            used_ports = list(set(result.ports) & set(ports_to_check))
+            if used_ports:
+                subprocess.run(["docker",  "stop", result.container_id])
 
     def check_docker_compose(self) -> None:
         self.config.no_log_prefix = True

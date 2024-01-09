@@ -31,6 +31,7 @@ def main() -> None:
     project_environment.map_folders()
     project_environment.generate_dockerfile()
     system_checker.check_docker()
+    system_checker.check_running_containers()
     project_environment.generate_config_file()
     StartStringBuilder(config)
     project_environment.generate_docker_compose_file()
