@@ -12,7 +12,7 @@ _logger = get_module_logger(__name__)
 class VirtualenvChecker():
 
     def __init__(self, config):
-        self.docker_venv_dir = config.get("docker_venv_dir", False)
+        self.docker_venv_dir = config.get("docker_venv_dir", "")
         self.docker_project_dir = config["docker_project_dir"]
         self.requirements_txt = config.get("requirements_txt", [])
         self.odoo_requirements_path = os.path.join(config["docker_odoo_dir"], "requirements.txt")
@@ -24,13 +24,13 @@ class VirtualenvChecker():
     def is_virtualenv(self):
         return sys.prefix != sys.base_prefix
 
-    def find_file(self, start_dir, pattern):
+    def find_file(self, start_dir: str, pattern: str):
         for root, dirs, files in os.walk(start_dir):
             for name in files:
                 if name.find(pattern) >= 0:
                     return root + os.sep + name
 
-        return None
+        return ""
 
     def set_venv(self):
         # This is the heart of this script that puts you inside the virtual environment. 

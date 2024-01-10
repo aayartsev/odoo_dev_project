@@ -1,11 +1,10 @@
 import sys
 import os
 import configparser
-import contextlib
-from contextlib import closing
+from contextlib import closing, contextmanager
 
 from logger import get_module_logger
-from command_line_params import *
+import cli_params
 
 _logger = get_module_logger(__name__)
 
@@ -27,14 +26,14 @@ class OdooChecker():
         sys.path.append(self.odoo_dir)
 
         from passlib.hash import pbkdf2_sha512
-        import odoo
-        from odoo.tools import config
-        from odoo.api import Environment
-        from odoo.release import version_info as odoo_version_info
+        import odoo # type: ignore
+        from odoo.tools import config # type: ignore
+        from odoo.api import Environment # type: ignore
+        from odoo.release import version_info as odoo_version_info # type: ignore
         if odoo_version_info < (15, 0):
             environment_manage = Environment.manage
         else:
-            @contextlib.contextmanager
+            @contextmanager
             def environment_manage():
                 # Environment.manage is a no-op in Odoo 15+, but it
                 # emits a noisy warning so let's avoid it.
@@ -49,14 +48,14 @@ class OdooChecker():
         # Enable database manager
         config['list_db'] = True
         os.chdir(self.odoo_dir)
-        drop_db_name = self.args_dict.get(DB_DROP_PARAM, False)
-        get_db_list = self.args_dict.get(GET_DB_LIST_PARAM, False)
-        db_name = self.args_dict.get(D_PARAM, False)
-        db_restore_file_path = self.args_dict.get(DB_RESTORE_PARAM, False)
-        set_admin_pass = self.args_dict.get(SET_ADMIN_PASS_PARAM, False)
+        drop_db_name = self.args_dict.get(cli_params.DB_DROP_PARAM.replace("-", "_").strip("_"), False)
+        get_db_list = self.args_dict.get(cli_params.GET_DB_LIST_PARAM.replace("-", "_").strip("_"), False)
+        db_name = self.args_dict.get(cli_params.D_PARAM.replace("-", "_").strip("_"), False)
+        db_restore_file_path = self.args_dict.get(cli_params.DB_RESTORE_PARAM.replace("-", "_").strip("_"), False)
+        set_admin_pass = self.args_dict.get(cli_params.SET_ADMIN_PASS_PARAM.replace("-", "_").strip("_"), False)
         if db_restore_file_path:
             db_restore_file_path = os.path.join(self.odoo_dir, "../backups/", db_restore_file_path)
-        # Запускаем в контексте окружения Odoo
+        # Start Odoo in environment context
         with self.environment_manage():
 
             if get_db_list:

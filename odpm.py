@@ -5,7 +5,7 @@ import sys
 from dev_project.check_system import SystemChecker
 from dev_project.host_project_env import CreateProjectEnvironment
 from dev_project.host_user_env import CreateUserEnvironment
-from dev_project.inside_docker_app.parse_args import ArgumentParser
+from dev_project.inside_docker_app.parse_args import args
 from dev_project.host_start_string_builder import StartStringBuilder
 from dev_project.project_dir_manager import ProjectDirManager
 from dev_project.host_config import Config
@@ -14,17 +14,15 @@ from dev_project.inside_docker_app.logger import get_module_logger
 
 _logger = get_module_logger(__name__)
 
-def main():
+def main() -> None:
     program_dir_path = os.path.dirname(os.path.abspath(__file__))
-    start_dir_path = os.getenv("PWD")
-    args_list = sys.argv[1:]
-    args_dict = ArgumentParser(args_list).args_dict
-    pd_manager = ProjectDirManager(start_dir_path, args_dict, program_dir_path)
+    start_dir_path = os.getenv("PWD", "")
+    pd_manager = ProjectDirManager(start_dir_path, args, program_dir_path)
     user_environment = CreateUserEnvironment(pd_manager)
     pd_manager.check_project_dir()
     config = Config(
         pd_manager,
-        args_dict,
+        args,
         program_dir_path,
         user_environment,
     )
@@ -33,6 +31,7 @@ def main():
     project_environment.map_folders()
     project_environment.generate_dockerfile()
     system_checker.check_docker()
+    system_checker.check_running_containers()
     project_environment.generate_config_file()
     StartStringBuilder(config)
     project_environment.generate_docker_compose_file()
