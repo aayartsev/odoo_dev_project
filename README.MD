@@ -1,4 +1,4 @@
-[![ru](https://img.shields.io/badge/lang-ru-green.svg)](https://github.com/aayartsev/odoo_dev_project/blob/3.0-add_types/README-RU.MD)
+[![ru](https://img.shields.io/badge/lang-ru-green.svg)](https://github.com/aayartsev/odoo_dev_project/blob/3.0-beta/README-RU.MD)
 
 # Odoo Developers Project Manager
 
