@@ -1,6 +1,43 @@
+import os
+import gettext
 import locale
 
-USER_NOT_IN_DOCKER_GROUP = """You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME}"""
+program_dir_path = os.path.dirname(os.path.abspath(__file__))
+# 
+class Translator(object):
+    
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(Translator, cls).__new__(cls)
+        return cls.instance
+    
+    def __init__(self) -> None:
+        self.app_locale = ""
+        if not self.app_locale:
+            self.app_locale =locale.getdefaultlocale()[0] or ""
+        self.set_locale()
+
+    def update_locale(self, app_locale: str) -> None:
+        self.app_locale = app_locale
+        self.set_locale()
+    
+    def set_locale(self) -> None:
+        program_dir_path = os.path.dirname(os.path.abspath(__file__))
+        print("program_dir_path", program_dir_path)
+        self.gettext_locale = gettext.translation("main", localedir=os.path.join(program_dir_path, "i18n"), languages=[self.app_locale])
+        self.gettext_locale.install()
+
+_ = Translator().gettext_locale.gettext
+
+current_locale = locale.getdefaultlocale()[0] or ""
+def get_translation(string_to_translate):
+    # current_locale = locale.getdefaultlocale()
+    translated_string = translations.get(string_to_translate, {}).get(current_locale[0], "")
+    if not translated_string:
+        translated_string = string_to_translate
+    return translated_string
+
+USER_NOT_IN_DOCKER_GROUP = ("""You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME}""")
 """run this command as root or sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}"""
 """then reboot your computer"""
 IS_GIT_INSTALLED = "Did you install git?"
@@ -161,10 +198,3 @@ translations = {
         "ru_RU": """Вы выбрали следующую версию odoo: {SELECTED_ODOO_VERSION}\n"""
     }
 }
-
-def get_translation(string_to_translate):
-    current_locale = locale.getdefaultlocale()
-    translated_string = translations.get(string_to_translate, {}).get(current_locale[0], False)
-    if not translated_string:
-        translated_string = string_to_translate
-    return translated_string

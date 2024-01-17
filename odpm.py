@@ -2,6 +2,7 @@
 import os
 import sys
 
+from dev_project.translations import _
 from dev_project.check_system import SystemChecker
 from dev_project.host_project_env import CreateProjectEnvironment
 from dev_project.host_user_env import CreateUserEnvironment
