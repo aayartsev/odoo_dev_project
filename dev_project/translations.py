@@ -23,27 +23,20 @@ class Translator(object):
     
     def set_locale(self) -> None:
         program_dir_path = os.path.dirname(os.path.abspath(__file__))
-        print("program_dir_path", program_dir_path)
         self.gettext_locale = gettext.translation("main", localedir=os.path.join(program_dir_path, "i18n"), languages=[self.app_locale])
         self.gettext_locale.install()
 
 _ = Translator().gettext_locale.gettext
 
 current_locale = locale.getdefaultlocale()[0] or ""
-def get_translation(string_to_translate):
-    # current_locale = locale.getdefaultlocale()
-    translated_string = translations.get(string_to_translate, {}).get(current_locale[0], "")
-    if not translated_string:
-        translated_string = string_to_translate
-    return translated_string
 
-USER_NOT_IN_DOCKER_GROUP = ("""You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME}""")
+USER_NOT_IN_DOCKER_GROUP = """You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME}"""
 """run this command as root or sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}"""
 """then reboot your computer"""
 IS_GIT_INSTALLED = "Did you install git?"
 CAN_NOT_CONNECT_DOCKER = "Cannot connect to the Docker daemon. Is the docker daemon running?"
 CAN_NOT_GET_DOCKER_COMPOSE_INFO = "Cannot get docker-compose info, did you install it?"
-CAN_NOT_CREATE_DIR = "Cannot create dir, {dir_path}, please check it"                
+CAN_NOT_CREATE_DIR = "Cannot create dir, {dir_path}, please check it"
 CHECK_ODOO_REPO = """Your odoo src directory {odoo_src_dir} is not git repository."""
 "Please fix it, or delete and clone its repo again: "
 "git clone https://github.com/odoo/odoo.git"
@@ -198,3 +191,9 @@ translations = {
         "ru_RU": """Вы выбрали следующую версию odoo: {SELECTED_ODOO_VERSION}\n"""
     }
 }
+
+def get_translation(string_to_translate):
+    translated_string = translations.get(string_to_translate, {}).get(current_locale[0], "")
+    if not translated_string:
+        translated_string = string_to_translate
+    return translated_string

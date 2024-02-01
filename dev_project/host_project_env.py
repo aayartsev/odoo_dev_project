@@ -65,8 +65,11 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             MappedPath(local=self.user_env.backups, docker=self.config.docker_backups_dir),
             MappedPath(local=os.path.join(self.config.docker_home, ".local"), docker=str(pathlib.PurePosixPath(self.config.docker_project_dir, ".local"))),
             MappedPath(local=os.path.join(self.config.docker_home, ".cache"), docker=str(pathlib.PurePosixPath(self.config.docker_project_dir, ".cache"))),
-            MappedPath(local=self.config.developing_project.project_path, docker=self.config.docker_odoo_project_dir_path),
         ]
+        if self.config.developing_project.project_path:
+            self.mapped_folders.append(
+                MappedPath(local=self.config.developing_project.project_path, docker=self.config.docker_odoo_project_dir_path),
+            )
         for dependency_path in self.config.dependencies:
             dependency_project = self.handle_git_link(dependency_path)
             docker_dependency_project_path = str(pathlib.PurePosixPath(self.config.docker_extra_addons, dependency_project.inside_docker_path))

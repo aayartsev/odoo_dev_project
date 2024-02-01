@@ -10,13 +10,16 @@ from . import constants
 
 @dataclass
 class OdooProjectData(object):
+    
     server:str
     author:str
     name:str
-
 class HandleOdooProjectGitLink():
 
     def __init__(self, gitlink:str, path_to_ssh_key: str, odoo_projects_dir: str):
+        self.is_true =True
+        if not gitlink:
+            self.is_true = False
         self.gitlink = gitlink
         self.path_to_ssh_key = path_to_ssh_key
         self.odoo_projects_dir = odoo_projects_dir
@@ -57,15 +60,22 @@ class HandleOdooProjectGitLink():
 
     def parse_local_filesystem(self) -> OdooProjectData:
         local_path = self.gitlink.replace("file://","")
-        if local_path[-1] == "/":
-            local_path = local_path[:-1]
+        if local_path:
+            if local_path[-1] == "/":
+                local_path = local_path[:-1]
 
-        project_name = os.path.basename(local_path)
-        return OdooProjectData(
-            server="",
-            author="",
-            name=project_name,
-        )
+            project_name = os.path.basename(local_path)
+            return OdooProjectData(
+                server="",
+                author="",
+                name=project_name,
+            )
+        else:
+            return OdooProjectData(
+                server="",
+                author="",
+                name="",
+            )
 
 
     def parse_http(self) -> OdooProjectData:
@@ -99,9 +109,10 @@ class HandleOdooProjectGitLink():
                 self.project_data.name,
             ))
         local_path = self.gitlink.replace("file://","")
-        if self.link_type in [constants.GITLINK_TYPE_FILE]:
-            if local_path[-1] == "/":
-                local_path = local_path[:-1]
+        if local_path:
+            if self.link_type in [constants.GITLINK_TYPE_FILE]:
+                if local_path[-1] == "/":
+                    local_path = local_path[:-1]
         return local_path
 
     def get_dir_to_clone(self) -> None:
@@ -131,3 +142,6 @@ class HandleOdooProjectGitLink():
             subprocess.run(["git", "clone", self.gitlink])
         else:
             subprocess.call(f'git clone {self.gitlink} --config core.sshCommand="ssh -i {self.path_to_ssh_key}"', shell=True)
+
+    def __bool__(self):
+        return self.is_true

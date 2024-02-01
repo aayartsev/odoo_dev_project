@@ -84,9 +84,8 @@ class Config():
         # init user settings from json file
         self.get_user_settings_json()
         self.get_user_settings()
-        self.init_modules = self.config_dict.get("init_modules", False)
-        self.update_modules = self.config_dict.get("update_modules", False)
-        self.beautify_module_list()
+        self.init_modules = self.beautify_module_list(self.config_dict.get("init_modules"))
+        self.update_modules = self.beautify_module_list(self.config_dict.get("update_modules"))
         self.db_creation_data = self.config_dict.get("db_creation_data", {})
         self.update_git_repos = self.config_dict.get("update_git_repos", False)
         self.clean_git_repos = self.config_dict.get("clean_git_repos", False)
@@ -139,10 +138,13 @@ class Config():
         # prepare of mapped dirs for odoo addons
         self.docker_dirs_with_addons = []
         self.docker_extra_addons = str(pathlib.PurePosixPath(self.docker_project_dir, "extra-addons"))
-        self.docker_odoo_project_dir_path = str(pathlib.PurePosixPath(self.docker_extra_addons, self.developing_project.project_data.name))
+        if self.developing_project:
+            self.docker_odoo_project_dir_path = str(pathlib.PurePosixPath(self.docker_extra_addons, self.developing_project.project_data.name))
+            self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
+
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "addons")))
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "odoo", "addons")))
-        self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
+        
 
         self.docker_path_odoo_conf = str(pathlib.PurePosixPath(self.docker_project_dir, "odoo.conf"))
         self.docker_venv_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "venv"))
@@ -256,14 +258,17 @@ class Config():
                 ))
 
     
-    def beautify_module_list(self) -> None:
-        for module_list in [self.init_modules, self.update_modules]:
-            if isinstance(module_list, list):
-                module_list = ",".join(module_list)
-            if isinstance(module_list, str):
-                module_list = module_list.split(",")
-                module_list = [module.strip() for module in module_list]
-                module_list = ",".join(module_list)
+    def beautify_module_list(self, modules) -> str:
+        if not modules:
+            return ""
+        if isinstance(modules, list):
+            modules = ",".join(modules)
+        if isinstance(modules, str):
+            modules = modules.split(",")
+            modules = [module.strip() for module in modules]
+            modules = ",".join(modules)
+        return modules
+        
     
     def create_default_user_setting_json_content(self) -> UserSettingsJson:
         user_settings_content = UserSettingsJson(
