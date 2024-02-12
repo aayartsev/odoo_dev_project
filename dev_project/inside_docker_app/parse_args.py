@@ -5,26 +5,7 @@ try:
 except:
     import cli_params
 
-class FooAction(argparse.Action):
-
-    def __init__(self, option_strings, dest, nargs=None, **kwargs):
-        if nargs is not None:
-            raise ValueError("nargs not allowed")
-        new_kwargs = dict(**kwargs)
-        new_kwargs.update({
-            "default": "test"
-        })
-        super().__init__(option_strings, dest, **new_kwargs)
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        print('%r %r %r' % (namespace, values, option_string))
-        setattr(namespace, self.dest, values)
-
-class MyArgumentParser(argparse.ArgumentParser):
-    def convert_arg_line_to_args(self, arg_line):
-        return arg_line.split()
-
-arg_parser = MyArgumentParser(
+arg_parser = argparse.ArgumentParser(
                     prog="odpm",
                     description="Odoo Developer Project Manager",
                     epilog="Developing is not configuration")
@@ -32,7 +13,10 @@ arg_parser = MyArgumentParser(
 arg_parser.add_argument(
     cli_params.INIT_PARAM,
     help="Use this param to initiate dir as odpm project",
-    action=FooAction
+    nargs="?",
+    default=None,
+    const="",
+    type=str,
 )
 
 arg_parser.add_argument(

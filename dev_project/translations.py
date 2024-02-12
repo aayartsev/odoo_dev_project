@@ -1,9 +1,10 @@
 import os
 import gettext
 import locale
+from . import constants
 
 program_dir_path = os.path.dirname(os.path.abspath(__file__))
-# 
+
 class Translator(object):
     
     def __new__(cls):
@@ -12,9 +13,7 @@ class Translator(object):
         return cls.instance
     
     def __init__(self) -> None:
-        self.app_locale = ""
-        if not self.app_locale:
-            self.app_locale =locale.getdefaultlocale()[0] or ""
+        self.app_locale = locale.getdefaultlocale()[0] or constants.DEFAULT_LOCALE
         self.set_locale()
 
     def update_locale(self, app_locale: str) -> None:

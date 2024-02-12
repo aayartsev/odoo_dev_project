@@ -104,3 +104,5 @@ ODOO_VERSION_DEFAULT_ENV = {
         "debian_version": DEFAULT_DEBIAN_VERSION,
     },
 }
+
+DEFAULT_LOCALE = "en_US"
