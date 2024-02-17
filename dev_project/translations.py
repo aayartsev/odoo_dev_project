@@ -21,11 +21,12 @@ class Translator(object):
         self.set_locale()
     
     def set_locale(self) -> None:
-        program_dir_path = os.path.dirname(os.path.abspath(__file__))
-        self.gettext_locale = gettext.translation("main", localedir=os.path.join(program_dir_path, "i18n"), languages=[self.app_locale])
-        self.gettext_locale.install()
+        # program_dir_path = os.path.dirname(os.path.abspath(__file__))
+        # self.gettext_locale = gettext.translation("main", localedir=os.path.join(program_dir_path, "i18n"), languages=[self.app_locale])
+        # self.gettext_locale.install()
+        pass
 
-_ = Translator().gettext_locale.gettext
+_ = Translator() #.gettext_locale.gettext
 
 current_locale = locale.getdefaultlocale()[0] or ""
 
