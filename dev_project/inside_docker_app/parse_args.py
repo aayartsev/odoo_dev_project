@@ -15,7 +15,7 @@ arg_parser.add_argument(
     help="Use this param to initiate dir as odpm project",
     nargs="?",
     default=None,
-    const="",
+    const=True,
     type=str,
 )
 

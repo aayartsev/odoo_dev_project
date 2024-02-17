@@ -286,7 +286,7 @@ class Config():
             check_system=self.config_json_content.get("check_system", True),
             db_manager_password=self.config_json_content.get("db_manager_password", "1"),
             dev_mode=self.config_json_content.get("dev_mode", False),
-            developing_project=self.config_json_content.get("developing_project", self.pd_manager.init),
+            developing_project=self.config_json_content.get("developing_project", self.pd_manager.init or ""),
             pre_commit_map_files=self.config_json_content.get("pre_commit_map_files", []),
         )
         return user_settings_content

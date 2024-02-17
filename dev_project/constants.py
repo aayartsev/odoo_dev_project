@@ -80,7 +80,7 @@ ODOO_VERSION_DEFAULT_ENV = {
         "debian_version": DEFAULT_DEBIAN_VERSION,
     },
     "16.0": {
-        "python_version": DEFAULT_PYTHON_VERSION,
+        "python_version": "3.10",
         "debian_version": DEFAULT_DEBIAN_VERSION,
     },
     "15.0": {
