@@ -127,6 +127,8 @@ class SystemChecker():
                         dir_path=dir_path,
                     ))
                     exit(1)
+        if not os.path.exists(self.config.user_env.odoo_src_dir):
+            os.mkdir(self.config.user_env.odoo_src_dir)
         os.chdir(self.config.user_env.odoo_src_dir)
         odoo_src_state_bytes = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         odoo_src_state_string = odoo_src_state_bytes.stdout.decode("utf-8")
