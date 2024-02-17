@@ -305,12 +305,10 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             json.dump(content, outfile, indent=4)
     
     def clone_odoo(self):
-        odoo_src_project = HandleOdooProjectGitLink(
-            constants.ODOO_GIT_LINK,
-            self.user_env.path_to_ssh_key,
-            self.user_env.odoo_src_dir,
-        )
-        odoo_src_project.build_project()
+        if not self.config.user_env.path_to_ssh_key:
+            subprocess.run(["git", "clone", self.user_env.odoo_src_dir])
+        else:
+            subprocess.call(f'git clone {self.config.user_env.odoo_src_dir} --config core.sshCommand="ssh -i {self.config.user_env.path_to_ssh_key}"', shell=True)
     
     def build_image(self):
         os.chdir(self.config.project_dir)
