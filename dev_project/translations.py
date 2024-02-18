@@ -30,9 +30,7 @@ _ = Translator() #.gettext_locale.gettext
 
 current_locale = locale.getdefaultlocale()[0] or ""
 
-USER_NOT_IN_DOCKER_GROUP = """You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME}"""
-"""run this command as root or sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}"""
-"""then reboot your computer"""
+USER_NOT_IN_DOCKER_GROUP = """You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME} run this command as root or sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER} then reboot your computer"""
 IS_GIT_INSTALLED = "Did you install git?"
 CAN_NOT_CONNECT_DOCKER = "Cannot connect to the Docker daemon. Is the docker daemon running?"
 CAN_NOT_GET_DOCKER_COMPOSE_INFO = "Cannot get docker-compose info, did you install it?"
@@ -70,9 +68,7 @@ YOU_SELECT_ODOO_VERSION = """You select this odoo version: {SELECTED_ODOO_VERSIO
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
-        "ru_RU": """Вам необходимо добавить пользователя {CURRENT_USER} в группу {LINUX_DOCKER_GROUPNAME}\n"""
-                 """запустите следующую команду от имени root или с помощью sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}\n"""
-                 """Затем перезапустите ваш компьютер""",
+        "ru_RU": """Вам необходимо добавить пользователя {CURRENT_USER} в группу {LINUX_DOCKER_GROUPNAME}\n запустите следующую команду от имени root или с помощью sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}\n Затем перезапустите ваш компьютер""",
     },
     IS_GIT_INSTALLED:{
         "ru_RU": "Вы установили git?"

@@ -37,6 +37,8 @@ CURRENT_PASSWORD = CURRENT_USER
 LINUX_DOCKER_GROUPNAME = "docker"
 if ARCH == "x86_64":
     ARCH = "amd64"
+if ARCH == "aarch64":
+    ARCH = "arm64"
 
 if platform.system() == "Linux":
     import pwd

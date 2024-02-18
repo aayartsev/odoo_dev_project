@@ -15,6 +15,7 @@ from . import constants
 from . import translations
 from .host_config import Config
 from .protocols import CreateProjectEnvironmentProtocol
+from .inside_docker_app.utils import delete_files_in_directory
 
 from .inside_docker_app.logger import get_module_logger
 
@@ -140,7 +141,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         
         mapped_volumes = "\n"
         for mapped_volume in self.mapped_folders:
-            mapped_volumes += " " * 6 + f"- {mapped_volume.local}:{mapped_volume.docker}\n"
+            mapped_volumes += " " * 6 + f"- {mapped_volume.local}:{mapped_volume.docker}:Z\n"
             if not os.path.exists(mapped_volume.local):
                 path = Path(mapped_volume.local)
                 path.mkdir(parents=True)
@@ -305,10 +306,12 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             json.dump(content, outfile, indent=4)
     
     def clone_odoo(self):
+        os.chdir(os.path.join(self.user_env.odoo_src_dir, ".."))
+        delete_files_in_directory(self.user_env.odoo_src_dir)
         if not self.config.user_env.path_to_ssh_key:
-            subprocess.run(["git", "clone", self.user_env.odoo_src_dir])
+            subprocess.run(["git", "clone", constants.ODOO_GIT_LINK])
         else:
-            subprocess.call(f'git clone {self.config.user_env.odoo_src_dir} --config core.sshCommand="ssh -i {self.config.user_env.path_to_ssh_key}"', shell=True)
+            subprocess.call(f'git clone {constants.ODOO_GIT_LINK} --config core.sshCommand="ssh -i {self.config.user_env.path_to_ssh_key}"', shell=True)
     
     def build_image(self):
         os.chdir(self.config.project_dir)
