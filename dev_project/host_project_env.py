@@ -15,10 +15,12 @@ from . import constants
 from . import translations
 from .host_config import Config
 from .protocols import CreateProjectEnvironmentProtocol
+from .inside_docker_app.utils import delete_files_in_directory
 
 from .inside_docker_app.logger import get_module_logger
 
 _logger = get_module_logger(__name__)
+_ = translations._
 
 class MappedPath(NamedTuple):
     local: str
@@ -65,8 +67,11 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             MappedPath(local=self.user_env.backups, docker=self.config.docker_backups_dir),
             MappedPath(local=os.path.join(self.config.docker_home, ".local"), docker=str(pathlib.PurePosixPath(self.config.docker_project_dir, ".local"))),
             MappedPath(local=os.path.join(self.config.docker_home, ".cache"), docker=str(pathlib.PurePosixPath(self.config.docker_project_dir, ".cache"))),
-            MappedPath(local=self.config.developing_project.project_path, docker=self.config.docker_odoo_project_dir_path),
         ]
+        if self.config.developing_project.project_path:
+            self.mapped_folders.append(
+                MappedPath(local=self.config.developing_project.project_path, docker=self.config.docker_odoo_project_dir_path),
+            )
         for dependency_path in self.config.dependencies:
             dependency_project = self.handle_git_link(dependency_path)
             docker_dependency_project_path = str(pathlib.PurePosixPath(self.config.docker_extra_addons, dependency_project.inside_docker_path))
@@ -136,7 +141,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         
         mapped_volumes = "\n"
         for mapped_volume in self.mapped_folders:
-            mapped_volumes += " " * 6 + f"- {mapped_volume.local}:{mapped_volume.docker}\n"
+            mapped_volumes += " " * 6 + f"- {mapped_volume.local}:{mapped_volume.docker}:Z\n"
             if not os.path.exists(mapped_volume.local):
                 path = Path(mapped_volume.local)
                 path.mkdir(parents=True)
@@ -174,14 +179,45 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             except:
                 current_branch_float = 0.0
             if current_branch_float and current_branch_string != self.config.odoo_version:
-                subprocess.run(["git", "stash"], capture_output=True)
-                subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
+                self.check_odoo_version_git_branch(source_dir)
             if self.config.clean_git_repos:
                 subprocess.run(["git", "stash"], capture_output=True)
                 subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
             if self.config.update_git_repos:
                 subprocess.run(["git", "pull"], capture_output=True)
-
+    
+    def check_odoo_version_git_branch(self, source_dir) -> None:
+        os.chdir(source_dir)
+        subprocess.run(["git", "stash"], capture_output=True)
+        branch_commit_bytes = subprocess.run(["git", "rev-parse", "--verify", self.config.odoo_version], capture_output=True)
+        branch_commit_string = branch_commit_bytes.stdout.decode("utf-8").strip()
+        if "fatal" in branch_commit_string:
+            newest_version = self.get_odoo_latest_version(source_dir)
+            subprocess.run(["git", "checkout", str(newest_version)])
+            subprocess.run(["git", "pull"])
+            newest_version = self.get_odoo_latest_version(source_dir)
+            if str(newest_version) == self.config.odoo_version:
+                subprocess.run(["git", "checkout", str(newest_version)])
+            else:
+                _logger.error(_(f"Version {self.config.odoo_version} not exists in git repository {source_dir}"))
+                exit(1)
+        else:
+            subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
+    
+    def get_odoo_latest_version(self, source_dir) -> float:
+        os.chdir(source_dir)
+        all_remote_branches_bytes = subprocess.run(["git", "branch", "-r", ], capture_output=True)
+        all_remote_branches_string = all_remote_branches_bytes.stdout.decode("utf-8").strip()
+        list_of_versions = []
+        all_branches_list = all_remote_branches_string.split("\n")
+        for branch_name in all_branches_list:
+            try:
+                branch_version = float(branch_name)
+                list_of_versions.append(branch_version)
+            except:
+                continue
+        newest_version = sorted(list_of_versions)[-1]
+        return newest_version
 
     
     def update_links(self) -> None:
@@ -270,12 +306,12 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             json.dump(content, outfile, indent=4)
     
     def clone_odoo(self):
-        odoo_src_project = HandleOdooProjectGitLink(
-            constants.ODOO_GIT_LINK,
-            self.user_env.path_to_ssh_key,
-            self.user_env.odoo_src_dir,
-        )
-        odoo_src_project.build_project()
+        os.chdir(os.path.join(self.user_env.odoo_src_dir, ".."))
+        delete_files_in_directory(self.user_env.odoo_src_dir)
+        if not self.config.user_env.path_to_ssh_key:
+            subprocess.run(["git", "clone", constants.ODOO_GIT_LINK])
+        else:
+            subprocess.call(f'git clone {constants.ODOO_GIT_LINK} --config core.sshCommand="ssh -i {self.config.user_env.path_to_ssh_key}"', shell=True)
     
     def build_image(self):
         os.chdir(self.config.project_dir)

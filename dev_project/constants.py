@@ -37,6 +37,8 @@ CURRENT_PASSWORD = CURRENT_USER
 LINUX_DOCKER_GROUPNAME = "docker"
 if ARCH == "x86_64":
     ARCH = "amd64"
+if ARCH == "aarch64":
+    ARCH = "arm64"
 
 if platform.system() == "Linux":
     import pwd
@@ -80,7 +82,7 @@ ODOO_VERSION_DEFAULT_ENV = {
         "debian_version": DEFAULT_DEBIAN_VERSION,
     },
     "16.0": {
-        "python_version": DEFAULT_PYTHON_VERSION,
+        "python_version": "3.10",
         "debian_version": DEFAULT_DEBIAN_VERSION,
     },
     "15.0": {
@@ -104,3 +106,5 @@ ODOO_VERSION_DEFAULT_ENV = {
         "debian_version": DEFAULT_DEBIAN_VERSION,
     },
 }
+
+DEFAULT_LOCALE = "en_US"

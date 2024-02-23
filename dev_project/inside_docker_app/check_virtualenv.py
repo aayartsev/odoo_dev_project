@@ -5,6 +5,7 @@ import shutil
 
 from pip._internal.operations.freeze import freeze
 
+from utils import delete_files_in_directory
 from logger import get_module_logger
 
 _logger = get_module_logger(__name__)
@@ -44,18 +45,7 @@ class VirtualenvChecker():
         os.environ["PATH"] = venv_bin_dir + os.pathsep + os.environ["PATH"]
         # inserting path to the venv`s dirs in system path
         sys.path.insert(1, venv_lib_path)
-    
-    def delete_files_in_directory(self, directory_path):
-        for filename in os.listdir(directory_path):
-            file_path = os.path.join(directory_path, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                _logger.warning(f"Failed to delete {file_path}. Reason: {e}")
-                exit()
+
 
     def check_packages_for_install(self) -> None:
         list_of_packages = [pkg for pkg in freeze()]
@@ -65,7 +55,7 @@ class VirtualenvChecker():
 
     
     def recreate_venv(self):
-        self.delete_files_in_directory(self.docker_venv_dir)
+        delete_files_in_directory(self.docker_venv_dir)
         self.create_venv()
         self.set_venv()
         exit_code = os.system(f"""python3 -m pip install -r {self.odoo_requirements_path}""")

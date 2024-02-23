@@ -13,6 +13,10 @@ arg_parser = argparse.ArgumentParser(
 arg_parser.add_argument(
     cli_params.INIT_PARAM,
     help="Use this param to initiate dir as odpm project",
+    nargs="?",
+    default=None,
+    const=True,
+    type=str,
 )
 
 arg_parser.add_argument(
@@ -42,6 +46,7 @@ arg_parser.add_argument(
 arg_parser.add_argument(
     cli_params.START_PRECOMMIT_PARAM,
     help="""Will start pre-commit for your project inside container, specified in parameter "developing_project" from file "user_settings.json" """,
+    action='store_true',
 )
 
 arg_parser.add_argument(

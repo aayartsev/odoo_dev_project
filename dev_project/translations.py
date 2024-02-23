@@ -1,12 +1,40 @@
+import os
+import gettext
 import locale
+from . import constants
 
-USER_NOT_IN_DOCKER_GROUP = """You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME}"""
-"""run this command as root or sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}"""
-"""then reboot your computer"""
+program_dir_path = os.path.dirname(os.path.abspath(__file__))
+
+class Translator(object):
+    
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            cls.instance = super(Translator, cls).__new__(cls)
+        return cls.instance
+    
+    def __init__(self) -> None:
+        self.app_locale = locale.getdefaultlocale()[0] or constants.DEFAULT_LOCALE
+        self.set_locale()
+
+    def update_locale(self, app_locale: str) -> None:
+        self.app_locale = app_locale
+        self.set_locale()
+    
+    def set_locale(self) -> None:
+        # program_dir_path = os.path.dirname(os.path.abspath(__file__))
+        # self.gettext_locale = gettext.translation("main", localedir=os.path.join(program_dir_path, "i18n"), languages=[self.app_locale])
+        # self.gettext_locale.install()
+        pass
+
+_ = Translator() #.gettext_locale.gettext
+
+current_locale = locale.getdefaultlocale()[0] or ""
+
+USER_NOT_IN_DOCKER_GROUP = """You need to add your user {CURRENT_USER} to group {LINUX_DOCKER_GROUPNAME} run this command as root or sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER} then reboot your computer"""
 IS_GIT_INSTALLED = "Did you install git?"
 CAN_NOT_CONNECT_DOCKER = "Cannot connect to the Docker daemon. Is the docker daemon running?"
 CAN_NOT_GET_DOCKER_COMPOSE_INFO = "Cannot get docker-compose info, did you install it?"
-CAN_NOT_CREATE_DIR = "Cannot create dir, {dir_path}, please check it"                
+CAN_NOT_CREATE_DIR = "Cannot create dir, {dir_path}, please check it"
 CHECK_ODOO_REPO = """Your odoo src directory {odoo_src_dir} is not git repository."""
 "Please fix it, or delete and clone its repo again: "
 "git clone https://github.com/odoo/odoo.git"
@@ -40,9 +68,7 @@ YOU_SELECT_ODOO_VERSION = """You select this odoo version: {SELECTED_ODOO_VERSIO
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
-        "ru_RU": """Вам необходимо добавить пользователя {CURRENT_USER} в группу {LINUX_DOCKER_GROUPNAME}\n"""
-                 """запустите следующую команду от имени root или с помощью sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}\n"""
-                 """Затем перезапустите ваш компьютер""",
+        "ru_RU": """Вам необходимо добавить пользователя {CURRENT_USER} в группу {LINUX_DOCKER_GROUPNAME}\n запустите следующую команду от имени root или с помощью sudo:  usermod -a -G {LINUX_DOCKER_GROUPNAME} {CURRENT_USER}\n Затем перезапустите ваш компьютер""",
     },
     IS_GIT_INSTALLED:{
         "ru_RU": "Вы установили git?"
@@ -163,8 +189,7 @@ translations = {
 }
 
 def get_translation(string_to_translate):
-    current_locale = locale.getdefaultlocale()
-    translated_string = translations.get(string_to_translate, {}).get(current_locale[0], False)
+    translated_string = translations.get(string_to_translate, {}).get(current_locale[0], "")
     if not translated_string:
         translated_string = string_to_translate
     return translated_string
