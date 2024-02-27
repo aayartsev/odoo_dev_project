@@ -79,7 +79,11 @@ class SystemChecker():
             port_items =  data_port_string.split(",")
             for port_item in port_items:
                 port_item = port_item.strip()
-                host_port = port_item.split("->")[1].split("/")[0]
+                host_port = port_item.split("->")
+                if len(host_port) >= 2:
+                    host_port = host_port[1].split("/")[0]
+                else:
+                    host_port = 0
                 busy_ports.append(int(host_port))
             return busy_ports
         process_result = subprocess.run(["docker",  "container", "ls", "--format", "'{{json .}}'"], capture_output=True)
