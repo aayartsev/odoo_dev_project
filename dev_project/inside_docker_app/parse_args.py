@@ -52,6 +52,10 @@ arg_parser.add_argument(
 arg_parser.add_argument(
     cli_params.SET_ADMIN_PASS_PARAM,
     help="""When you specify the value of this parameter, the administrator account (user with id = 2) will have its password and login changed to those specified in the "db_default_admin_login" and "db_default_admin_password" parameters in the "user_settings.json" configuration file. Be sure to specify the name of the database for which you want to change the password and use the "-d database_name" parameter""",
+    nargs="?",
+    default=None,
+    const=True,
+    type=str,
 )
 
 arg_parser.add_argument(

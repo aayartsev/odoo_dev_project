@@ -26,6 +26,7 @@ class OdooChecker():
         sys.path.append(self.odoo_dir)
 
         from passlib.hash import pbkdf2_sha512
+        import passlib
         import odoo # type: ignore
         from odoo.tools import config # type: ignore
         from odoo.api import Environment # type: ignore
@@ -42,7 +43,11 @@ class OdooChecker():
         if self.db_manager_password:
             if odoo_version_info[0] not in [11,12]:
                 db_manager_password_crypt = pbkdf2_sha512.using(rounds=1).hash(self.db_manager_password)
-                self.odoo_config_data["options"]["admin_passwd"] = db_manager_password_crypt
+            else:
+                crypt_context = passlib.context.CryptContext(schemes=['pbkdf2_sha512', 'plaintext'],
+                             deprecated=['plaintext'])
+                db_manager_password_crypt = crypt_context.encrypt(self.db_manager_password)
+            self.odoo_config_data["options"]["admin_passwd"] = db_manager_password_crypt
         self.create_config_file()
         odoo.tools.config.parse_config(["-c", self.docker_path_odoo_conf])
         # Enable database manager
@@ -89,8 +94,17 @@ class OdooChecker():
 
             if set_admin_pass and db_name:
                 new_password = self.db_default_admin_password
-                password_crypt = pbkdf2_sha512.using(rounds=1).hash(new_password)
-                sql_command = f""" UPDATE res_users SET password = '{password_crypt}', login = '{self.db_default_admin_login}' WHERE id = 2;"""
+                if odoo_version_info[0] not in [11,12]:
+                    db_manager_password_crypt = pbkdf2_sha512.using(rounds=1).hash(self.db_manager_password)
+                    password_crypt = pbkdf2_sha512.using(rounds=1).hash(new_password)
+                    sql_command = f""" UPDATE res_users SET password = '{password_crypt}', login = '{self.db_default_admin_login}' WHERE id = 2;"""
+                else:
+                    crypt_context = passlib.context.CryptContext(schemes=['pbkdf2_sha512', 'plaintext'],
+                                deprecated=['plaintext'])
+                    password_crypt = crypt_context.encrypt(new_password)
+                    sql_command = f""" UPDATE res_users SET password_crypt = '{password_crypt}', login = '{self.db_default_admin_login}' WHERE id = 1;"""
+                
+                
                 db = odoo.sql_db.db_connect(db_name)
                 with closing(db.cursor()) as cr:
                     cr.execute(sql_command, log_exceptions=True)
