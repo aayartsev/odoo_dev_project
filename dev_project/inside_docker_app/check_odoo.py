@@ -97,14 +97,25 @@ class OdooChecker():
                 if odoo_version_info[0] not in [11,12]:
                     db_manager_password_crypt = pbkdf2_sha512.using(rounds=1).hash(self.db_manager_password)
                     password_crypt = pbkdf2_sha512.using(rounds=1).hash(new_password)
-                    sql_command = f""" UPDATE res_users SET password = '{password_crypt}', login = '{self.db_default_admin_login}' WHERE id = 2;"""
+                    admin_xml_id = "base.user_admin"
+                    xml_id_query = self.get_id_from_ir_model_data_by_xml_id(admin_xml_id)
+                    sql_command = f""" 
+                    UPDATE res_users SET 
+                        password = '{password_crypt}',
+                        login = '{self.db_default_admin_login}' 
+                    WHERE id in ({xml_id_query});
+                    """
                 else:
-                    crypt_context = passlib.context.CryptContext(schemes=['pbkdf2_sha512', 'plaintext'],
-                                deprecated=['plaintext'])
+                    crypt_context = passlib.context.CryptContext(schemes=['pbkdf2_sha512', 'plaintext'],deprecated=['plaintext'])
                     password_crypt = crypt_context.encrypt(new_password)
-                    sql_command = f""" UPDATE res_users SET password_crypt = '{password_crypt}', login = '{self.db_default_admin_login}' WHERE id = 1;"""
-                
-                
+                    admin_xml_id = "base.user_root"
+                    xml_id_query = self.get_id_from_ir_model_data_by_xml_id(admin_xml_id)
+                    sql_command = f""" 
+                    UPDATE res_users SET 
+                        password_crypt = '{password_crypt}',
+                        login = '{self.db_default_admin_login}' 
+                    WHERE id in ({xml_id_query});
+                    """
                 db = odoo.sql_db.db_connect(db_name)
                 with closing(db.cursor()) as cr:
                     cr.execute(sql_command, log_exceptions=True)
@@ -119,3 +130,9 @@ class OdooChecker():
         # Now we will create config file from received data threw current scrip argument
         with open(self.docker_path_odoo_conf, 'w') as odoo_config_file:
             odoo_conf.write(odoo_config_file)
+    
+    def get_id_from_ir_model_data_by_xml_id(self, xml_id):
+        module_name = xml_id.split(".")[0]
+        id_name = xml_id.split(".")[1]
+        string_query = f""" SELECT res_id FROM ir_model_data WHERE name = '{id_name}' AND module = '{module_name}' """
+        return string_query

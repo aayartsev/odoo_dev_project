@@ -26,7 +26,7 @@ You need to download and install the following programs:
 
 ## How to start work
 
-Create a folder where your new project will be located. At the end of the project name, I add the odoo version number through a hyphen. For example, `odoo_demo_project-17`. This is due to the fact that the difference between versions is quite significant and I consider the same modules for different versions as different projects for development, despite the fact that they can be in the same repository. In this directory, initiate a new project using the `--init` command option, where we can specify a link to the git repository and using the `--branch` option, we specify the specific branch we want to switch the project under development to:
+Create a folder where your new project will be located. At the end of the project name, I add the odoo version number through a hyphen. For example, `odoo_demo_project-17`. This is due to the fact that the difference between versions is quite significant and I consider the same modules for different versions as different projects for development, despite the fact that they can be in the same repository. Your project environment will be located in this directory in the future. You need to initiate a new one using the `--init` command option, where we can specify a link to the git repository(o link to local directory) and using the `--branch` option, we specify the specific branch we want to switch the project under development to:
 
 Launch `VSCode` then threw menu File - Open Folder, open our folder `odoo_demo_project-17`.
 
@@ -36,6 +36,12 @@ At the very first launch of the previously described command:
 ```bash
 python3 /path/to/cloned/odoo_dev_project/odpm.py --init git@github.com:aayartsev/odoo_demo_project.git --branch 17.0-test_odpm_json
 ```
+If you do not wish to contact the `git` repository for any reason, you can easily create a local development environment by simply specifying a desired directory location.
+
+```bash
+python3 /path/to/cloned/odoo_dev_project/odpm.py --init file:///your/path/to/odoo_demo_project-17/name_of_development_directory
+```
+
 The system will try to prepare your computer:
 1. The system will ask questions about which parameters should be saved to a file `.env`
 1. If you are deploying a project from scratch, the system will ask you to specify the odoo version and make initial settings based on this information
@@ -62,6 +68,10 @@ After that, you can open the address `http://127.0.0.1:8069` in the browser and 
 2 configuration files are required for the system to work:
 - `odpm.json` -  it also can be located in the repository with the developing project, contains the necessary information on how to start this project. If the file is not found, it will be created from the default values.
 - `user_settings.json` - contains the settings and preferences of a specific developer. If the file is not found, it will be created from the default values.
+
+## Short summary
+
+This app build environment for your project. The project itself is a directory that is specified in a parameter `developing_project` of `user_settings.json` file or as key of `--init` param.
 
 ## Parameters in .env file:
 The system will try to create a `.odpm` directory in the user's home directory of your operating system. Inside it the system will place the `.env` file. If you are launching the application for the first time, it will ask a question for each item described below in this file and offer default values. If you don't know what to answer, just press `Enter`. If you place the `.env` file in the project directory, the program will consider it a priority and try to take values from the file inside the project.
