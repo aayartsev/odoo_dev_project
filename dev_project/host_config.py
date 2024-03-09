@@ -22,7 +22,8 @@ _logger = get_module_logger(__name__)
 
 class OdpmJson(TypedDict):
     python_version: str
-    debian_version: str
+    distro_version: str
+    distro_name: str
     odoo_version: str
     dependencies: list
     requirements_txt: list
@@ -59,6 +60,11 @@ class ConfigToJson(TypedDict):
     odoo_version: str
     python_version: str
     arch: str
+
+DEPRECATED_WORDS = [
+    "debian_version",
+    "debian_name"
+]
 
 class Config():
 
@@ -101,23 +107,31 @@ class Config():
         # init project settings from odpm.json
         self.get_project_odpm_json()
         self.get_odpm_settings()
+
+        # check for deprecated words
+        self.check_file_for_deprecated_words(self.project_odpm_json)
+        if not os.path.exists(self.project_odpm_json):
+            self.rewrite_odpm_json()
+        
         self.odoo_version = self.config_dict.get("odoo_version", 0.0)
         self.python_version = self.config_dict.get("python_version", constants.DEFAULT_PYTHON_VERSION)
-        self.debian_version = self.config_dict.get("debian_version", constants.DEFAULT_DEBIAN_VERSION)
-        self.debian_name = constants.DEBIAN_NAMES.get(self.debian_version)
+        self.distro_version = self.config_dict.get("distro_version", constants.DEFAULT_DISTRO_VERSION)
+        self.distro_name = self.config_dict.get("distro_name", constants.DEFAULT_DISTRO_NAME)
+        self.distro_version_codename = constants.DISTRO_INFO.get(self.distro_name, {}).get(self.distro_version, "")
         self.dependencies = self.config_dict.get("dependencies", [])
         self.requirements_txt = self.config_dict.get("requirements_txt", [])
         if constants.DEBUGPY not in self.requirements_txt:
             self.requirements_txt.append(constants.DEBUGPY)
         
         # prepare dockerfile template
-        self.dockerfile_template_name = f"""debian_{self.debian_version}_dockerfile"""
+        self.dockerfile_template_name = f"""{self.distro_name}_{self.distro_version.replace(".", "")}_dockerfile"""
         self.project_dockerfile_template_path = os.path.join(
             self.pd_manager.project_path,
             os.path.join(constants.PROJECT_SERVICE_DIRECTORY, self.dockerfile_template_name)
         )
+        self.check_file_for_deprecated_words(self.project_dockerfile_template_path)
         if not os.path.exists(self.project_dockerfile_template_path):
-            self.pd_manager.rebuild_dockerfile_template(debian_template_filename=self.dockerfile_template_name)
+            self.pd_manager.rebuild_dockerfile_template(docker_template_filename=self.dockerfile_template_name)
 
         # prepare list of mapped dirs for  third party modules from which our project depends on
         self.dependencies_dirs = []
@@ -129,7 +143,7 @@ class Config():
         if self.arch == "auto":
             self.arch = constants.ARCH
         
-        self.odoo_image_name = f"""odoo-{self.arch}-python-{self.python_version}-debian-{self.debian_version}"""
+        self.odoo_image_name = f"""odoo-{self.arch}-python-{self.python_version}-{self.distro_name}-{self.distro_version.replace(".", "")}"""
         self.docker_project_dir = str(pathlib.PurePosixPath("/home", constants.CURRENT_USER))
         self.docker_dev_project_dir = str(pathlib.PurePosixPath(self.docker_project_dir, constants.DEV_PROJECT_DIR))
         self.docker_inside_app = str(pathlib.PurePosixPath(self.docker_dev_project_dir, "inside_docker_app"))
@@ -183,14 +197,34 @@ class Config():
             subprocess.run(["git", "stash"], capture_output=False)
             subprocess.run(["git", "pull"], capture_output=False)
             subprocess.run(["git", "checkout", self.arguments.branch], capture_output=False)
+    
+    def check_file_for_deprecated_words(self, file_path: str) -> None:
+        with open(file_path) as f:
+            lines = f.readlines()
+        remove_file = False
+        for line in lines:
+            for word in DEPRECATED_WORDS:
+                if word.lower() in line.lower():
+                    remove_file = True
+                    break
+        if remove_file:
+            dir_fo_file = os.path.dirname(file_path)
+            filename = os.path.basename(file_path)
+            os.rename(file_path, os.path.join(dir_fo_file, f"deprecated_{filename}"))
+
+        
 
     def get_project_odpm_json(self) -> None:
         self.repo_odpm_json = os.path.join(self.developing_project.project_path, constants.PROJECT_CONFIG_FILE_NAME)
         self.project_odpm_json = os.path.join(self.project_dir, constants.PROJECT_CONFIG_FILE_NAME)
         if not os.path.exists(self.repo_odpm_json) and not os.path.exists(self.project_odpm_json):
-            default_odpm_json_content = self.create_default_odpm_json_content()
-            with open(self.project_odpm_json, "w", encoding="utf-8") as odpm_json_file:
-                json.dump(default_odpm_json_content, odpm_json_file, ensure_ascii=False, indent=4)
+            self.rewrite_odpm_json()
+
+    def rewrite_odpm_json(self) -> None:
+        default_odpm_json_content = self.create_default_odpm_json_content()
+        with open(self.project_odpm_json, "w", encoding="utf-8") as odpm_json_file:
+            json.dump(default_odpm_json_content, odpm_json_file, ensure_ascii=False, indent=4)
+            
     
     def get_user_settings_json(self) -> None:
         self.user_settings_json = os.path.join(self.project_dir, constants.USER_CONFIG_FILE_NAME)
@@ -203,14 +237,17 @@ class Config():
         if self.config_json_content:
             return OdpmJson(
                 python_version=self.config_json_content.get("python_version", constants.DEFAULT_PYTHON_VERSION),
-                debian_version=self.config_json_content.get("debian_version", constants.DEFAULT_DEBIAN_VERSION),
+                distro_name=self.config_json_content.get("distro_name", constants.DEFAULT_DISTRO_NAME),
+                distro_version=self.config_json_content.get("distro_version", constants.DEFAULT_DISTRO_VERSION),
                 odoo_version=self.config_json_content.get("odoo_version", 0.0),
                 dependencies=self.config_json_content.get("dependencies", []),
                 requirements_txt=self.config_json_content.get("requirements_txt", []),
             )
         available_versions = [int(float(version)) for version in constants.ODOO_VERSION_DEFAULT_ENV]
         available_versions_str = ", ".join([str(float(version)) for version in available_versions])
-        user_odoo_version = input(translations.get_translation(translations.SET_ODOO_VERSION).format(
+        user_odoo_version = self.config_dict.get("odoo_version", None)
+        if not user_odoo_version:
+            user_odoo_version = input(translations.get_translation(translations.SET_ODOO_VERSION).format(
                     ODOO_LATEST_VERSION=constants.ODOO_LATEST_VERSION,
                     AVAILABEL_ODOO_VERSIONS_ARE = available_versions_str,
                 ))
@@ -221,11 +258,12 @@ class Config():
                 SELECTED_ODOO_VERSION=user_odoo_version,
             ))
         default_odpm_json_content = OdpmJson(
-            python_version=constants.ODOO_VERSION_DEFAULT_ENV[user_odoo_version]["python_version"],
-            debian_version=constants.ODOO_VERSION_DEFAULT_ENV[user_odoo_version]["debian_version"],
+            python_version=self.config_dict.get("python_version",constants.ODOO_VERSION_DEFAULT_ENV[user_odoo_version]["python_version"]),
+            distro_version=self.config_dict.get("distro_version",constants.ODOO_VERSION_DEFAULT_ENV[user_odoo_version]["distro_version"]),
+            distro_name=self.config_dict.get("distro_name",constants.ODOO_VERSION_DEFAULT_ENV[user_odoo_version]["distro_name"]),
             odoo_version=user_odoo_version,
-            dependencies=[],
-            requirements_txt=[],
+            dependencies=self.config_dict.get("dependencies", []),
+            requirements_txt=self.config_dict.get("requirements_txt", []),
         )
         
         return default_odpm_json_content
@@ -248,7 +286,7 @@ class Config():
 
     def check_for_config(self) -> None:
         self.config_json_path = os.path.join(self.project_dir, constants.CONFIG_FILE_NAME)
-        self.config_deprecated_json_path = os.path.join(self.project_dir, "config_deprecated.json")
+        self.config_deprecated_json_path = os.path.join(self.project_dir, f"deprecated_{self.config_json_path}")
         if os.path.exists(self.config_json_path):
             with open(self.config_json_path) as config_file:
                 self.config_json_content = json.load(config_file)

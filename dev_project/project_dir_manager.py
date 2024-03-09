@@ -68,14 +68,14 @@ class ProjectDirManager():
         self.rebuild_docker_compose_template()
         self.rebuild_odoo_config_file_template()
     
-    def rebuild_dockerfile_template(self, debian_template_filename=constants.DOCKERFILE):
+    def rebuild_dockerfile_template(self, docker_template_filename=constants.DOCKERFILE):
         program_dockerfile_template_path = os.path.join(
             self.program_dir_path,
-            os.path.join(constants.DEV_PROJECT_DIR, "templates", debian_template_filename)
+            os.path.join(constants.DEV_PROJECT_DIR, "templates", docker_template_filename)
         )
         project_dockerfile_template_path = os.path.join(
             self.project_path,
-            os.path.join(constants.PROJECT_SERVICE_DIRECTORY, debian_template_filename)
+            os.path.join(constants.PROJECT_SERVICE_DIRECTORY, docker_template_filename)
         )
         self.generate_project_template_files(program_dockerfile_template_path, project_dockerfile_template_path)
     

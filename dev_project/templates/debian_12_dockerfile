@@ -1,14 +1,14 @@
 # #MESSAGE#
-FROM python:{PYTHON_VERSION}-{DEBIAN_NAME}
+FROM python:{PYTHON_VERSION}-{DISTRO_VERSION_CODENAME}
   
-# Переменные проекта
+# Project variables
 ARG USER_UID={CURRENT_USER_UID}
 ARG USER_GID={CURRENT_USER_GID}
 
 ARG USER_NAME={CURRENT_USER}
 ARG PASSWORD={CURRENT_PASSWORD}
 
-# Подготавливаем внутреннего пользователя
+# Prepare internal user
 RUN groupadd --gid $USER_GID $USER_NAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USER_NAME -p $(openssl passwd -6 $PASSWORD) \
     && apt-get update \
@@ -20,7 +20,7 @@ RUN groupadd --gid $USER_GID $USER_NAME \
     && mkdir -p /home/$USER_NAME/.vscode-server\
     && chown -R $USER_NAME:$USER_NAME /home/$USER_NAME/.vscode-server
  
-# устанавливаем все необходимые зависимости 
+# install dependecies
 RUN apt-get update && apt-get -y install libxml2-dev libxslt1-dev libldap2-dev\  
         libsasl2-dev libtiff5-dev libjpeg62-turbo-dev libopenjp2-7-dev\  
         zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev\  

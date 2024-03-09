@@ -111,8 +111,9 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             CURRENT_USER=constants.CURRENT_USER,
             CURRENT_PASSWORD=constants.CURRENT_PASSWORD,
             PYTHON_VERSION=self.config.python_version,
-            DEBIAN_NAME=self.config.debian_name,
-
+            DISTRO_NAME=self.config.distro_name,
+            DISTRO_VERSION=self.config.distro_version, 
+            DISTRO_VERSION_CODENAME=self.config.distro_version_codename,
         )
         content = content.replace(translations.get_translation(translations.MESSAGE_ODOO_CONF), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
         dockerfile_path = os.path.join(self.config.project_dir, constants.DOCKERFILE)
@@ -199,7 +200,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             if str(newest_version) == self.config.odoo_version:
                 subprocess.run(["git", "checkout", str(newest_version)])
             else:
-                _logger.error(_(f"Version {self.config.odoo_version} not exists in git repository {source_dir}"))
+                _logger.error(f"Version {self.config.odoo_version} not exists in git repository {source_dir}")
                 exit(1)
         else:
             subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
@@ -316,4 +317,4 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
     def build_image(self):
         os.chdir(self.config.project_dir)
         # i need to create .dockerignore file (because it tries to send docker context)
-        subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, f"--platform=linux/{self.config.arch}", "."])
+        subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, f"--platform=linux/{self.config.arch}", self.config.project_dir])
