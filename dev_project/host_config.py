@@ -199,6 +199,8 @@ class Config():
             subprocess.run(["git", "checkout", self.arguments.branch], capture_output=False)
     
     def check_file_for_deprecated_words(self, file_path: str) -> None:
+        if not os.path.exists(file_path):
+            return
         with open(file_path) as f:
             lines = f.readlines()
         remove_file = False
