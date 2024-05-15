@@ -178,8 +178,6 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         list_for_checkout = [odoo_project]
         list_for_checkout.extend(self.config.dependencies_projects)
         for project in list_for_checkout:
-            print("project", project)
-            print("project.project_path", project.project_path)
             os.chdir(project.project_path)
             current_branch_bytes = subprocess.run(["git", "branch", "--show-current"], capture_output=True)
             current_branch_string = current_branch_bytes.stdout.decode("utf-8").strip() 

@@ -62,16 +62,13 @@ class StartStringBuilder():
             start_python_command +=  f" {cli_params.D_PARAM} {db_name}"
 
         if self.args.i:
-            print("self.config.init_modules", self.config.init_modules)
             start_python_command += f""" {cli_params.I_PARAM} {self.config.init_modules}"""
 
         if self.args.u:
-            print("self.config.update_modules", self.config.update_modules)
             start_python_command += f""" {cli_params.U_PARAM} {self.config.update_modules}"""
 
         if self.args.test:
             start_python_command += f" --test-enable --stop-after-init"
-            print("self.args.screencasts", self.args.screencasts)
             if self.args.screencasts:
                 start_python_command += f""" {cli_params.SCREENCASTS_PARAM} {self.config.docker_temp_tests_dir}"""
                 
