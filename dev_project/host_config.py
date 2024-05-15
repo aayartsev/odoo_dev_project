@@ -10,7 +10,7 @@ from . import constants
 from . import translations
 from .inside_docker_app import cli_params
 
-from .handle_odoo_project_git_link import HandleOdooProjectGitLink
+from .handle_odoo_project_git_link import HandleOdooProjectLink
 from .host_user_env import CreateUserEnvironment
 from .project_dir_manager import ProjectDirManager
 
@@ -135,6 +135,7 @@ class Config():
 
         # prepare list of mapped dirs for  third party modules from which our project depends on
         self.dependencies_dirs = []
+        self.dependencies_projects = []
         # prepare list of mapped dirs for building config file for debugger usage
         self.debugger_path_mappings = []
 
@@ -333,8 +334,8 @@ class Config():
 
 
     
-    def handle_git_link(self, gitlink: str) -> HandleOdooProjectGitLink:
-        odoo_project = HandleOdooProjectGitLink(
+    def handle_git_link(self, gitlink: str) -> HandleOdooProjectLink:
+        odoo_project = HandleOdooProjectLink(
             gitlink,
             self.user_env.path_to_ssh_key,
             self.user_env.odoo_projects_dir,
