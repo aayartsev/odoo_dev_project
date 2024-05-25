@@ -74,13 +74,18 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             )
         for dependency_string in self.config.dependencies:
             dependency_project = self.handle_git_link(dependency_string)
+            list_of_subprojects_rel_paths = self.check_project_for_subprojects(dependency_project)
             docker_dependency_project_path = str(pathlib.PurePosixPath(self.config.docker_extra_addons, dependency_project.inside_docker_path))
             self.config.dependencies_projects.append(dependency_project)
             self.config.dependencies_dirs.append(dependency_project.project_path)
             docker_dir_with_addons = docker_dependency_project_path
             if dependency_project.project_type == constants.TYPE_PROJECT_MODULE:
                 docker_dir_with_addons = str(pathlib.PurePosixPath(docker_dir_with_addons, os.pardir))
-            self.config.docker_dirs_with_addons.append(docker_dir_with_addons)
+            if list_of_subprojects_rel_paths:
+                for subproject_rel_path in list_of_subprojects_rel_paths:
+                    self.config.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(docker_dir_with_addons, subproject_rel_path)))
+            else:
+                self.config.docker_dirs_with_addons.append(docker_dir_with_addons)
             self.mapped_folders.append(
                 MappedPath(local=dependency_project.project_path, docker=docker_dependency_project_path)
             )
@@ -101,6 +106,18 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                     PRE_COMMIT_FILE=pre_commit_file,
                     ODOO_PROJECT_DIR_PATH=self.config.odoo_project_dir_path,
                 ))
+    
+    def check_project_for_subprojects(self, dependency_project: HandleOdooProjectLink) -> list:
+        subprojects_set = set()
+        list_of_subproject_rel_paths = []
+        for root, dirs, files in os.walk(dependency_project.project_path):
+            for file in files:
+                if file == "__manifest__.py":
+                    subprojects_set.add(os.path.abspath(os.path.join(root, os.pardir)))
+        for subproject_dir in subprojects_set:
+            rel_path = os.path.relpath(subproject_dir, dependency_project.project_path)
+            list_of_subproject_rel_paths.append(rel_path)
+        return list_of_subproject_rel_paths
 
     def generate_dockerfile(self) -> None:
         with open(self.config.project_dockerfile_template_path) as f:
