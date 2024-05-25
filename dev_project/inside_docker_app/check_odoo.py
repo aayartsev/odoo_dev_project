@@ -22,6 +22,7 @@ class OdooChecker():
         self.db_default_admin_login = config["db_creation_data"]["db_default_admin_login"]
         self.db_create_demo = config["db_creation_data"]["create_demo"]
         self.db_manager_password = config.get("db_manager_password", False)
+        self.sql_queries = config.get("sql_queries", False)
 
         sys.path.append(self.odoo_dir)
 
@@ -62,7 +63,6 @@ class OdooChecker():
             db_restore_file_path = os.path.join(self.odoo_dir, "../backups/", db_restore_file_path)
         # Start Odoo in environment context
         with self.environment_manage():
-
             if get_db_list:
                 list = odoo.service.db.list_dbs(force=True)
                 final_string = ""
@@ -125,6 +125,16 @@ class OdooChecker():
                 with closing(db.cursor()) as cr:
                     cr.execute(sql_command, log_exceptions=True)
                     cr.commit()
+
+            if self.sql_queries:
+                db = odoo.sql_db.db_connect(db_name)
+                with closing(db.cursor()) as cr:
+                    for query in self.sql_queries:
+                        try:
+                            cr.execute(query, log_exceptions=True)
+                            cr.commit()
+                        except:
+                            pass
     
     def create_config_file(self):
         odoo_conf = configparser.ConfigParser()

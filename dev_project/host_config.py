@@ -46,6 +46,7 @@ class UserSettingsJson(TypedDict):
     dev_mode: str
     developing_project: str
     pre_commit_map_files: list
+    sql_queries: list
 
 class ConfigToJson(TypedDict):
     docker_odoo_dir: str
@@ -60,6 +61,7 @@ class ConfigToJson(TypedDict):
     odoo_version: str
     python_version: str
     arch: str
+    sql_queries: list
 
 DEPRECATED_WORDS = [
     "debian_version",
@@ -100,6 +102,7 @@ class Config():
         self.dev_mode = self.config_dict.get("dev_mode", False)
         self.developing_project = self.config_dict.get("developing_project", "")
         self.pre_commit_map_files = self.config_dict.get("pre_commit_map_files", [])
+        self.sql_queries = self.config_dict.get("sql_queries", [])
 
         # prepare developing project
         self.developing_project = self.handle_git_link(self.developing_project)
@@ -329,6 +332,7 @@ class Config():
             dev_mode=self.config_json_content.get("dev_mode", False),
             developing_project=self.config_json_content.get("developing_project", self.pd_manager.init or ""),
             pre_commit_map_files=self.config_json_content.get("pre_commit_map_files", []),
+            sql_queries=self.config_json_content.get("sql_queries", []),
         )
         return user_settings_content
 
@@ -357,6 +361,7 @@ class Config():
             odoo_version=self.odoo_version,
             python_version=self.python_version,
             arch=self.arch,
+            sql_queries=self.sql_queries,
         )
         return json.dumps(config).encode("utf-8")
             
