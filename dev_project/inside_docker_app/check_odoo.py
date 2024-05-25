@@ -108,11 +108,16 @@ class OdooChecker():
                 else:
                     crypt_context = passlib.context.CryptContext(schemes=['pbkdf2_sha512', 'plaintext'],deprecated=['plaintext'])
                     password_crypt = crypt_context.encrypt(new_password)
-                    admin_xml_id = "base.user_root"
+                    admin_xml_id = "base.user_admin"
+                    if odoo_version_info[0] == 11:
+                        password_crypt_field = "password_crypt"
+                        admin_xml_id = "base.user_root"
+                    elif odoo_version_info[0] == 12:
+                        password_crypt_field = "password"
                     xml_id_query = self.get_id_from_ir_model_data_by_xml_id(admin_xml_id)
                     sql_command = f""" 
                     UPDATE res_users SET 
-                        password_crypt = '{password_crypt}',
+                        {password_crypt_field} = '{password_crypt}',
                         login = '{self.db_default_admin_login}' 
                     WHERE id in ({xml_id_query});
                     """
