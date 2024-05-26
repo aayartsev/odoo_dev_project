@@ -10,7 +10,7 @@ The main goal is - to create tool for developing on odoo platform, which will me
 - To have convenient tools that are often necessary for the developer, for example:
     - fast DB recovery from the archive
     - сreation of a new DB with its own settings (country, language, demo data, etc.)
-    - change password for specified login
+    - Changing the login and password for the administrator
     - ... and more
     - mechanisms for extending the functionality, for the future
 
@@ -61,7 +61,7 @@ After that, you can run odoo in developer mode:
 ```bash
 python3 /path/to/cloned/odoo_dev_project/odpm.py -d test_db -i -u
 ```
-This command will launch odoo inside the `Docker container` and create a new database named `new_db`` and install the module from the specified project there
+This command will launch odoo inside the `Docker container` and create a new database named `test_db` and install the module from the specified project there
 
 After that, you can open the address `http://127.0.0.1:8069` in the browser and you will see the login window.
 
@@ -83,7 +83,7 @@ The system will try to create a `.odpm` directory in the user's home directory o
 - `POSTGRES_PORT` - the port on which the PostgreSQL DBMS will be launched by default at the address 127.0.0.1
 - `DEBUGGER_PORT` - the port on which the debugger will run by default at the address 127.0.0.1
 
-Пример для Lnux:
+Example for Linux:
 ```conf
 BACKUP_DIR=/home/user/odoo_backups
 ODOO_SRC_DIR=/home/user/odoo
@@ -107,10 +107,11 @@ DEBUGGER_PORT=5678
 - `update_git_repos` - `type: Boolean`. Indicates whether the dependency repositories and odoo itself will be updated when the system is restarted
 - `clean_git_repos` - `type: Boolean`. Indicates whether changes to odoo itself and dependency projects will be reset on restart
 - `check_system` - `type: Boolean`. Indicates whether the system check will be started at startup. Useful for beginners. Checks if `git`, `docker`, and `docker-compose` are installed.
-- `developing_project` - `type: String`. A link to the project you are developing. Example: `"git@github.com:aayartsev/odoo_demo_project.git "`
+- `developing_project` - `type: String`.A link to the project you are developing. Example: `"git@github.com:aayartsev/odoo_demo_project.git "`
 - `pre_commit_map_files` - `type: String`. A list of files for the `pre-commit` system that are taken out of the project and pushed there through the docker file mapping. It is necessary to work on non-Linux systems
 - `dev_mode` - `type: String`. You can specify comma-separated [parameters for developers](https://www.oovoo.com/documentation/16.0/developer/reference/cli.html?highlight=dev#cmdoption-odoo-bin-dev). See the official documentation for your version of odoo
 - `db_manager_password` - `type: String`. password for the database manager
+- `sql_queries` - `type: List`. Contains a list of strings, each of which is an SQL script that will be executed when using the command line parameter `--sql-execute` 
 
 ## Parameters in odpm.json:
 - `python_version` - `type: String`. The python version is indicated in text form by its number, for example `"3.10"` or `"3.7"`,
@@ -134,4 +135,5 @@ DEBUGGER_PORT=5678
 - `--pip-install` - will start install of all python packages from odoo `requirements.txt` and from `requirements_txt` param to environment inside `docker container`.
 - `--start-precommit` - will start pre-commit for your project inside container, specified in parameter `developing_project` from file `user_settings.json`.
 - `--build-image` - will build Docker image for your odoo version
-- `--set-admin-pass` - when you specify the value of this parameter, the administrator account (user with id = 2) will have its password and login changed to those specified in the `db_default_admin_login` and `db_default_admin_password` parameters in the `user_settings.json` configuration file. Be sure to specify the name of the database for which you want to change the password and use the `-d database_name` parameter
+- `--set-admin-pass` - when you specify the value of this parameter, the administrator account (user with id = 2) will have its password and login changed to those specified in the `db_default_admin_login` and `db_default_admin_password` parameters in the `user_settings.json` configuration file. Be sure to specify the name of the database for which you want to change the password and use the `-d database_name` parameter.
+- `--sql-execute` - wen this parameter is used, the SQL scripts specified in the `sql_queries` parameter of the `user_settings.json` configuration file will be executed. Each script is a separate string that is an element of the list. You must specify the name of the database for which you want to change the password and use the parameter `-d database_name`.
