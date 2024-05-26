@@ -158,7 +158,12 @@ class Config():
         self.docker_extra_addons = str(pathlib.PurePosixPath(self.docker_project_dir, "extra-addons"))
         if self.developing_project:
             self.docker_odoo_project_dir_path = str(pathlib.PurePosixPath(self.docker_extra_addons, self.developing_project.project_data.name))
-            self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
+            list_of_subprojects_rel_paths = self.check_project_for_subprojects(self.developing_project)
+            if list_of_subprojects_rel_paths:
+                for subproject_rel_path in list_of_subprojects_rel_paths:
+                    self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_project_dir_path, subproject_rel_path)))
+            else:
+                self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
 
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "addons")))
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "odoo", "addons")))
@@ -195,6 +200,18 @@ class Config():
     def project_env(self, value: CreateProjectEnvironmentProtocol) -> None:
         """Set project_env property."""
         self._project_env = value
+    
+    def check_project_for_subprojects(self, dependency_project: HandleOdooProjectLink) -> list:
+        subprojects_set = set()
+        list_of_subproject_rel_paths = []
+        for root, dirs, files in os.walk(dependency_project.project_path):
+            for file in files:
+                if file == "__manifest__.py":
+                    subprojects_set.add(os.path.abspath(os.path.join(root, os.pardir)))
+        for subproject_dir in subprojects_set:
+            rel_path = os.path.relpath(subproject_dir, dependency_project.project_path)
+            list_of_subproject_rel_paths.append(rel_path)
+        return list_of_subproject_rel_paths
 
     def clone_project(self) -> None:
         if cli_params.BRANCH_PARAM in self.arguments and isinstance(cli_params.BRANCH_PARAM, str):
