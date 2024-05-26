@@ -113,4 +113,9 @@ arg_parser.add_argument(
     action='store_true',
 )
 
+arg_parser.add_argument(
+    cli_params.SQL_EXECUTE_PARAM,
+    help="""Will execute sql queries that are written in "sql_queries" """,
+)
+
 args = arg_parser.parse_args()

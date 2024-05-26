@@ -10,7 +10,7 @@ from typing import NamedTuple
 from typing import TypedDict
 from typing import Literal
 
-from .handle_odoo_project_git_link import HandleOdooProjectGitLink
+from .handle_odoo_project_git_link import HandleOdooProjectLink
 from . import constants
 from . import translations
 from .host_config import Config
@@ -49,9 +49,9 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         self.user_env = self.config.user_env
         self.config.project_env = self
 
-    def handle_git_link(self, gitlink:str) -> HandleOdooProjectGitLink:
-        odoo_project = HandleOdooProjectGitLink(
-            gitlink,
+    def handle_git_link(self, dependency_string:str) -> HandleOdooProjectLink:
+        odoo_project = HandleOdooProjectLink(
+            dependency_string,
             self.user_env.path_to_ssh_key,
             self.user_env.odoo_projects_dir,
         )
@@ -72,14 +72,20 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             self.mapped_folders.append(
                 MappedPath(local=self.config.developing_project.project_path, docker=self.config.docker_odoo_project_dir_path),
             )
-        for dependency_path in self.config.dependencies:
-            dependency_project = self.handle_git_link(dependency_path)
+        for dependency_string in self.config.dependencies:
+            dependency_project = self.handle_git_link(dependency_string)
+            list_of_subprojects_rel_paths = self.config.check_project_for_subprojects(dependency_project)
             docker_dependency_project_path = str(pathlib.PurePosixPath(self.config.docker_extra_addons, dependency_project.inside_docker_path))
+            self.config.dependencies_projects.append(dependency_project)
             self.config.dependencies_dirs.append(dependency_project.project_path)
             docker_dir_with_addons = docker_dependency_project_path
             if dependency_project.project_type == constants.TYPE_PROJECT_MODULE:
                 docker_dir_with_addons = str(pathlib.PurePosixPath(docker_dir_with_addons, os.pardir))
-            self.config.docker_dirs_with_addons.append(docker_dir_with_addons)
+            if list_of_subprojects_rel_paths:
+                for subproject_rel_path in list_of_subprojects_rel_paths:
+                    self.config.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(docker_dir_with_addons, subproject_rel_path)))
+            else:
+                self.config.docker_dirs_with_addons.append(docker_dir_with_addons)
             self.mapped_folders.append(
                 MappedPath(local=dependency_project.project_path, docker=docker_dependency_project_path)
             )
@@ -169,41 +175,49 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             writer.write(content)
     
     def checkout_dependencies(self) -> None:
-        list_for_checkout = [self.user_env.odoo_src_dir]
-        list_for_checkout.extend(self.config.dependencies_dirs)
-        for source_dir in list_for_checkout:
-            os.chdir(source_dir)
+        odoo_project = HandleOdooProjectLink(
+            f"""file://{self.user_env.odoo_src_dir}""",
+            self.user_env.path_to_ssh_key,
+            self.user_env.odoo_projects_dir,
+        )
+        list_for_checkout = [odoo_project]
+        list_for_checkout.extend(self.config.dependencies_projects)
+        for project in list_for_checkout:
+            os.chdir(project.project_path)
             current_branch_bytes = subprocess.run(["git", "branch", "--show-current"], capture_output=True)
-            current_branch_string = current_branch_bytes.stdout.decode("utf-8").strip()
+            current_branch_string = current_branch_bytes.stdout.decode("utf-8").strip() 
             try:
                 current_branch_float = float(current_branch_string)
             except:
                 current_branch_float = 0.0
-            if current_branch_float and current_branch_string != self.config.odoo_version:
-                self.check_odoo_version_git_branch(source_dir)
+            if current_branch_float and project.branch and current_branch_string != project.branch:
+                self.check_odoo_version_branch(project)
             if self.config.clean_git_repos:
                 subprocess.run(["git", "stash"], capture_output=True)
                 subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
             if self.config.update_git_repos:
                 subprocess.run(["git", "pull"], capture_output=True)
     
-    def check_odoo_version_git_branch(self, source_dir) -> None:
-        os.chdir(source_dir)
+    def check_odoo_version_branch(self, project: HandleOdooProjectLink) -> None:
+        os.chdir(project.project_path)
         subprocess.run(["git", "stash"], capture_output=True)
         branch_commit_bytes = subprocess.run(["git", "rev-parse", "--verify", self.config.odoo_version], capture_output=True)
         branch_commit_string = branch_commit_bytes.stdout.decode("utf-8").strip()
         if "fatal" in branch_commit_string:
-            newest_version = self.get_odoo_latest_version(source_dir)
+            newest_version = self.get_odoo_latest_version(os.chdir(project.project_path))
             subprocess.run(["git", "checkout", str(newest_version)])
             subprocess.run(["git", "pull"])
-            newest_version = self.get_odoo_latest_version(source_dir)
+            newest_version = self.get_odoo_latest_version(os.chdir(project.project_path))
             if str(newest_version) == self.config.odoo_version:
                 subprocess.run(["git", "checkout", str(newest_version)])
             else:
-                _logger.error(f"Version {self.config.odoo_version} not exists in git repository {source_dir}")
+                _logger.error(f"Version {self.config.odoo_version} not exists in git repository {project.project_path}")
                 exit(1)
         else:
-            subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
+            if project.branch:
+                subprocess.run(["git", "checkout", project.branch, project.commit], capture_output=True)
+            else:
+                subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
     
     def get_odoo_latest_version(self, source_dir) -> float:
         os.chdir(source_dir)

@@ -10,7 +10,7 @@ from . import constants
 from . import translations
 from .inside_docker_app import cli_params
 
-from .handle_odoo_project_git_link import HandleOdooProjectGitLink
+from .handle_odoo_project_git_link import HandleOdooProjectLink
 from .host_user_env import CreateUserEnvironment
 from .project_dir_manager import ProjectDirManager
 
@@ -46,6 +46,7 @@ class UserSettingsJson(TypedDict):
     dev_mode: str
     developing_project: str
     pre_commit_map_files: list
+    sql_queries: list
 
 class ConfigToJson(TypedDict):
     docker_odoo_dir: str
@@ -60,6 +61,7 @@ class ConfigToJson(TypedDict):
     odoo_version: str
     python_version: str
     arch: str
+    sql_queries: list
 
 DEPRECATED_WORDS = [
     "debian_version",
@@ -100,6 +102,7 @@ class Config():
         self.dev_mode = self.config_dict.get("dev_mode", False)
         self.developing_project = self.config_dict.get("developing_project", "")
         self.pre_commit_map_files = self.config_dict.get("pre_commit_map_files", [])
+        self.sql_queries = self.config_dict.get("sql_queries", [])
 
         # prepare developing project
         self.developing_project = self.handle_git_link(self.developing_project)
@@ -135,6 +138,7 @@ class Config():
 
         # prepare list of mapped dirs for  third party modules from which our project depends on
         self.dependencies_dirs = []
+        self.dependencies_projects = []
         # prepare list of mapped dirs for building config file for debugger usage
         self.debugger_path_mappings = []
 
@@ -154,7 +158,12 @@ class Config():
         self.docker_extra_addons = str(pathlib.PurePosixPath(self.docker_project_dir, "extra-addons"))
         if self.developing_project:
             self.docker_odoo_project_dir_path = str(pathlib.PurePosixPath(self.docker_extra_addons, self.developing_project.project_data.name))
-            self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
+            list_of_subprojects_rel_paths = self.check_project_for_subprojects(self.developing_project)
+            if list_of_subprojects_rel_paths:
+                for subproject_rel_path in list_of_subprojects_rel_paths:
+                    self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_project_dir_path, subproject_rel_path)))
+            else:
+                self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
 
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "addons")))
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "odoo", "addons")))
@@ -191,6 +200,18 @@ class Config():
     def project_env(self, value: CreateProjectEnvironmentProtocol) -> None:
         """Set project_env property."""
         self._project_env = value
+    
+    def check_project_for_subprojects(self, dependency_project: HandleOdooProjectLink) -> list:
+        subprojects_set = set()
+        list_of_subproject_rel_paths = []
+        for root, dirs, files in os.walk(dependency_project.project_path):
+            for file in files:
+                if file == "__manifest__.py":
+                    subprojects_set.add(os.path.abspath(os.path.join(root, os.pardir)))
+        for subproject_dir in subprojects_set:
+            rel_path = os.path.relpath(subproject_dir, dependency_project.project_path)
+            list_of_subproject_rel_paths.append(rel_path)
+        return list_of_subproject_rel_paths
 
     def clone_project(self) -> None:
         if cli_params.BRANCH_PARAM in self.arguments and isinstance(cli_params.BRANCH_PARAM, str):
@@ -328,13 +349,14 @@ class Config():
             dev_mode=self.config_json_content.get("dev_mode", False),
             developing_project=self.config_json_content.get("developing_project", self.pd_manager.init or ""),
             pre_commit_map_files=self.config_json_content.get("pre_commit_map_files", []),
+            sql_queries=self.config_json_content.get("sql_queries", []),
         )
         return user_settings_content
 
 
     
-    def handle_git_link(self, gitlink: str) -> HandleOdooProjectGitLink:
-        odoo_project = HandleOdooProjectGitLink(
+    def handle_git_link(self, gitlink: str) -> HandleOdooProjectLink:
+        odoo_project = HandleOdooProjectLink(
             gitlink,
             self.user_env.path_to_ssh_key,
             self.user_env.odoo_projects_dir,
@@ -356,6 +378,7 @@ class Config():
             odoo_version=self.odoo_version,
             python_version=self.python_version,
             arch=self.arch,
+            sql_queries=self.sql_queries,
         )
         return json.dumps(config).encode("utf-8")
             
