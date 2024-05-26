@@ -115,10 +115,29 @@ DEBUGGER_PORT=5678
 
 ## Parameters in odpm.json:
 - `python_version` - `type: String`. The python version is indicated in text form by its number, for example `"3.10"` or `"3.7"`,
-- `debian_version` - `type: String`. The version of the Debian distribution is indicated in text form by its number, for example `"11"` or `"12"`,
+- `distro_name` - `type: String`. The name of the distribution on which the image for running Odoo will be created. Currently, only `"debian"` is supported.
+- `distro_version` - `type: String`. The version of the distribution specified in the distro_name key, indicated as a text version, for example, `"11"` or `"12"`
 - `odoo_version` - `type: String`. The version of the odoo system. Examples: `"16.0"`, `"15.0"`, `"11.0"`
 - `dependencies` - `type: List`. A list of links to the project repositories on which your project depends
 - `requirements_txt` - `type: List`. A list of python modules, each element can be formatted in the same way as a line in a file requirements.txt
+
+### Supported Linux Distributions and Versions with Python Versions
+
+Currently, for Odoo versions 11 to 16 inclusive, Python 3.7 on Debian 11 (Bullseye) has been tested and works stably.
+Also tested and works stably for Odoo versions 16 to 17 with Python 3.10 on Debian 11 (Bullseye) and Debian 12 (Bullseye).
+Experimental support for Ubuntu distributions has begun, but it is still in its early stages, and all experiments are at your own discretion.
+Supported distributions and versions:
+
+- Stable:
+    - Debian 11 (Bullseye)
+        - Python 3.7, 3.10
+    - Debian 12 (Bullseye)
+        - Python 3.10
+- Experimental:
+    - Ubuntu 22.04 (Jammy)
+        - Python 3.10
+    - Ubuntu 20.04 (Focal)
+        - Python 3.8
 
 ## Command Line Interface parameters
 
