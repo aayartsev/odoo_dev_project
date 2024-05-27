@@ -190,7 +190,9 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                 current_branch_float = float(current_branch_string)
             except:
                 current_branch_float = 0.0
-            if current_branch_float and project.branch and current_branch_string != project.branch:
+            if not project.branch:
+                project.branch = self.config.odoo_version
+            if current_branch_float and current_branch_string != project.branch:
                 self.check_odoo_version_branch(project)
             if self.config.clean_git_repos:
                 subprocess.run(["git", "stash"], capture_output=True)
@@ -214,10 +216,10 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                 _logger.error(f"Version {self.config.odoo_version} not exists in git repository {project.project_path}")
                 exit(1)
         else:
-            if project.branch:
-                subprocess.run(["git", "checkout", project.branch, project.commit], capture_output=True)
+            if not project.commit:
+                subprocess.run(["git", "checkout", project.branch], capture_output=True)
             else:
-                subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
+                subprocess.run(["git", "checkout", project.branch, project.commit], capture_output=True)
     
     def get_odoo_latest_version(self, source_dir) -> float:
         os.chdir(source_dir)
