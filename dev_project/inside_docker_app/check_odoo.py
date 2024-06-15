@@ -144,7 +144,7 @@ class OdooChecker():
         if int_odoo_version not in [11,12]:
             password_crypt = self.pbkdf2_sha512.using(rounds=1).hash(text_password)
         else:
-            crypt_context = self.passlib.context.CryptContext(schemes=['pbkdf2_sha512', 'plaintext'],
+            crypt_context = self.passlib.context.CryptContext(schemes=['pbkdf2_sha512', 'plaintext'], # type: ignore
                             deprecated=['plaintext'])
             password_crypt = crypt_context.encrypt(text_password)
 

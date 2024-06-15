@@ -38,7 +38,7 @@ CAN_NOT_CREATE_DIR = "Cannot create dir, {dir_path}, please check it"
 CHECK_ODOO_REPO = """Your odoo src directory {odoo_src_dir} is not git repository."""
 "Please fix it, or delete and clone its repo again: "
 "git clone https://github.com/odoo/odoo.git"
-MESSAGE_ODOO_CONF = "If you want drop this file to default values, just delete it"
+MESSAGE_FOR_TEMPLATES = "If you want drop this file to default values, just delete it"
 DO_NOT_CHANGE_PARAM = "Do not change this param, it is generating automatically"
 DO_NOT_CHANGE_FILE = "Do not change this file, its content is generating automatically"
 ADMIN_PASSWD_MESSAGE = """Do not change, it will get from "db_manager_password" param from config.json file"""
@@ -88,7 +88,7 @@ translations = {
                  "Пожалуйста исправьте повреждения или клонируйте репозиторий заново: "
                  "git clone https://github.com/odoo/odoo.git"
     },
-    MESSAGE_ODOO_CONF: {
+    MESSAGE_FOR_TEMPLATES: {
         "ru_RU": "Если вы хотите сбросить настройки этого файла в параметры по умолчанию, просто удалите его."
     },
     DO_NOT_CHANGE_PARAM:{

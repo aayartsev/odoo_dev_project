@@ -13,10 +13,15 @@ PROJECT_SERVICE_DIRECTORY = f".{PROJECT_NAME.lower()}"
 ENV_FILE_NAME = ".env"
 DOCKERFILE = "Dockerfile"
 ODOO_CONF_NAME = "odoo.conf"
+
 PROGRAM_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "docker-compose.yml")
 PROJECT_DOCKER_COMPOSE_TEMPLATE_FILE_RELATIVE_PATH = os.path.join(PROJECT_SERVICE_DIRECTORY, "docker-compose.yml")
+
 PROGRAM_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(DEV_PROJECT_DIR, "templates", "dev_odoo_docker_config_file.conf")
 PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH = os.path.join(PROJECT_SERVICE_DIRECTORY, "dev_odoo_docker_config_file.conf")
+
+PROGRAM_VSCODE_SETTINGS_TEMPLATE = os.path.join(DEV_PROJECT_DIR, "templates", "vscode_settings.json")
+PROJECT_VSCODE_SETTINGS_TEMPLATE = os.path.join(PROJECT_SERVICE_DIRECTORY, "vscode_settings.json")
 
 DEBUGGER_DEFAULT_PORT = 5678
 DEBUGGER_DOCKER_PORT = DEBUGGER_DEFAULT_PORT
@@ -123,3 +128,11 @@ ODOO_VERSION_DEFAULT_ENV = {
 }
 
 DEFAULT_LOCALE = "en_US"
+
+MODULE_FILES = ("__manifest__.py", "__openerp__.py", "__odoo__.py", "__terp__.py")
+
+DEPRECATED_WORDS = [
+    "debian_version",
+    "debian_name"
+]
+

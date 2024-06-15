@@ -74,16 +74,17 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             )
         for dependency_string in self.config.dependencies:
             dependency_project = self.handle_git_link(dependency_string)
-            list_of_subprojects_rel_paths = self.config.check_project_for_subprojects(dependency_project)
+            list_of_subprojects = self.config.check_project_for_subprojects(dependency_project.project_path)
             docker_dependency_project_path = str(pathlib.PurePosixPath(self.config.docker_extra_addons, dependency_project.inside_docker_path))
             self.config.dependencies_projects.append(dependency_project)
             self.config.dependencies_dirs.append(dependency_project.project_path)
             docker_dir_with_addons = docker_dependency_project_path
             if dependency_project.project_type == constants.TYPE_PROJECT_MODULE:
                 docker_dir_with_addons = str(pathlib.PurePosixPath(docker_dir_with_addons, os.pardir))
-            if list_of_subprojects_rel_paths:
-                for subproject_rel_path in list_of_subprojects_rel_paths:
-                    self.config.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(docker_dir_with_addons, subproject_rel_path)))
+            if list_of_subprojects:
+                self.config.catalogs_of_modules_data.extend(list_of_subprojects)
+                for subproject in list_of_subprojects:
+                    self.config.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(docker_dir_with_addons, subproject.subproject_rel_path)))
             else:
                 self.config.docker_dirs_with_addons.append(docker_dir_with_addons)
             self.mapped_folders.append(
@@ -121,7 +122,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             DISTRO_VERSION=self.config.distro_version, 
             DISTRO_VERSION_CODENAME=self.config.distro_version_codename,
         )
-        content = content.replace(translations.get_translation(translations.MESSAGE_ODOO_CONF), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
+        content = content.replace(translations.get_translation(translations.MESSAGE_FOR_TEMPLATES), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
         dockerfile_path = os.path.join(self.config.project_dir, constants.DOCKERFILE)
         self.config.dockerfile_path = dockerfile_path
         with open(dockerfile_path, 'w') as writer:
@@ -134,7 +135,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         content = "".join(lines)
         for replace_phrase in {constants.DO_NOT_CHANGE_PARAM: translations.get_translation(translations.DO_NOT_CHANGE_PARAM),
             constants.ADMIN_PASSWD_MESSAGE: translations.get_translation(translations.ADMIN_PASSWD_MESSAGE),
-            constants.MESSAGE_MARKER: translations.get_translation(translations.MESSAGE_ODOO_CONF)}.items():
+            constants.MESSAGE_MARKER: translations.get_translation(translations.MESSAGE_FOR_TEMPLATES)}.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
         odoo_config_file_path = os.path.join(self.config.project_dir, constants.ODOO_CONF_NAME)
         if not os.path.exists(odoo_config_file_path):
@@ -169,7 +170,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             POSTGRES_DOCKER_PORT=constants.POSTGRES_DOCKER_PORT,
             COMPOSE_FILE_VERSION=self.config.compose_file_version
         )
-        content = content.replace(translations.get_translation(translations.MESSAGE_ODOO_CONF), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
+        content = content.replace(translations.get_translation(translations.MESSAGE_FOR_TEMPLATES), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
         dockerfile_compose_path = os.path.join(self.config.project_dir, "docker-compose.yml")
         with open(dockerfile_compose_path, 'w') as writer:
             writer.write(content)
@@ -258,6 +259,33 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         if self.config.dependencies_dirs:
             delete_old_links(self.config.dependencies_dir, self.config.dependencies_dirs)
             create_new_links(self.config.dependencies_dir, self.config.dependencies_dirs)
+        list_of_all_modules = []
+        for catalog_of_modules in self.config.catalogs_of_modules_data:
+            list_of_all_modules.extend(catalog_of_modules.list_of_modules)
+        
+        if list_of_all_modules:
+            odoo_src_addons_dir = os.path.join(self.user_env.odoo_src_dir, "odoo","addons")
+            delete_old_links(odoo_src_addons_dir, list_of_all_modules)
+            create_new_links(odoo_src_addons_dir, list_of_all_modules)
+    
+    def generate_vscode_settings_json(self) -> None:
+        vscode_settings_json_template_path = os.path.join(self.config.project_dir, constants.PROJECT_VSCODE_SETTINGS_TEMPLATE)
+        with open(vscode_settings_json_template_path) as f:
+            lines = f.readlines()
+        content = "".join(lines[1:]).replace(
+            "{PYTHON_VERSION}", self.config.python_version,
+        )
+        content = content.replace(translations.get_translation(translations.MESSAGE_FOR_TEMPLATES), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
+        vscode_settings_json_path = os.path.join(self.get_vscode_dir_path(), "settings.json")
+        with open(vscode_settings_json_path, 'w') as writer:
+            writer.write(content)
+    
+    def get_vscode_dir_path(self) -> str:
+        vscode_dir = os.path.join(self.config.project_dir, ".vscode")
+        if not vscode_dir:
+            os.mkdir(vscode_dir)
+        return vscode_dir
+
     
     def update_vscode_debugger_launcher(self) -> None:
 
@@ -285,9 +313,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                             remoteRoot=mapped_folder.docker,
                         ))
 
-        if not os.path.exists(os.path.join(self.config.project_dir, ".vscode")):
-            os.mkdir(os.path.join(self.config.project_dir, ".vscode"))
-        launch_json = os.path.join(self.config.project_dir, ".vscode", "launch.json")
+        launch_json = os.path.join(self.get_vscode_dir_path(), "launch.json")
         if not os.path.exists(launch_json):
             content = {
                 "configurations": []

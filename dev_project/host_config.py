@@ -5,6 +5,7 @@ import subprocess
 from argparse import Namespace
 
 from typing import TypedDict
+from dataclasses import dataclass
 
 from . import constants
 from . import translations
@@ -63,10 +64,11 @@ class ConfigToJson(TypedDict):
     arch: str
     sql_queries: list
 
-DEPRECATED_WORDS = [
-    "debian_version",
-    "debian_name"
-]
+@dataclass
+class SubProject:
+    subproject_dir_path: str
+    subproject_rel_path: str
+    list_of_modules: list
 
 class Config():
 
@@ -135,6 +137,8 @@ class Config():
         self.check_file_for_deprecated_words(self.project_dockerfile_template_path)
         if not os.path.exists(self.project_dockerfile_template_path):
             self.pd_manager.rebuild_dockerfile_template(docker_template_filename=self.dockerfile_template_name)
+        
+        # prepare vscode settings.json template
 
         # prepare list of mapped dirs for  third party modules from which our project depends on
         self.dependencies_dirs = []
@@ -154,22 +158,26 @@ class Config():
         self.docker_odoo_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "odoo"))
         
         # prepare of mapped dirs for odoo addons
+        self.catalogs_of_modules_data = []
         self.docker_dirs_with_addons = []
         self.docker_extra_addons = str(pathlib.PurePosixPath(self.docker_project_dir, "extra-addons"))
         if self.developing_project:
             self.docker_odoo_project_dir_path = str(pathlib.PurePosixPath(self.docker_extra_addons, self.developing_project.project_data.name))
-            list_of_subprojects_rel_paths = self.check_project_for_subprojects(self.developing_project)
-            if list_of_subprojects_rel_paths:
-                for subproject_rel_path in list_of_subprojects_rel_paths:
-                    self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_project_dir_path, subproject_rel_path)))
+            list_of_subprojects_data = self.check_project_for_subprojects(self.developing_project.project_path)
+            if list_of_subprojects_data:
+                self.catalogs_of_modules_data.extend(list_of_subprojects_data)
+                for subproject in list_of_subprojects_data:
+                    self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_project_dir_path, subproject.subproject_rel_path)))
             else:
                 self.docker_dirs_with_addons.append(self.docker_odoo_project_dir_path)
-
+        odoo_addons_modules_data = self.check_project_for_subprojects(os.path.join(self.user_env.odoo_src_dir, "addons"))
+        self.catalogs_of_modules_data.extend(odoo_addons_modules_data)
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "addons")))
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "odoo", "addons")))
         
 
-        self.docker_path_odoo_conf = str(pathlib.PurePosixPath(self.docker_project_dir, "odoo.conf"))
+
+        self.docker_path_odoo_conf = str(pathlib.PurePosixPath(self.docker_project_dir, constants.ODOO_CONF_NAME))
         self.docker_venv_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "venv"))
         
         self.docker_backups_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "backups"))
@@ -184,7 +192,7 @@ class Config():
         # list of dirs and files which symlinks must be inside of project dir
         self.list_for_symlinks = [
             self.user_env.backups,
-            self.user_env.odoo_src_dir,
+            os.path.join(self.user_env.odoo_src_dir, "odoo"),
             self.odoo_project_dir_path,
         ]
 
@@ -201,17 +209,22 @@ class Config():
         """Set project_env property."""
         self._project_env = value
     
-    def check_project_for_subprojects(self, dependency_project: HandleOdooProjectLink) -> list:
-        subprojects_set = set()
-        list_of_subproject_rel_paths = []
-        for root, dirs, files in os.walk(dependency_project.project_path):
+    def check_project_for_subprojects(self, project_path: str) -> list[SubProject]:
+        subprojects_data = {}
+        list_of_subprojects = []
+        for root, dirs, files in os.walk(project_path):
             for file in files:
-                if file == "__manifest__.py":
-                    subprojects_set.add(os.path.abspath(os.path.join(root, os.pardir)))
-        for subproject_dir in subprojects_set:
-            rel_path = os.path.relpath(subproject_dir, dependency_project.project_path)
-            list_of_subproject_rel_paths.append(rel_path)
-        return list_of_subproject_rel_paths
+                if file in constants.MODULE_FILES:
+                    subproject_dir_path = os.path.abspath(os.path.join(root, os.pardir))
+                    if not subprojects_data.get(subproject_dir_path, False):
+                        subprojects_data[subproject_dir_path] = [root]
+                    else:
+                        subprojects_data[subproject_dir_path].append(root)
+        for subproject_dir, module_list in subprojects_data.items():
+            rel_path = os.path.relpath(subproject_dir, project_path)
+            subproject = SubProject(subproject_dir_path=subproject_dir, subproject_rel_path=rel_path, list_of_modules=module_list)
+            list_of_subprojects.append(subproject)
+        return list_of_subprojects
 
     def clone_project(self) -> None:
         if cli_params.BRANCH_PARAM in self.arguments and isinstance(cli_params.BRANCH_PARAM, str):
@@ -226,7 +239,7 @@ class Config():
             lines = f.readlines()
         remove_file = False
         for line in lines:
-            for word in DEPRECATED_WORDS:
+            for word in constants.DEPRECATED_WORDS:
                 if word.lower() in line.lower():
                     remove_file = True
                     break

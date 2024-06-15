@@ -40,6 +40,7 @@ def main() -> None:
     project_environment.checkout_dependencies()
     project_environment.update_links()
     project_environment.update_vscode_debugger_launcher()
+    project_environment.generate_vscode_settings_json()
 
     os.chdir(config.project_dir)
 
