@@ -49,14 +49,6 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         self.user_env = self.config.user_env
         self.config.project_env = self
 
-    def handle_git_link(self, dependency_string:str) -> HandleOdooProjectLink:
-        odoo_project = HandleOdooProjectLink(
-            dependency_string,
-            self.user_env.path_to_ssh_key,
-            self.user_env.odoo_projects_dir,
-        )
-        odoo_project.build_project()
-        return odoo_project
 
     def map_folders(self) -> None:
         self.mapped_folders = [
@@ -72,8 +64,10 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             self.mapped_folders.append(
                 MappedPath(local=self.config.developing_project.project_path, docker=self.config.docker_odoo_project_dir_path),
             )
+        self.check_oca_dependencies(self.config.developing_project)
         for dependency_string in self.config.dependencies:
-            dependency_project = self.handle_git_link(dependency_string)
+            dependency_project = self.config.handle_git_link(dependency_string)
+            self.check_oca_dependencies(dependency_project)
             list_of_subprojects = self.config.check_project_for_subprojects(dependency_project.project_path)
             docker_dependency_project_path = str(pathlib.PurePosixPath(self.config.docker_extra_addons, dependency_project.inside_docker_path))
             self.config.dependencies_projects.append(dependency_project)
@@ -90,7 +84,6 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             self.mapped_folders.append(
                 MappedPath(local=dependency_project.project_path, docker=docker_dependency_project_path)
             )
-
         for pre_commit_file in self.config.pre_commit_map_files:
             real_file_place = os.path.join(self.config.odoo_project_dir_path, pre_commit_file)
             if os.path.exists(real_file_place):
@@ -127,6 +120,21 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         self.config.dockerfile_path = dockerfile_path
         with open(dockerfile_path, 'w') as writer:
             writer.write(content)
+    
+    def check_oca_dependencies(self, project: HandleOdooProjectLink) -> None:
+        self.checkout_project(project)
+        oca_dependencies_txt = os.path.join(project.project_path, "oca_dependencies.txt")
+        if os.path.exists(oca_dependencies_txt):
+            with open(oca_dependencies_txt, "r") as oca_deps:
+                oca_deps_content_lines = oca_deps.readlines()
+            for oca_dep_string in oca_deps_content_lines:
+                oca_dep_string = oca_dep_string.strip()
+                if "#" in oca_dep_string:
+                    continue
+                if not "github" in oca_dep_string:
+                    oca_dep_string = f"https://github.com/OCA/{oca_dep_string}.git"
+                if oca_dep_string not in self.config.dependencies:
+                    self.config.dependencies.append(oca_dep_string)
     
     def generate_config_file(self) -> None:
         config_file_template_path = os.path.join(self.config.project_dir, constants.PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
@@ -184,22 +192,24 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         list_for_checkout = [odoo_project]
         list_for_checkout.extend(self.config.dependencies_projects)
         for project in list_for_checkout:
-            os.chdir(project.project_path)
-            current_branch_bytes = subprocess.run(["git", "branch", "--show-current"], capture_output=True)
-            current_branch_string = current_branch_bytes.stdout.decode("utf-8").strip() 
-            try:
-                current_branch_float = float(current_branch_string)
-            except:
-                current_branch_float = 0.0
-            if not project.branch:
-                project.branch = self.config.odoo_version
-            if current_branch_float and current_branch_string != project.branch:
-                self.check_odoo_version_branch(project)
-            if self.config.clean_git_repos:
-                subprocess.run(["git", "stash"], capture_output=True)
-                subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
-            if self.config.update_git_repos:
-                subprocess.run(["git", "pull"], capture_output=True)
+            self.checkout_project(project)
+
+    def checkout_project(self, project: HandleOdooProjectLink) -> None:
+        os.chdir(project.project_path)
+        current_branch_bytes = subprocess.run(["git", "branch", "--show-current"], capture_output=True)
+        current_branch_string = current_branch_bytes.stdout.decode("utf-8").strip() 
+        try:
+            current_branch_float = float(current_branch_string)
+        except:
+            current_branch_float = 0.0
+        if current_branch_float and (project.branch or project.branch == "")  and current_branch_string != project.branch:
+            self.check_odoo_version_branch(project)
+        if self.config.clean_git_repos:
+            subprocess.run(["git", "stash"], capture_output=True)
+            subprocess.run(["git", "checkout", self.config.odoo_version], capture_output=True)
+        if self.config.update_git_repos:
+            subprocess.run(["git", "pull"], capture_output=True)
+
     
     def check_odoo_version_branch(self, project: HandleOdooProjectLink) -> None:
         os.chdir(project.project_path)
@@ -358,5 +368,5 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
     
     def build_image(self):
         os.chdir(self.config.project_dir)
-        # i need to create .dockerignore file (because it tries to send docker context)
+        # TODO i need to create .dockerignore file (because it tries to send docker context)
         subprocess.run(["docker", "build", "-f", self.config.dockerfile_path, "-t", self.config.odoo_image_name, f"--platform=linux/{self.config.arch}", self.config.project_dir])
