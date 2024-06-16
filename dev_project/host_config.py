@@ -2,6 +2,7 @@ import os
 import pathlib
 import json
 import subprocess
+import ast
 from argparse import Namespace
 
 from typing import TypedDict
@@ -69,6 +70,7 @@ class SubProject:
     subproject_dir_path: str
     subproject_rel_path: str
     list_of_modules: list
+    list_of_python_packages: list
 
 class Config():
 
@@ -125,9 +127,13 @@ class Config():
         self.distro_version_codename = constants.DISTRO_INFO.get(self.distro_name, {}).get(self.distro_version, "")
         self.dependencies = self.config_dict.get("dependencies", [])
         self.requirements_txt = self.config_dict.get("requirements_txt", [])
-        if constants.DEBUGPY not in self.requirements_txt:
-            self.requirements_txt.append(constants.DEBUGPY)
-        
+
+        debugpy_name = constants.DEBUGPY.split("==")[0]
+        for python_package in self.requirements_txt:
+            if debugpy_name in python_package:
+                self.requirements_txt.remove(python_package)
+                self.requirements_txt.append(constants.DEBUGPY)
+
         # prepare dockerfile template
         self.dockerfile_template_name = f"""{self.distro_name}_{self.distro_version.replace(".", "")}_dockerfile"""
         self.project_dockerfile_template_path = os.path.join(
@@ -156,7 +162,7 @@ class Config():
         self.docker_dev_project_dir = str(pathlib.PurePosixPath(self.docker_project_dir, constants.DEV_PROJECT_DIR))
         self.docker_inside_app = str(pathlib.PurePosixPath(self.docker_dev_project_dir, "inside_docker_app"))
         self.docker_odoo_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "odoo"))
-        
+
         # prepare of mapped dirs for odoo addons
         self.catalogs_of_modules_data = []
         self.docker_dirs_with_addons = []
@@ -212,6 +218,7 @@ class Config():
     def check_project_for_subprojects(self, project_path: str) -> list[SubProject]:
         subprojects_data = {}
         list_of_subprojects = []
+        set_of_python_packages = set()
         for root, dirs, files in os.walk(project_path):
             for file in files:
                 if file in constants.MODULE_FILES:
@@ -220,11 +227,32 @@ class Config():
                         subprojects_data[subproject_dir_path] = [root]
                     else:
                         subprojects_data[subproject_dir_path].append(root)
+                    list_of_python_packages_for_module = self.get_names_of_python_packages_from_manifest(os.path.abspath(os.path.join(root, file)))
+                    for module in list_of_python_packages_for_module:
+                        set_of_python_packages.add(module)
         for subproject_dir, module_list in subprojects_data.items():
             rel_path = os.path.relpath(subproject_dir, project_path)
-            subproject = SubProject(subproject_dir_path=subproject_dir, subproject_rel_path=rel_path, list_of_modules=module_list)
+            subproject = SubProject(
+                subproject_dir_path=subproject_dir,
+                subproject_rel_path=rel_path,
+                list_of_modules=module_list,
+                list_of_python_packages=list(set_of_python_packages)
+            )
             list_of_subprojects.append(subproject)
         return list_of_subprojects
+    
+    def get_names_of_python_packages_from_manifest(self, path_to_manifest: str) -> list[str]:
+        manifest_data = self.get_manifest_data(path_to_manifest)
+        return manifest_data.get("external_dependencies", {}).get("python", [])
+    
+    def get_manifest_data(self, path_to_manifest: str) -> dict:
+        manifest_data = {}
+        f = open(path_to_manifest, mode='rb')
+        try:
+            manifest_data.update(ast.literal_eval(f.read().decode('utf-8')))
+        finally:
+            f.close()
+        return manifest_data
 
     def clone_project(self) -> None:
         if cli_params.BRANCH_PARAM in self.arguments and isinstance(cli_params.BRANCH_PARAM, str):
