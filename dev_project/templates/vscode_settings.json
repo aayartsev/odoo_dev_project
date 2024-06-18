@@ -10,7 +10,7 @@
         "odoo"
     ],
     "files.exclude": {
-        "**/*.pyc": {"when": "$(basename).py"}, 
+        "**/*.pyc": true, 
         "**/__pycache__": true
     }
     
