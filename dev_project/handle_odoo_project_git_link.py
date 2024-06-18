@@ -19,13 +19,15 @@ class OdooProjectData(object):
     name:str
     commit: str
     branch: str
+    is_developing: bool
 
 class HandleOdooProjectLink():
 
-    def __init__(self, project_string:str, path_to_ssh_key: str, odoo_projects_dir: str):
+    def __init__(self, project_string:str, path_to_ssh_key: str, odoo_projects_dir: str, is_developing: bool = False):
         self.is_true =True
         if not project_string:
             self.is_true = False
+        self.is_developing = is_developing
         self.project_string = project_string
         self.project_link = ""
         self.gitlink = ""
@@ -40,6 +42,8 @@ class HandleOdooProjectLink():
         self.link_type = self.get_git_link_type()
         self.project_data = self.parse_link_by_type()
         self.project_path = self.get_project_path()
+        
+        
     
     def build_project(self) -> None:
         if self.link_type in [constants.GITLINK_TYPE_HTTP, constants.GITLINK_TYPE_SSH]:
@@ -102,6 +106,7 @@ class HandleOdooProjectLink():
                 name=project_name,
                 commit=self.commit,
                 branch=self.branch,
+                is_developing=self.is_developing
             )
         else:
             return OdooProjectData(
@@ -110,6 +115,7 @@ class HandleOdooProjectLink():
                 name="",
                 commit=self.commit,
                 branch=self.branch,
+                is_developing=self.is_developing
             )
 
 
@@ -126,6 +132,7 @@ class HandleOdooProjectLink():
             name=project_name,
             commit=self.commit,
             branch=self.branch,
+            is_developing=self.is_developing
         )
     
     def parse_ssh(self) -> OdooProjectData:
@@ -138,6 +145,7 @@ class HandleOdooProjectLink():
             name=project_name,
             commit=self.commit,
             branch=self.branch,
+            is_developing=self.is_developing
         )
     
     def get_project_path(self) -> str:

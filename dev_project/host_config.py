@@ -109,7 +109,7 @@ class Config():
         self.sql_queries = self.config_dict.get("sql_queries", [])
 
         # prepare developing project
-        self.developing_project = self.handle_git_link(self.developing_project)
+        self.developing_project = self.handle_git_link(self.developing_project, is_developing=True)
         self.odoo_project_dir_path = self.developing_project.project_path
         # init project settings from odpm.json
         self.get_project_odpm_json()
@@ -198,7 +198,7 @@ class Config():
         # list of dirs and files which symlinks must be inside of project dir
         self.list_for_symlinks = [
             self.user_env.backups,
-            os.path.join(self.user_env.odoo_src_dir, "odoo"),
+            self.user_env.odoo_src_dir,
             self.odoo_project_dir_path,
         ]
 
@@ -396,11 +396,12 @@ class Config():
 
 
     
-    def handle_git_link(self, gitlink: str) -> HandleOdooProjectLink:
+    def handle_git_link(self, gitlink: str, is_developing: bool = False) -> HandleOdooProjectLink:
         odoo_project = HandleOdooProjectLink(
             gitlink,
             self.user_env.path_to_ssh_key,
             self.user_env.odoo_projects_dir,
+            is_developing=is_developing
         )
         odoo_project.build_project()
         return odoo_project

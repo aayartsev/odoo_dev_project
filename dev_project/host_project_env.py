@@ -202,7 +202,8 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             current_branch_float = float(current_branch_string)
         except:
             current_branch_float = 0.0
-        if current_branch_float and (project.branch or project.branch == "")  and current_branch_string != project.branch:
+
+        if current_branch_float and not project.is_developing and (project.branch or project.branch == "")  and current_branch_string != project.branch:
             self.check_odoo_version_branch(project)
         if self.config.clean_git_repos:
             subprocess.run(["git", "stash"], capture_output=True)
