@@ -128,11 +128,12 @@ class Config():
         self.dependencies = self.config_dict.get("dependencies", [])
         self.requirements_txt = self.config_dict.get("requirements_txt", [])
 
-        debugpy_name = constants.DEBUGPY.split("==")[0]
+        current_python_debugpy = constants.DEBUGPY.get(self.python_version, constants.DEFAULT_DEBUGPY)
+        debugpy_name = current_python_debugpy.split("==")[0]
         for python_package in self.requirements_txt:
             if debugpy_name in python_package:
                 self.requirements_txt.remove(python_package)
-                self.requirements_txt.append(constants.DEBUGPY)
+                self.requirements_txt.append(current_python_debugpy)
 
         # prepare dockerfile template
         self.dockerfile_template_name = f"""{self.distro_name}_{self.distro_version.replace(".", "")}_dockerfile"""

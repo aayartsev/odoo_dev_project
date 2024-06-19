@@ -70,7 +70,15 @@ ADMIN_PASSWD_MESSAGE = "#ADMIN_PASSWD_MESSAGE#"
 DO_NOT_CHANGE_PARAM = "#DO_NOT_CHANGE_PARAM#"
 ODOO_GIT_LINK = "https://github.com/odoo/odoo.git"
 
-DEBUGPY = "debugpy==1.7.0"
+DEFAULT_DEBUGPY = "debugpy==1.6.3"
+DEBUGPY = {
+    "3.7": DEFAULT_DEBUGPY,
+    "3.8": DEFAULT_DEBUGPY,
+    "3.9": DEFAULT_DEBUGPY,
+    "3.10": "debugpy==1.7.0",
+    "3.11": "debugpy==1.7.0",
+    "3.12": "debugpy==1.7.0",
+}
 
 DEFAULT_PYTHON_VERSION = "3.7"
 DEFAULT_DISTRO_NAME = "debian"
