@@ -110,7 +110,7 @@ class Config():
 
         # prepare developing project
         self.developing_project = self.handle_git_link(self.developing_project, is_developing=True)
-        self.odoo_project_dir_path = self.developing_project.project_path
+        self.developing_project_dir_path = self.developing_project.project_path
         # init project settings from odpm.json
         self.get_project_odpm_json()
         self.get_odpm_settings()
@@ -200,7 +200,7 @@ class Config():
         self.list_for_symlinks = [
             self.user_env.backups,
             self.user_env.odoo_src_dir,
-            self.odoo_project_dir_path,
+            self.developing_project_dir_path,
         ]
 
         if os.path.exists(self.repo_odpm_json):

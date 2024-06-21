@@ -85,7 +85,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                 MappedPath(local=dependency_project.project_path, docker=docker_dependency_project_path)
             )
         for pre_commit_file in self.config.pre_commit_map_files:
-            real_file_place = os.path.join(self.config.odoo_project_dir_path, pre_commit_file)
+            real_file_place = os.path.join(self.config.developing_project_dir_path, pre_commit_file)
             if os.path.exists(real_file_place):
                 full_path_pre_commit_file = os.path.join(self.config.project_dir,pre_commit_file)
                 if not os.path.exists(full_path_pre_commit_file):
@@ -98,7 +98,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                 
                 _logger.warning(translations.get_translation(translations.PRE_COMMIT_FILE_WAS_NOT_FOUND).format(
                     PRE_COMMIT_FILE=pre_commit_file,
-                    ODOO_PROJECT_DIR_PATH=self.config.odoo_project_dir_path,
+                    ODOO_PROJECT_DIR_PATH=self.config.developing_project_dir_path,
                 ))
 
     def generate_dockerfile(self) -> None:
@@ -267,6 +267,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                     pass
         if not os.path.exists(self.config.dependencies_dir) and self.config.dependencies_dirs:
             os.mkdir(self.config.dependencies_dir)
+        print("self.config.list_for_symlinks", self.config.list_for_symlinks)
         delete_old_links(self.config.project_dir, self.config.list_for_symlinks)
         create_new_links(self.config.project_dir, self.config.list_for_symlinks)
         if self.config.dependencies_dirs:
@@ -305,7 +306,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         def get_list_of_mapped_sources() -> None:
             list_for_links = [
                 self.user_env.odoo_src_dir,
-                self.config.odoo_project_dir_path,
+                self.config.developing_project_dir_path,
             ]
             for linking_dir in list_for_links:
                 dir_name_to_link = os.path.basename(linking_dir)
