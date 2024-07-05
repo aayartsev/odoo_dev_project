@@ -64,10 +64,12 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             self.mapped_folders.append(
                 MappedPath(local=self.config.developing_project.project_path, docker=self.config.docker_odoo_project_dir_path),
             )
-        self.check_oca_dependencies(self.config.developing_project)
+        if self.config.use_oca_dependencies:
+            self.check_oca_dependencies(self.config.developing_project)
         for dependency_string in self.config.dependencies:
             dependency_project = self.config.handle_git_link(dependency_string)
-            self.check_oca_dependencies(dependency_project)
+            if self.config.use_oca_dependencies:
+                self.check_oca_dependencies(dependency_project)
             list_of_subprojects = self.config.check_project_for_subprojects(dependency_project.project_path)
             docker_dependency_project_path = str(pathlib.PurePosixPath(self.config.docker_extra_addons, dependency_project.inside_docker_path))
             self.config.dependencies_projects.append(dependency_project)
@@ -267,7 +269,6 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                     pass
         if not os.path.exists(self.config.dependencies_dir) and self.config.dependencies_dirs:
             os.mkdir(self.config.dependencies_dir)
-        print("self.config.list_for_symlinks", self.config.list_for_symlinks)
         delete_old_links(self.config.project_dir, self.config.list_for_symlinks)
         create_new_links(self.config.project_dir, self.config.list_for_symlinks)
         if self.config.dependencies_dirs:

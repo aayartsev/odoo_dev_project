@@ -49,6 +49,7 @@ class UserSettingsJson(TypedDict):
     developing_project: str
     pre_commit_map_files: list
     sql_queries: list
+    use_oca_dependencies: bool
 
 class ConfigToJson(TypedDict):
     docker_odoo_dir: str
@@ -107,6 +108,7 @@ class Config():
         self.developing_project = self.config_dict.get("developing_project", "")
         self.pre_commit_map_files = self.config_dict.get("pre_commit_map_files", [])
         self.sql_queries = self.config_dict.get("sql_queries", [])
+        self.use_oca_dependencies = self.config_dict.get("use_oca_dependencies", True)
 
         # prepare developing project
         self.developing_project = self.handle_git_link(self.developing_project, is_developing=True)
@@ -392,6 +394,7 @@ class Config():
             developing_project=self.config_json_content.get("developing_project", self.pd_manager.init or ""),
             pre_commit_map_files=self.config_json_content.get("pre_commit_map_files", []),
             sql_queries=self.config_json_content.get("sql_queries", []),
+            use_oca_dependencies=self.config_json_content.get("use_oca_dependencies", True), 
         )
         return user_settings_content
 
