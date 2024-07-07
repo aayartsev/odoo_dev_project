@@ -99,18 +99,21 @@ class Config():
         self.get_user_settings()
         self.init_modules = self.beautify_module_list(self.config_dict.get("init_modules"))
         self.update_modules = self.beautify_module_list(self.config_dict.get("update_modules"))
-        self.db_creation_data = self.config_dict.get("db_creation_data", {})
-        self.update_git_repos = self.config_dict.get("update_git_repos", False)
-        self.clean_git_repos = self.config_dict.get("clean_git_repos", False)
-        self.check_system = self.config_dict.get("check_system", False)
-        self.db_manager_password = self.config_dict.get("db_manager_password", "admin")
-        self.dev_mode = self.config_dict.get("dev_mode", False)
-        self.developing_project = self.config_dict.get("developing_project", "")
-        self.pre_commit_map_files = self.config_dict.get("pre_commit_map_files", [])
-        self.sql_queries = self.config_dict.get("sql_queries", [])
-        self.use_oca_dependencies = self.config_dict.get("use_oca_dependencies", True)
+        self.db_creation_data = self.config_dict.get("db_creation_data", constants.DEFAULT_DB_CREATION_DATA)
+        self.update_git_repos = self.config_dict.get("update_git_repos", constants.DEFAULT_UPDATE_GIT_REPOS)
+        self.clean_git_repos = self.config_dict.get("clean_git_repos", constants.DEFAULT_CLEAN_GIT_REPOS)
+        self.check_system = self.config_dict.get("check_system", constants.DEFAULT_CHECK_SYSTEM)
+        self.db_manager_password = self.config_dict.get("db_manager_password", constants.DEFAULT_DB_MANAGER_PASSWORD)
+        self.dev_mode = self.config_dict.get("dev_mode", constants.DEFAULT_DEV_MODE)
+        self.developing_project = self.config_dict.get("developing_project", constants.DEFAULT_DEVELOPING_PROJECT)
+        self.pre_commit_map_files = self.config_dict.get("pre_commit_map_files", constants.DEFAULT_PRE_COMMIT_MAP_FILES)
+        self.sql_queries = self.config_dict.get("sql_queries", constants.DEFAULT_SQL_QUERIES)
+        self.use_oca_dependencies = self.config_dict.get("use_oca_dependencies", constants.DEFAULT_USE_OCA_DEPENDENCIES)
 
         # prepare developing project
+        if not self.developing_project:
+            _logger.error(translations.get_translation(translations.YOU_DO_NOT_SET_DEVELOPING_PROJECT))
+            exit(1)
         self.developing_project = self.handle_git_link(self.developing_project, is_developing=True)
         self.developing_project_dir_path = self.developing_project.project_path
         # init project settings from odpm.json
@@ -365,7 +368,7 @@ class Config():
     
     def beautify_module_list(self, modules) -> str:
         if not modules:
-            return ""
+            return constants.DEFAULT_LIST_OF_MODULES
         if isinstance(modules, list):
             modules = ",".join(modules)
         if isinstance(modules, str):
@@ -377,24 +380,24 @@ class Config():
     
     def create_default_user_setting_json_content(self) -> UserSettingsJson:
         user_settings_content = UserSettingsJson(
-            init_modules=self.config_json_content.get("init_modules", ""),
-            update_modules=self.config_json_content.get("update_modules", ""),
+            init_modules=self.config_json_content.get("init_modules", constants.DEFAULT_INIT_MODULES),
+            update_modules=self.config_json_content.get("update_modules", constants.DEFAULT_UPDATE_MODULES),
             db_creation_data=DbCreationData(
-                db_lang=self.config_json_content.get("db_creation_data", {}).get("db_lang", "en_US"),
-                db_country_code=self.config_json_content.get("db_creation_data", {}).get("db_country_code", None),
-                create_demo=self.config_json_content.get("db_creation_data", {}).get("create_demo", True),
-                db_default_admin_login=self.config_json_content.get("db_creation_data", {}).get("db_default_admin_login", "admin"),
-                db_default_admin_password=self.config_json_content.get("db_creation_data", {}).get("db_default_admin_password", "admin"),
+                db_lang=self.config_json_content.get("db_creation_data", {}).get("db_lang", constants.DEFAULT_DB_CREATION_DATA_DB_LANG),
+                db_country_code=self.config_json_content.get("db_creation_data", {}).get("db_country_code", constants.DEFAULT_DB_CREATION_DATA_DB_COUNTRY_CODE),
+                create_demo=self.config_json_content.get("db_creation_data", {}).get("create_demo", constants.DEFAULT_DB_CREATION_DATA_CREATE_DEMO),
+                db_default_admin_login=self.config_json_content.get("db_creation_data", {}).get("db_default_admin_login", constants.DEFAULT_DB_CREATION_DATA_DB_DEFAULT_ADMIN_LOGIN),
+                db_default_admin_password=self.config_json_content.get("db_creation_data", {}).get("db_default_admin_password", constants.DEFAULT_DB_CREATION_DATA_DB_DEFAULT_ADMIN_PASSWORD),
             ),
-            update_git_repos=self.config_json_content.get("update_git_repos", False),
-            clean_git_repos=self.config_json_content.get("clean_git_repos", False),
-            check_system=self.config_json_content.get("check_system", True),
-            db_manager_password=self.config_json_content.get("db_manager_password", "1"),
-            dev_mode=self.config_json_content.get("dev_mode", False),
-            developing_project=self.config_json_content.get("developing_project", self.pd_manager.init or ""),
-            pre_commit_map_files=self.config_json_content.get("pre_commit_map_files", []),
-            sql_queries=self.config_json_content.get("sql_queries", []),
-            use_oca_dependencies=self.config_json_content.get("use_oca_dependencies", True), 
+            update_git_repos=self.config_json_content.get("update_git_repos", constants.DEFAULT_UPDATE_GIT_REPOS),
+            clean_git_repos=self.config_json_content.get("clean_git_repos", constants.DEFAULT_CLEAN_GIT_REPOS),
+            check_system=self.config_json_content.get("check_system", constants.DEFAULT_CHECK_SYSTEM),
+            db_manager_password=self.config_json_content.get("db_manager_password", constants.DEFAULT_DB_MANAGER_PASSWORD),
+            dev_mode=self.config_json_content.get("dev_mode", constants.DEFAULT_DEV_MODE),
+            developing_project=self.config_json_content.get("developing_project", self.pd_manager.init or constants.DEFAULT_DEVELOPING_PROJECT),
+            pre_commit_map_files=self.config_json_content.get("pre_commit_map_files", constants.DEFAULT_PRE_COMMIT_MAP_FILES),
+            sql_queries=self.config_json_content.get("sql_queries", constants.DEFAULT_SQL_QUERIES),
+            use_oca_dependencies=self.config_json_content.get("use_oca_dependencies", constants.DEFAULT_USE_OCA_DEPENDENCIES), 
         )
         return user_settings_content
 

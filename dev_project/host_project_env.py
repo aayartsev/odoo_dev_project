@@ -68,6 +68,8 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             self.check_oca_dependencies(self.config.developing_project)
         for dependency_string in self.config.dependencies:
             dependency_project = self.config.handle_git_link(dependency_string)
+            if not dependency_project.is_cloned:
+                continue
             if self.config.use_oca_dependencies:
                 self.check_oca_dependencies(dependency_project)
             list_of_subprojects = self.config.check_project_for_subprojects(dependency_project.project_path)
@@ -178,7 +180,8 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             ODOO_DOCKER_PORT=constants.ODOO_DOCKER_PORT,
             DEBUGGER_DOCKER_PORT=constants.DEBUGGER_DOCKER_PORT,
             POSTGRES_DOCKER_PORT=constants.POSTGRES_DOCKER_PORT,
-            COMPOSE_FILE_VERSION=self.config.compose_file_version
+            COMPOSE_FILE_VERSION=self.config.compose_file_version,
+            DATABASE_NAME_INSTANCE=constants.DATABASE_NAME_INSTANCE
         )
         content = content.replace(translations.get_translation(translations.MESSAGE_FOR_TEMPLATES), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
         dockerfile_compose_path = os.path.join(self.config.project_dir, "docker-compose.yml")
@@ -206,7 +209,6 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             current_branch_float = float(current_branch_string)
         except:
             current_branch_float = 0.0
-
         if current_branch_float and not project.is_developing and current_branch_string != project.branch:
             self.check_odoo_version_branch(project)
         if self.config.clean_git_repos:

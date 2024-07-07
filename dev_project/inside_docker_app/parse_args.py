@@ -72,8 +72,17 @@ arg_parser.add_argument(
 
 arg_parser.add_argument(
     cli_params.DB_RESTORE_PARAM,
-    help="""As a parameter, the path to the archive is specified, relative to the directory specified in the "backups/localdir" parameter of the configuration file "user_settings.json". The DB name for restoration will be taken from the "-d" parameter.""",
+    help="""As a parameter, the name of the archive is specified, relative to the directory "BACKUP_DIR" in .env file. The DB name for restoration will be taken from the "-d" parameter.""",
     type=str
+)
+
+arg_parser.add_argument(
+    cli_params.DB_BACKUP_PARAM,
+    help="""As a parameter, the name of the archive is specified, relative to the directory "BACKUP_DIR" in .env file. The DB name for creating backup will be taken from the "-d" parameter.""",
+    nargs="?",
+    default=None,
+    const=True,
+    type=str,
 )
 
 arg_parser.add_argument(

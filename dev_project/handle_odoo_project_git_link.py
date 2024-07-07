@@ -8,6 +8,10 @@ from typing import Literal
 
 from . import constants
 
+from .inside_docker_app.logger import get_module_logger
+
+_logger = get_module_logger(__name__)
+
 HTTP_MARKER = "http"
 GIT_MARKER = "git"
 SSH_MARKER = "ssh"
@@ -44,6 +48,7 @@ class HandleOdooProjectLink():
         self.link_type = self.get_git_link_type()
         self.project_data = self.parse_link_by_type()
         self.project_path = self.get_project_path()
+        self.is_cloned = False
         
         
     
@@ -249,10 +254,16 @@ class HandleOdooProjectLink():
     
     def clone_repo(self) -> None:
         if not self.path_to_ssh_key:
-            subprocess.run(["git", "clone", self.gitlink])
+            clone_results = subprocess.run(["git", "clone", self.gitlink], capture_output=True)
         else:
-            command_to_execute = f'git clone {self.gitlink} --config core.sshCommand="ssh -i {self.path_to_ssh_key}"'
-            subprocess.call(command_to_execute, shell=True)
+            clone_results = subprocess.run(["git", "clone", self.gitlink, "--config", f'core.sshCommand="ssh -i {self.path_to_ssh_key}"' ], capture_output=True)
+        if clone_results.stderr: 
+            clone_results_error_string = clone_results.stderr.decode("utf-8").strip()
+            _logger.warning(clone_results_error_string)
+            self.is_cloned = False
+        else:
+            self.is_cloned = True
+        
 
     def __bool__(self):
         return self.is_true

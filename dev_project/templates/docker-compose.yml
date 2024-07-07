@@ -2,7 +2,7 @@
 version: "{COMPOSE_FILE_VERSION}"
 
 services:
-  db:
+  {DATABASE_NAME_INSTANCE}:
     image: postgres:13
     user: root
     tty: true
@@ -18,7 +18,7 @@ services:
     user: {CURRENT_USER}
     tty: true
     depends_on:
-      - db
+      - {DATABASE_NAME_INSTANCE}
     environment:
       - PYTHONUNBUFFERED=1
     ports:

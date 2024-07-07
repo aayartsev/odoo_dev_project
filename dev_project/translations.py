@@ -35,9 +35,7 @@ IS_GIT_INSTALLED = "Did you install git?"
 CAN_NOT_CONNECT_DOCKER = "Cannot connect to the Docker daemon. Is the docker daemon running?"
 CAN_NOT_GET_DOCKER_COMPOSE_INFO = "Cannot get docker-compose info, did you install it?"
 CAN_NOT_CREATE_DIR = "Cannot create dir, {dir_path}, please check it"
-CHECK_ODOO_REPO = """Your odoo src directory {odoo_src_dir} is not git repository."""
-"Please fix it, or delete and clone its repo again: "
-"git clone https://github.com/odoo/odoo.git"
+CHECK_ODOO_REPO = """Your odoo src directory {odoo_src_dir} is not git repository.Please fix it, or delete and clone its repo again: git clone https://github.com/odoo/odoo.git"""
 MESSAGE_FOR_TEMPLATES = "If you want drop this file to default values, just delete it"
 DO_NOT_CHANGE_PARAM = "Do not change this param, it is generating automatically"
 DO_NOT_CHANGE_FILE = "Do not change this file, its content is generating automatically"
@@ -65,6 +63,7 @@ DO_YOU_WANT_CLONE_ODOO = "Do you want to clone odoo? y/n\n"
 CONFIG_JSON_IS_DEPRECATED = """ "config.json" is deprecated. Please read documentation"""
 SET_ODOO_VERSION = """Please, enter odoo versions of this project. There is list of supported versions: {AVAILABEL_ODOO_VERSIONS_ARE}. You can leave default {ODOO_LATEST_VERSION} or write your own. Press 'Enter' to leave default value:\n"""
 YOU_SELECT_ODOO_VERSION = """You select this odoo version: {SELECTED_ODOO_VERSION}\n"""
+YOU_DO_NOT_SET_DEVELOPING_PROJECT = """You do not set where developing project is situated. You can set it with --init command. Example: '--init file:///home/user/projects/your_directory_for_project' or directly form git repo --init https://github.com/aayartsev/odoo_demo_project.git'. You also can set it in user_settings.json file in key 'developing_project'"""
 
 translations = {
     USER_NOT_IN_DOCKER_GROUP: {
@@ -185,7 +184,10 @@ translations = {
     },
     YOU_SELECT_ODOO_VERSION:{
         "ru_RU": """Вы выбрали следующую версию odoo: {SELECTED_ODOO_VERSION}\n"""
-    }
+    },
+    YOU_DO_NOT_SET_DEVELOPING_PROJECT: {
+        "ru_RU": """Вы не указали разрабатываемый проект. Вы можете указать это при использовании --init команды. Например: '--init file:///home/user/projects/your_directory_for_project' или напрямую из git репозитория --init https://github.com/aayartsev/odoo_demo_project.git'. Вы так же можете указать это в файле user_settings.json в ключе 'developing_project'"""
+    },
 }
 
 def get_translation(string_to_translate):
