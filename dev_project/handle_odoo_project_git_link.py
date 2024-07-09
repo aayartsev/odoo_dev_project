@@ -238,6 +238,8 @@ class HandleOdooProjectLink():
                 state = subprocess.run(["git", "rev-parse", "--is-inside-work-tree"], capture_output=True)
         if not state or b"true" not in state.stdout:
             self.force_clone_repo()
+        else:
+            self.is_cloned = True
         if project_dir_name in  ["odoo"] and not os.path.exists(new_destination):
             os.rename(self.project_path, new_destination)
             self.project_path = new_destination
