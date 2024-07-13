@@ -138,7 +138,7 @@ class Config():
         for python_package in self.requirements_txt:
             if debugpy_name in python_package:
                 self.requirements_txt.remove(python_package)
-                self.requirements_txt.append(current_python_debugpy)
+        self.requirements_txt.append(current_python_debugpy)
 
         # prepare dockerfile template
         self.dockerfile_template_name = f"""{self.distro_name}_{self.distro_version.replace(".", "")}_dockerfile"""

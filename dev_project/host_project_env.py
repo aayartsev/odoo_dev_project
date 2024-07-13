@@ -299,7 +299,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
     
     def get_vscode_dir_path(self) -> str:
         vscode_dir = os.path.join(self.config.project_dir, ".vscode")
-        if not vscode_dir:
+        if not os.path.exists(vscode_dir):
             os.mkdir(vscode_dir)
         return vscode_dir
 
