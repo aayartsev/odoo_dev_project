@@ -50,6 +50,7 @@ class UserSettingsJson(TypedDict):
     pre_commit_map_files: list
     sql_queries: list
     use_oca_dependencies: bool
+    create_module_links: bool
 
 class ConfigToJson(TypedDict):
     docker_odoo_dir: str
@@ -109,6 +110,7 @@ class Config():
         self.pre_commit_map_files = self.config_dict.get("pre_commit_map_files", constants.DEFAULT_PRE_COMMIT_MAP_FILES)
         self.sql_queries = self.config_dict.get("sql_queries", constants.DEFAULT_SQL_QUERIES)
         self.use_oca_dependencies = self.config_dict.get("use_oca_dependencies", constants.DEFAULT_USE_OCA_DEPENDENCIES)
+        self.create_module_links = self.config_dict.get("create_module_links", constants.DEFAULT_CREATE_MODULE_LINKS)
 
         # prepare developing project
         if not self.developing_project:
@@ -207,8 +209,7 @@ class Config():
             self.user_env.odoo_src_dir,
             self.developing_project_dir_path,
         ]
-
-        if os.path.exists(self.repo_odpm_json):
+        if self.create_module_links and os.path.exists(self.repo_odpm_json):
             self.list_for_symlinks.append(self.repo_odpm_json)
     
     @property
@@ -398,6 +399,7 @@ class Config():
             pre_commit_map_files=self.config_json_content.get("pre_commit_map_files", constants.DEFAULT_PRE_COMMIT_MAP_FILES),
             sql_queries=self.config_json_content.get("sql_queries", constants.DEFAULT_SQL_QUERIES),
             use_oca_dependencies=self.config_json_content.get("use_oca_dependencies", constants.DEFAULT_USE_OCA_DEPENDENCIES), 
+            create_module_links = self.config_json_content.get("create_module_links", constants.DEFAULT_CREATE_MODULE_LINKS),
         )
         return user_settings_content
 

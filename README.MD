@@ -113,6 +113,7 @@ DEBUGGER_PORT=5678
 - `db_manager_password` - `type: String`. password for the database manager
 - `sql_queries` - `type: List`. Contains a list of strings, each of which is an SQL script that will be executed when using the command line parameter `--sql-execute`
 - `use_oca_dependencies` - added an experimental feature that allows automatically loading all dependencies specified in the `"oca_dependencies.txt"` file. The default value is `false`
+- `create_module_links` - an experimental feature that adds soft links for all modules involved in the project to the `odoo/odoo/addons` directory. This allows the language server to automatically resolve import paths. The default value is `false`.
 
 ## Parameters in odpm.json:
 - `python_version` - `type: String`. The python version is indicated in text form by its number, for example `"3.10"` or `"3.7"`,
