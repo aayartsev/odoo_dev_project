@@ -189,7 +189,6 @@ class OdooChecker():
             cr.commit()
     
     def execute_sql_queries(self):
-        self.execute_sql_queries()
         db = self.odoo.sql_db.db_connect(self.db_name)
         with closing(db.cursor()) as cr:
             for query in self.sql_queries:
