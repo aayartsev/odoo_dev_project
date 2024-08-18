@@ -283,7 +283,8 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         if list_of_all_modules:
             odoo_src_addons_dir = os.path.join(self.user_env.odoo_src_dir, "odoo","addons")
             delete_old_links(odoo_src_addons_dir, list_of_all_modules)
-            create_new_links(odoo_src_addons_dir, list_of_all_modules)
+            if self.config.create_module_links:
+                create_new_links(odoo_src_addons_dir, list_of_all_modules)
     
     def generate_vscode_settings_json(self) -> None:
         vscode_settings_json_template_path = os.path.join(self.config.project_dir, constants.PROJECT_VSCODE_SETTINGS_TEMPLATE)
