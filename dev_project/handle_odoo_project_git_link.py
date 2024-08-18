@@ -3,6 +3,7 @@ import os
 import subprocess
 import shutil
 import pathlib
+from urllib.parse import urlparse
 from dataclasses import dataclass
 from typing import Literal
 
@@ -43,7 +44,7 @@ class HandleOdooProjectLink():
         self.odoo_projects_dir = odoo_projects_dir
         self.dir_to_clone = ""
         self.project_type = None
-        self.git_regex = r"git@[a-z.]*:"
+        self.git_regex = r"git@[a-z._-]*:"
         self.parse_project_string()
         self.link_type = self.get_git_link_type()
         self.project_data = self.parse_link_by_type()
@@ -85,10 +86,13 @@ class HandleOdooProjectLink():
         project_link_type = constants.GITLINK_TYPE_FILE
         if FILE_SYSTEM_MARKER in self.project_link:
             project_link_type = constants.GITLINK_TYPE_FILE
+            return project_link_type
         if HTTP_MARKER in self.project_link:
             project_link_type = constants.GITLINK_TYPE_HTTP
+            return project_link_type
         if SSH_MARKER in self.project_link:
             project_link_type = constants.GITLINK_TYPE_SSH
+            return project_link_type
         git_pattern = re.findall(self.git_regex, self.project_link)
         if git_pattern:
             project_link_type = constants.GITLINK_TYPE_GIT
@@ -161,10 +165,14 @@ class HandleOdooProjectLink():
             )
 
     def parse_ssh(self) -> OdooProjectData:
-        server = self.project_link.split("/")[2]
+        parsed_link = urlparse(self.project_link)
+        server = parsed_link.netloc
         if ":" in server:
             server = server.split(":")[0]
-        project_name = os.path.join(*self.project_link.split("/")[3:])
+        relative_path = parsed_link.path
+        if ".git" in relative_path:
+            relative_path = relative_path.replace(".git", "")
+        project_name = os.path.join(*relative_path.split("/"))
         project_name = os.path.basename(project_name)
         return OdooProjectData(
             server=server,
@@ -211,9 +219,13 @@ class HandleOdooProjectLink():
                 os.path.join(*self.project_link.split("/")[3:])
             ))
         if self.link_type in [constants.GITLINK_TYPE_SSH]:
+            parsed_link = urlparse(self.project_link)
+            relative_path = parsed_link.path
+            if ".git" in relative_path:
+                relative_path = relative_path.replace(".git", "")
             return os.path.abspath(os.path.join(
                 self.odoo_projects_dir,
-                os.path.join(*self.project_link.split("/")[3:])
+                os.path.join(*relative_path.split("/"))
             ))
         local_path = self.project_link.replace("file://","")
         if local_path:
