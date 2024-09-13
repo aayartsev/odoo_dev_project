@@ -219,6 +219,7 @@ class HandleOdooProjectLink():
                 os.path.join(*self.project_link.split("/")[3:])
             ))
         if self.link_type in [constants.GITLINK_TYPE_SSH]:
+            os.environ["GIT_SSH_VARIANT"] = "ssh"
             parsed_link = urlparse(self.project_link)
             relative_path = parsed_link.path
             if ".git" in relative_path:
@@ -268,9 +269,9 @@ class HandleOdooProjectLink():
     
     def clone_repo(self) -> None:
         if not self.path_to_ssh_key:
-            clone_results = subprocess.run(["git", "clone", self.gitlink], capture_output=True)
+            clone_results = subprocess.run(["git", "clone", self.gitlink], capture_output=False)
         else:
-            clone_results = subprocess.run(["git", "clone", self.gitlink, "--config", f'core.sshCommand="ssh -i {self.path_to_ssh_key}"' ], capture_output=True)
+            clone_results = subprocess.run(["git", "clone", self.gitlink, "--config", f'core.sshCommand="ssh -i {self.path_to_ssh_key}"' ], capture_output=False)
         if clone_results.stderr: 
             clone_results_error_string = clone_results.stderr.decode("utf-8").strip()
             _logger.warning(clone_results_error_string)

@@ -59,6 +59,7 @@ if platform.system() == "Linux":
 # In this case you need to delete old data or use old variables
 POSTGRES_ODOO_USER = CURRENT_USER
 POSTGRES_ODOO_PASS = CURRENT_PASSWORD
+POSTGRES_ODOO_HOST = DATABASE_NAME_INSTANCE
 
 NO_LOG_PREFIX = "--no-log-prefix"
 DOCKER_COMPOSE_DEFAULT_FILE_VERSION = "3.3"
