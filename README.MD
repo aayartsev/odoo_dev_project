@@ -111,7 +111,9 @@ DEBUGGER_PORT=5678
 - `pre_commit_map_files` - `type: String`. A list of files for the `pre-commit` system that are taken out of the project and pushed there through the docker file mapping. It is necessary to work on non-Linux systems
 - `dev_mode` - `type: String`. You can specify comma-separated [parameters for developers](https://www.oovoo.com/documentation/16.0/developer/reference/cli.html?highlight=dev#cmdoption-odoo-bin-dev). See the official documentation for your version of odoo
 - `db_manager_password` - `type: String`. password for the database manager
-- `sql_queries` - `type: List`. Contains a list of strings, each of which is an SQL script that will be executed when using the command line parameter `--sql-execute` 
+- `sql_queries` - `type: List`. Contains a list of strings, each of which is an SQL script that will be executed when using the command line parameter `--sql-execute`
+- `use_oca_dependencies` - added an experimental feature that allows automatically loading all dependencies specified in the `"oca_dependencies.txt"` file. The default value is `false`
+- `create_module_links` - an experimental feature that adds soft links for all modules involved in the project to the `odoo/odoo/addons` directory. This allows the language server to automatically resolve import paths. The default value is `false`.
 
 ## Parameters in odpm.json:
 - `python_version` - `type: String`. The python version is indicated in text form by its number, for example `"3.10"` or `"3.7"`,
@@ -148,7 +150,8 @@ Supported distributions and versions:
 - `-u` - the parameter indicates that the modules specified in the `pdate_modules` parameter of the `user_settings.json` configuration file should be updated.
 - `-t` - will run tests of modules specified in `init_modules` and `update_modules`, works only when using parameters `-d`, `-i`, `-u`. If the database is being created from scratch, tests of all installed modules will be run. This may take a long time.
 - `--get-dbs-list` - will show list of databases
-- `--db-restore` - as a parameter, the path to the archive is specified, relative to the directory specified in the `backups/localdir` parameter of the configuration file `user_settings.json``. The DB name for restoration will be taken from the `-d` parameter."
+- `--db-restore` - The system will attempt to restore a database archive. Specify the archive name, which must be located in the directory specified by the `BACKUP_DIR` parameter in the `.env` file. The database name for restoration will be taken from the `-d` parameter.
+- `--db-backup` - The system will attempt to create a database archive. You can specify the archive name to be created in the directory specified by the `BACKUP_DIR` parameter in the `.env` file. If no name is provided, it will be generated automatically based on the database name from the `-d` parameter plus a timestamp. The database name for archiving will be taken from the `-d` parameter.
 - `--db-drop` - accept database name as parameter. Database with selected  name will be deleted. If you will use it with  params `-d`, `-i`, `-u`, and select the same name, system will with first step delete DB and with second step will create new DB with the same name, and will install selected modules.
 - `--translate` - will update translation for selected language, for example `ru_RU` or `eu_US` for database from `-d` param and for modules form `update_modules` and `init_modules` from `user_settings.json` file
 - `--pip-install` - will start install of all python packages from odoo `requirements.txt` and from `requirements_txt` param to environment inside `docker container`.

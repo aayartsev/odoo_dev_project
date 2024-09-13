@@ -2,9 +2,6 @@ from typing import Protocol
 
 class CreateProjectEnvironmentProtocol(Protocol):
 
-    def handle_git_link(self):
-        NotImplementedError(
-                f"""Define handle_git_link in {self.__class__.__name__}""")
 
     def map_folders(self):
         NotImplementedError(

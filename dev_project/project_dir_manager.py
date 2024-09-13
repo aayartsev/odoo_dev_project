@@ -67,6 +67,7 @@ class ProjectDirManager():
     def rebuild_templates(self):
         self.rebuild_docker_compose_template()
         self.rebuild_odoo_config_file_template()
+        self.rebuild_vscode_settings_json_file_template()
     
     def rebuild_dockerfile_template(self, docker_template_filename=constants.DOCKERFILE):
         program_dockerfile_template_path = os.path.join(
@@ -88,13 +89,18 @@ class ProjectDirManager():
         program_odoo_config_file_template_path = os.path.join(self.program_dir_path, constants.PROGRAM_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
         project_odoo_config_file_template_path = os.path.join(self.project_path, constants.PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
         self.generate_project_template_files(program_odoo_config_file_template_path, project_odoo_config_file_template_path)
+    
+    def rebuild_vscode_settings_json_file_template(self):
+        program_vscode_settings_json_file_template = os.path.join(self.program_dir_path, constants.PROGRAM_VSCODE_SETTINGS_TEMPLATE)
+        project_vscode_settings_json_file_template = os.path.join(self.project_path, constants.PROJECT_VSCODE_SETTINGS_TEMPLATE)
+        self.generate_project_template_files(program_vscode_settings_json_file_template, project_vscode_settings_json_file_template)
 
     def generate_project_template_files(self, program_template_file, project_template_file):
         with open(program_template_file) as f:
             lines = f.readlines()
         content = "".join(lines)
         for replace_phrase in {
-                constants.MESSAGE_MARKER: translations.get_translation(translations.MESSAGE_ODOO_CONF),
+                constants.MESSAGE_MARKER: translations.get_translation(translations.MESSAGE_FOR_TEMPLATES),
             }.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
         if not os.path.exists(project_template_file):

@@ -40,14 +40,15 @@ def main() -> None:
     project_environment.checkout_dependencies()
     project_environment.update_links()
     project_environment.update_vscode_debugger_launcher()
+    project_environment.generate_vscode_settings_json()
 
     os.chdir(config.project_dir)
 
     try:
         if config.no_log_prefix:
-            os.system(f"""docker-compose up --no-log-prefix --abort-on-container-exit""")
+            os.system(f"""docker-compose up --no-log-prefix --abort-on-container-exit --force-recreate""")
         else:
-            os.system(f"""docker-compose up --abort-on-container-exit""")
+            os.system(f"""docker-compose up --abort-on-container-exit --force-recreate""")
     except KeyboardInterrupt:
         _logger.info("Control+C pressed")
         sys.exit()
