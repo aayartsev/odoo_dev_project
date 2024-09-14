@@ -145,13 +145,19 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
         with open(config_file_template_path) as f:
             lines = f.readlines()
         content = "".join(lines)
-        for replace_phrase in {constants.DO_NOT_CHANGE_PARAM: translations.get_translation(translations.DO_NOT_CHANGE_PARAM),
-            constants.ADMIN_PASSWD_MESSAGE: translations.get_translation(translations.ADMIN_PASSWD_MESSAGE),
-            constants.MESSAGE_MARKER: translations.get_translation(translations.MESSAGE_FOR_TEMPLATES)}.items():
+        for replace_phrase in {
+                constants.DO_NOT_CHANGE_PARAM: translations.get_translation(translations.DO_NOT_CHANGE_PARAM),
+                constants.ADMIN_PASSWD_MESSAGE: translations.get_translation(translations.ADMIN_PASSWD_MESSAGE),
+                constants.MESSAGE_MARKER: translations.get_translation(translations.MESSAGE_FOR_TEMPLATES),
+                constants.POSTGRES_ODOO_USER_MARKER: constants.POSTGRES_ODOO_USER,
+                constants.POSTGRES_ODOO_PASS_MARKER: constants.POSTGRES_ODOO_PASS,
+                constants.POSTGRES_ODOO_HOST_MARKER: constants.POSTGRES_ODOO_HOST,
+                constants.POSTGRES_ODOO_PORT_MARKER: str(constants.POSTGRES_ODOO_PORT),
+                constants.ODOO_PORT_MARKER: str(constants.ODOO_DOCKER_PORT),
+            }.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
-        odoo_config_file_path = os.path.join(self.config.project_dir, constants.ODOO_CONF_NAME)
-        if not os.path.exists(odoo_config_file_path):
-            with open(odoo_config_file_path, 'w') as writer:
+        if not os.path.exists(self.config.path_odoo_conf):
+            with open(self.config.path_odoo_conf, 'w') as writer:
                 writer.write(content)
     
     def generate_docker_compose_file(self) -> None:

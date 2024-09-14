@@ -190,7 +190,7 @@ class Config():
         self.docker_dirs_with_addons.append(str(pathlib.PurePosixPath(self.docker_odoo_dir, "odoo", "addons")))
         
 
-
+        self.path_odoo_conf = os.path.join(self.project_dir, constants.ODOO_CONF_NAME)
         self.docker_path_odoo_conf = str(pathlib.PurePosixPath(self.docker_project_dir, constants.ODOO_CONF_NAME))
         self.docker_venv_dir = str(pathlib.PurePosixPath(self.docker_project_dir, "venv"))
         
