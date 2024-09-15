@@ -31,7 +31,6 @@ class StartStringBuilder():
             self.config.docker_dirs_with_addons
         )
         odoo_config["options"]["addons_path"] = addons_string
-        odoo_config["options"]["db_password"] = constants.POSTGRES_ODOO_PASS
 
         data_dir = str(pathlib.PurePosixPath(self.config.docker_project_dir, ".local/share/Odoo"))
         odoo_config["options"]["data_dir"] = data_dir

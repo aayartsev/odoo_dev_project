@@ -187,7 +187,8 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             DEBUGGER_DOCKER_PORT=constants.DEBUGGER_DOCKER_PORT,
             POSTGRES_DOCKER_PORT=constants.POSTGRES_DOCKER_PORT,
             COMPOSE_FILE_VERSION=self.config.compose_file_version,
-            DATABASE_NAME_INSTANCE=constants.DATABASE_NAME_INSTANCE
+            DATABASE_NAME_INSTANCE=constants.DATABASE_NAME_INSTANCE,
+            POSTGRES_VERSION=self.config.postgres_version,
         )
         content = content.replace(translations.get_translation(translations.MESSAGE_FOR_TEMPLATES), translations.get_translation(translations.DO_NOT_CHANGE_FILE))
         dockerfile_compose_path = os.path.join(self.config.project_dir, "docker-compose.yml")
