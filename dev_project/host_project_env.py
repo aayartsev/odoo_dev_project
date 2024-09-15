@@ -156,7 +156,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                 constants.ODOO_PORT_MARKER: str(constants.ODOO_DOCKER_PORT),
             }.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
-        if not os.path.exists(self.config.path_odoo_conf):
+        if not os.path.exists(self.config.path_odoo_conf) or self.config.pd_manager.odoo_config_need_to_rebuild:
             with open(self.config.path_odoo_conf, 'w') as writer:
                 writer.write(content)
     

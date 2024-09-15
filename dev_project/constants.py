@@ -90,6 +90,7 @@ DEBUGPY = {
     "3.12": "debugpy==1.7.0",
 }
 
+DEFAULT_POSTGRES_VERSION = "13"
 DEFAULT_PYTHON_VERSION = "3.7"
 DEFAULT_DISTRO_NAME = "debian"
 DEFAULT_DISTRO_VERSION = "11"
@@ -102,7 +103,6 @@ DISTRO_INFO = {
         "22.04": "jammy",
         "20.04": "focal",
     }
-
 }
 
 # git rev-parse --abbrev-ref HEAD
