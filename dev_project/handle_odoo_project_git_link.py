@@ -221,7 +221,8 @@ class HandleOdooProjectLink():
         if self.link_type in [constants.GITLINK_TYPE_SSH]:
             os.environ["GIT_SSH_VARIANT"] = "ssh"
             parsed_link = urlparse(self.project_link)
-            relative_path = parsed_link.path
+            hostname = parsed_link.hostname
+            relative_path = f"{hostname}{parsed_link.path}"
             if ".git" in relative_path:
                 relative_path = relative_path.replace(".git", "")
             return os.path.abspath(os.path.join(
