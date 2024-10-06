@@ -15,7 +15,7 @@ from . import constants
 from . import translations
 from .host_config import Config
 from .protocols import CreateProjectEnvironmentProtocol
-from .inside_docker_app.utils import delete_files_in_directory
+from .inside_docker_app.utils import delete_files_in_directory, get_direct_link_to_download_from_yadisk, download_file, un_zip_file_to_directory
 
 from .inside_docker_app.logger import get_module_logger
 
@@ -156,7 +156,7 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
                 constants.ODOO_PORT_MARKER: str(constants.ODOO_DOCKER_PORT),
             }.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
-        if not os.path.exists(self.config.path_odoo_conf) or self.config.pd_manager.odoo_config_need_to_rebuild:
+        if not os.path.exists(self.config.path_odoo_conf) or self.config.pd_manager.check_project_odoo_config_template(config_file_template_path):
             with open(self.config.path_odoo_conf, 'w') as writer:
                 writer.write(content)
     
@@ -374,12 +374,26 @@ class CreateProjectEnvironment(CreateProjectEnvironmentProtocol):
             json.dump(content, outfile, indent=4)
     
     def clone_odoo(self):
-        os.chdir(os.path.join(self.user_env.odoo_src_dir, ".."))
-        delete_files_in_directory(self.user_env.odoo_src_dir)
+        dir_for_odoo_src = os.path.join(self.user_env.odoo_src_dir, "..")
+        os.chdir(dir_for_odoo_src)
         if not self.config.user_env.path_to_ssh_key:
             subprocess.run(["git", "clone", constants.ODOO_GIT_LINK])
         else:
             subprocess.call(f'git clone {constants.ODOO_GIT_LINK} --config core.sshCommand="ssh -i {self.config.user_env.path_to_ssh_key}"', shell=True)
+    
+    def download_odoo_repository(self):
+        self.config.system_checker.check_free_space_for_odoo_developing()
+        dir_for_odoo_src = os.path.join(self.user_env.odoo_src_dir, "..")
+        os.chdir(dir_for_odoo_src)
+        delete_files_in_directory(self.user_env.odoo_src_dir)
+        link_to_download = get_direct_link_to_download_from_yadisk(constants.YADISK_SHARING_LINK)
+        filepath_to_save = os.path.join(Path.home(), "odoo.zip.download")
+        download_file(link_to_download=link_to_download, filepath_to_save=filepath_to_save)
+        un_zip_file_to_directory(dir_for_odoo_src, filepath_to_save)
+        os.chdir(self.user_env.odoo_src_dir)
+        subprocess.run(["git", "pull"])
+        if os.path.exists(filepath_to_save):
+            os.remove(filepath_to_save)
     
     def build_image(self):
         os.chdir(self.config.project_dir)

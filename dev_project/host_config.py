@@ -17,6 +17,7 @@ from .host_user_env import CreateUserEnvironment
 from .project_dir_manager import ProjectDirManager
 
 from .protocols import CreateProjectEnvironmentProtocol
+from .protocols import SystemCheckerProtocol
 
 from .inside_docker_app.logger import get_module_logger
 
@@ -223,6 +224,16 @@ class Config():
     def project_env(self, value: CreateProjectEnvironmentProtocol) -> None:
         """Set project_env property."""
         self._project_env = value
+    
+    @property
+    def system_checker(self) -> SystemCheckerProtocol:
+        """Get system_checker property."""
+        return self._system_checker
+
+    @system_checker.setter
+    def system_checker(self, value: SystemCheckerProtocol) -> None:
+        """Set system_checker property."""
+        self._system_checker = value
     
     def check_project_for_subprojects(self, project_path: str) -> list[SubProject]:
         subprojects_data = {}
