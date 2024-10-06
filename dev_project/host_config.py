@@ -332,16 +332,24 @@ class Config():
         available_versions_str = ", ".join([str(float(version)) for version in available_versions])
         user_odoo_version = self.config_dict.get("odoo_version", None)
         if not user_odoo_version:
-            user_odoo_version = input(translations.get_translation(translations.SET_ODOO_VERSION).format(
-                    ODOO_LATEST_VERSION=constants.ODOO_LATEST_VERSION,
-                    AVAILABEL_ODOO_VERSIONS_ARE = available_versions_str,
-                ))
-        if not user_odoo_version:
-            user_odoo_version = constants.ODOO_LATEST_VERSION
+            while True:
+                user_odoo_version = input(translations.get_translation(translations.SET_ODOO_VERSION).format(
+                        ODOO_LATEST_VERSION=constants.ODOO_LATEST_VERSION,
+                        AVAILABEL_ODOO_VERSIONS_ARE = available_versions_str,
+                    ))
+                try:
+                    if not user_odoo_version:
+                        user_odoo_version = constants.ODOO_LATEST_VERSION
+                    float_version_from_user = float(user_odoo_version)
+                    if str(float_version_from_user) not in available_versions_str:
+                        continue
+                    break
+                except:
+                    continue
 
         _logger.info(translations.get_translation(translations.YOU_SELECT_ODOO_VERSION).format(
-                SELECTED_ODOO_VERSION=user_odoo_version,
-            ))
+            SELECTED_ODOO_VERSION=user_odoo_version,
+        ))
         default_odpm_json_content = OdpmJson(
             python_version=self.config_dict.get("python_version",constants.ODOO_VERSION_DEFAULT_ENV[user_odoo_version]["python_version"]),
             distro_version=self.config_dict.get("distro_version",constants.ODOO_VERSION_DEFAULT_ENV[user_odoo_version]["distro_version"]),
