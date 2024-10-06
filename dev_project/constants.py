@@ -106,8 +106,13 @@ DISTRO_INFO = {
 }
 
 # git rev-parse --abbrev-ref HEAD
-ODOO_LATEST_VERSION = "17.0"
+ODOO_LATEST_VERSION = "18.0"
 ODOO_VERSION_DEFAULT_ENV = {
+    "18.0": {
+        "python_version": "3.10",
+        "distro_name": "bookworm",
+        "distro_version": "12",
+    },
     "17.0": {
         "python_version": "3.10",
         "distro_name": DEFAULT_DISTRO_NAME,
@@ -178,3 +183,9 @@ DEFAULT_PRE_COMMIT_MAP_FILES = []
 DEFAULT_SQL_QUERIES = []
 DEFAULT_USE_OCA_DEPENDENCIES = False
 DEFAULT_CREATE_MODULE_LINKS = False
+
+# YANDEX DISK LINKS
+YADISK_SHARING_LINK = "https://disk.yandex.ru/d/-5z2VJ_DUo2v2g"
+YADISK_API_ENDPOINT = "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key={}"
+
+FREE_SPACE_FOR_USAGE = 20.0
