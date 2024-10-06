@@ -21,7 +21,6 @@ class ProjectDirManager():
         self.service_directory = os.path.join(self.project_path, constants.PROJECT_SERVICE_DIRECTORY)
         self.program_dir_path = program_dir_path
         self.home_config_dir = os.path.join(Path.home(), constants.CONFIG_DIR_IN_HOME_DIR)
-        self.odoo_config_need_to_rebuild = False
     
     def find_project_dir_in_parents(self):
         exist_service_directory = os.path.exists(self.service_directory)
@@ -89,10 +88,12 @@ class ProjectDirManager():
     def rebuild_odoo_config_file_template(self):
         program_odoo_config_file_template_path = os.path.join(self.program_dir_path, constants.PROGRAM_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
         project_odoo_config_file_template_path = os.path.join(self.project_path, constants.PROJECT_ODOO_TEMPLATE_CONFIG_FILE_RELATIVE_PATH)
-        self.check_project_odoo_config_template(project_odoo_config_file_template_path)
+        if self.check_project_odoo_config_template(project_odoo_config_file_template_path):
+            os.remove(project_odoo_config_file_template_path)
         self.generate_project_template_files(program_odoo_config_file_template_path, project_odoo_config_file_template_path)
     
     def check_project_odoo_config_template(self, project_odoo_config_file_template_path):
+        odoo_config_need_to_rebuild = False
         if os.path.exists(project_odoo_config_file_template_path):
             with open(project_odoo_config_file_template_path) as f:
                 lines = f.readlines()
@@ -108,7 +109,8 @@ class ProjectDirManager():
                     constants.ODOO_PORT_MARKER,
                 ]:
                 if searchable_pattern not in content:
-                    self.odoo_config_need_to_rebuild = True
+                    odoo_config_need_to_rebuild = True
+        return odoo_config_need_to_rebuild
 
     
     def rebuild_vscode_settings_json_file_template(self):
@@ -124,6 +126,6 @@ class ProjectDirManager():
                 constants.MESSAGE_MARKER: translations.get_translation(translations.MESSAGE_FOR_TEMPLATES),
             }.items():
             content = content.replace(replace_phrase[0], replace_phrase[1])
-        if not os.path.exists(project_template_file) or self.odoo_config_need_to_rebuild:
+        if not os.path.exists(project_template_file):
             with open(project_template_file, 'w') as writer:
                 writer.write(content)
