@@ -101,7 +101,6 @@ class ProjectDirManager():
             for searchable_pattern in [
                     constants.DO_NOT_CHANGE_PARAM,
                     constants.ADMIN_PASSWD_MESSAGE,
-                    constants.MESSAGE_MARKER,
                     constants.POSTGRES_ODOO_USER_MARKER,
                     constants.POSTGRES_ODOO_PASS_MARKER,
                     constants.POSTGRES_ODOO_HOST_MARKER,
@@ -110,6 +109,8 @@ class ProjectDirManager():
                 ]:
                 if searchable_pattern not in content:
                     odoo_config_need_to_rebuild = True
+        else:
+            odoo_config_need_to_rebuild = True
         return odoo_config_need_to_rebuild
 
     
